@@ -1,5 +1,5 @@
 //
-//  Item.swift
+//  Memo.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/05/04.
@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Item {
+final class Memo {
     var title: String
     var content: String
     var createdAt: Date
