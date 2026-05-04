@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var memos: [Memo]
+    @Query(sort: [SortDescriptor(\Memo.order)]) private var memos: [Memo]
 
     @State private var editMode: EditMode = .inactive
     @State private var memoToDelete: Memo?
@@ -46,6 +46,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .onMove(perform: moveMemo)
                 .onDelete(perform: deleteMemos)
                 .alert(item: $memoToDelete) { memo in
                     Alert(title: Text("Delete this memo?"),
@@ -78,6 +79,7 @@ struct ContentView: View {
     private func deleteMemo(memo: Memo) {
         modelContext.delete(memo)
         try? modelContext.save()
+        moveAllMemos()
     }
 
     private func deleteMemos(offsets: IndexSet) {
@@ -86,7 +88,26 @@ struct ContentView: View {
                 modelContext.delete(memos[index])
             }
             try? modelContext.save()
+            moveAllMemos()
         }
+    }
+
+    private func moveMemo(from source: IndexSet, to destination: Int) {
+        var orderedMemos = memos.sorted(by: { $0.order < $1.order })
+        orderedMemos.move(fromOffsets: source, toOffset: destination)
+        for (index, memo) in orderedMemos.enumerated() {
+            if let existingMemo = memos.first(where: { $0.id == memo.id }) {
+                existingMemo.order = index + 1
+            }
+        }
+        try? modelContext.save()
+    }
+
+    private func moveAllMemos() {
+        for (index, memo) in memos.enumerated() {
+            memo.order = index + 1
+        }
+        try? modelContext.save()
     }
 }
 

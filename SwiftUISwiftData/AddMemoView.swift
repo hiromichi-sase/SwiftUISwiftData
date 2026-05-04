@@ -30,7 +30,13 @@ struct AddMemoView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Save") {
-                    let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: 0)
+                    let order: Int
+                    do {
+                        order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
+                    } catch {
+                        order = 1
+                    }
+                    let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
                     modelContext.insert(memo)
                     try? modelContext.save()
                     dismiss()

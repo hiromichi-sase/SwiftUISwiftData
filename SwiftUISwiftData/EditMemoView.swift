@@ -63,6 +63,7 @@ struct EditMemoView: View {
                         guard !disabled else { return }
                         memo.title = title
                         memo.content = content
+                        memo.updatedAt = Date()
                         try? modelContext.save()
                         disabled = true
                     }
