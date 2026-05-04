@@ -10,16 +10,16 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Memo]
+    @Query private var memos: [Memo]
 
     var body: some View {
         NavigationSplitView {
             List {
-                ForEach(items) { item in
+                ForEach(memos) { memo in
                     NavigationLink {
-                        Text("Memo at \(item.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                        Text("Memo at \(memo.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
                     } label: {
-                        Text(item.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))
+                        Text(memo.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))
                     }
                 }
                 .onDelete(perform: deleteMemos)
@@ -35,13 +35,13 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            Text("Select an item")
+            Text("Select a memo")
         }
     }
 
     private func addMemo() {
         withAnimation {
-            let newMemo = Memo(title: "", content: "", createdAt: Date(), updatedAt: Date(), order: items.count + 1)
+            let newMemo = Memo(title: "", content: "", createdAt: Date(), updatedAt: Date(), order: memos.count + 1)
             modelContext.insert(newMemo)
         }
     }
@@ -49,7 +49,7 @@ struct ContentView: View {
     private func deleteMemos(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(memos[index])
             }
         }
     }
