@@ -47,11 +47,13 @@ struct ContentView: View {
                     }
                 }
                 .onMove(perform: moveMemo)
-                .onDelete(perform: deleteMemos)
+                .onDelete(perform: deleteMemo)
                 .alert(item: $memoToDelete) { memo in
                     Alert(title: Text("Delete this memo?"),
                           primaryButton: .destructive(Text("Delete")) {
-                        deleteMemo(memo: memo)
+                        modelContext.delete(memo)
+                        try? modelContext.save()
+                        moveAllMemos()
                     }, secondaryButton: .cancel())
                 }
             }
@@ -76,20 +78,9 @@ struct ContentView: View {
         }
     }
 
-    private func deleteMemo(memo: Memo) {
-        modelContext.delete(memo)
-        try? modelContext.save()
-        moveAllMemos()
-    }
-
-    private func deleteMemos(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(memos[index])
-            }
-            try? modelContext.save()
-            moveAllMemos()
-        }
+    private func deleteMemo(offsets: IndexSet) {
+        guard let first = offsets.first else { return }
+        memoToDelete = memos[first]
     }
 
     private func moveMemo(from source: IndexSet, to destination: Int) {
