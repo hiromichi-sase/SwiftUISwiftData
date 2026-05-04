@@ -12,38 +12,72 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var memos: [Memo]
 
+    @State private var editMode: EditMode = .inactive
+    @State private var memoToDelete: Memo?
+    @State private var memoToPush: Memo?
+    @State private var path = NavigationPath()
+
     var body: some View {
-        NavigationSplitView {
+        NavigationStack(path: $path) {
             List {
                 ForEach(memos) { memo in
-                    NavigationLink {
-                        Text("Memo at \(memo.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                    Button {
+                        if editMode == .inactive {
+                            memoToPush = memo
+                        }
                     } label: {
-                        Text(memo.createdAt, format: Date.FormatStyle(date: .numeric, time: .standard))
+                        Text(memo.title)
+                    }
+                    .tint(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .contextMenu {
+                        if editMode == .inactive {
+                            Button("Edit", systemImage: "pencil") {
+                                memoToPush = memo
+                            }
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                memoToDelete = memo
+                            }
+                        }
+                    } preview: {
+                        if editMode == .inactive {
+                            PreviewMemoView(memo: memo)
+                        }
                     }
                 }
                 .onDelete(perform: deleteMemos)
+                .alert(item: $memoToDelete) { memo in
+                    Alert(title: Text("Delete this memo?"),
+                          primaryButton: .destructive(Text("Delete")) {
+                        deleteMemo(memo: memo)
+                    }, secondaryButton: .cancel())
+                }
             }
+            .navigationDestination(item: $memoToPush) { memo in
+                EditMemoView(memo: memo, disabled: true)
+            }
+            .navigationTitle(Text("Memos"))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .topBarLeading) {
                     EditButton()
                 }
-                ToolbarItem {
-                    Button(action: addMemo) {
-                        Label("Add Memo", systemImage: "plus")
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    NavigationLink {
+                        AddMemoView()
+                    } label: {
+                        Text("Add")
                     }
                 }
             }
-        } detail: {
-            Text("Select a memo")
+            .environment(\.editMode, $editMode)
         }
     }
 
-    private func addMemo() {
-        withAnimation {
-            let newMemo = Memo(title: "", content: "", createdAt: Date(), updatedAt: Date(), order: memos.count + 1)
-            modelContext.insert(newMemo)
-        }
+    private func deleteMemo(memo: Memo) {
+        modelContext.delete(memo)
+        try? modelContext.save()
     }
 
     private func deleteMemos(offsets: IndexSet) {
@@ -51,6 +85,7 @@ struct ContentView: View {
             for index in offsets {
                 modelContext.delete(memos[index])
             }
+            try? modelContext.save()
         }
     }
 }
