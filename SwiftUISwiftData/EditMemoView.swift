@@ -46,6 +46,9 @@ struct EditMemoView: View {
             ToolbarItemGroup(placement: .topBarLeading) {
                 if !disabled {
                     Button("Cancel") {
+                        guard !disabled else { return }
+                        title = memo.title
+                        content = memo.content
                         disabled = true
                     }
                 }
