@@ -45,6 +45,7 @@ struct ContentView: View {
                             PreviewMemoView(memo: memo)
                         }
                     }
+                    .moveDisabled(!editMode.isEditing)
                 }
                 .onMove(perform: moveMemo)
                 .onDelete(perform: deleteMemo)
@@ -84,6 +85,8 @@ struct ContentView: View {
     }
 
     private func moveMemo(from source: IndexSet, to destination: Int) {
+        guard editMode == .active else { return }
+
         var orderedMemos = memos.sorted(by: { $0.order < $1.order })
         orderedMemos.move(fromOffsets: source, toOffset: destination)
         for (index, memo) in orderedMemos.enumerated() {
