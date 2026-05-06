@@ -60,17 +60,22 @@ struct EditMemoView: View {
                     }
                 } else {
                     Button("Save") {
-                        guard !disabled else { return }
+                        guard !disabled && memoUpdated else { return }
                         memo.title = title
                         memo.content = content
                         memo.updatedAt = Date()
                         try? modelContext.save()
                         disabled = true
                     }
+                    .disabled(!memoUpdated)
                 }
 
             }
         }
+    }
+
+    private var memoUpdated: Bool {
+        memo.title != title || memo.content != content
     }
 
     private var didSavePublisher: NotificationCenter.Publisher {
