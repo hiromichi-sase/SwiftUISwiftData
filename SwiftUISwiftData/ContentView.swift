@@ -26,11 +26,14 @@ struct ContentView: View {
                             memoToPush = memo
                         }
                     } label: {
-                        Text(memo.title)
+                        HStack {
+                            Text(memo.title)
+                            Spacer()
+                        }
+                        .padding()
                     }
-                    .tint(.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
+                    .listRowInsets(.init())
+                    .buttonStyle(ListItemButtonStyle(editMode: editMode))
                     .contextMenu {
                         if editMode == .inactive {
                             Button("Edit", systemImage: "pencil") {
