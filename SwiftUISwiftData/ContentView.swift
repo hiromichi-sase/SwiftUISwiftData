@@ -17,49 +17,64 @@ struct ContentView: View {
     @State private var memoToPush: Memo?
     @State private var path = NavigationPath()
 
+    @State private var selection: Set<UUID> = []
+    @State private var showDeleteSelectionAlert = false
+
     var body: some View {
         NavigationStack(path: $path) {
-            List {
+            List(selection: $selection) {
                 ForEach(memos) { memo in
-                    Button {
-                        if editMode == .inactive {
-                            memoToPush = memo
-                        }
-                    } label: {
-                        HStack {
-                            Text(memo.title)
-                            Spacer()
-                        }
-                        .padding()
+                    let _memo = memo
+                    HStack {
+                        Text(_memo.title)
+                        Spacer()
                     }
-                    .listRowInsets(.init())
-                    .buttonStyle(ListItemButtonStyle(editMode: editMode))
+                    .padding()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if editMode == .inactive {
+                            memoToPush = _memo
+                        } else {
+                            if selection.contains(_memo.id) {
+                                selection.remove(_memo.id)
+                            } else {
+                                selection.insert(_memo.id)
+                            }
+                        }
+                    }
                     .contextMenu {
                         if editMode == .inactive {
                             Button("Edit", systemImage: "pencil") {
-                                memoToPush = memo
+                                memoToPush = _memo
                             }
                             Button("Delete", systemImage: "trash", role: .destructive) {
-                                memoToDelete = memo
+                                memoToDelete = _memo
                             }
                         }
                     } preview: {
                         if editMode == .inactive {
-                            PreviewMemoView(memo: memo)
+                            PreviewMemoView(memo: _memo)
                         }
                     }
+                    .listRowInsets(.init())
                     .moveDisabled(!editMode.isEditing)
                 }
                 .onMove(perform: moveMemo)
-                .onDelete(perform: deleteMemo)
-                .alert(item: $memoToDelete) { memo in
-                    Alert(title: Text("Delete this memo?"),
-                          primaryButton: .destructive(Text("Delete")) {
-                        modelContext.delete(memo)
-                        try? modelContext.save()
-                        moveAllMemos()
-                    }, secondaryButton: .cancel())
+            }
+            .alert(item: $memoToDelete) { memo in
+                Alert(
+                    title: Text("Delete this memo?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        deleteMemos([memo])
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .alert("Delete selected memos?", isPresented: $showDeleteSelectionAlert) {
+                Button("Delete", role: .destructive) {
+                    deleteMemos(selectedMemos)
                 }
+                Button("Cancel", role: .cancel) {}
             }
             .navigationDestination(item: $memoToPush) { memo in
                 EditMemoView(memo: memo, disabled: true)
@@ -77,6 +92,13 @@ struct ContentView: View {
                         } label: {
                             Text("Add")
                         }
+                    } else {
+                        Button(role: .destructive) {
+                            showDeleteSelectionAlert = true
+                        } label: {
+                            Text("Delete")
+                        }
+                        .disabled(selection.isEmpty)
                     }
                 }
             }
@@ -84,9 +106,17 @@ struct ContentView: View {
         }
     }
 
-    private func deleteMemo(offsets: IndexSet) {
-        guard let first = offsets.first else { return }
-        memoToDelete = memos[first]
+    private var selectedMemos: [Memo] {
+        memos.filter { selection.contains($0.id) }
+    }
+
+    private func deleteMemos(_ memos: [Memo]) {
+        for memo in memos {
+            modelContext.delete(memo)
+        }
+        try? modelContext.save()
+        selection.removeAll()
+        moveAllMemos()
     }
 
     private func moveMemo(from source: IndexSet, to destination: Int) {

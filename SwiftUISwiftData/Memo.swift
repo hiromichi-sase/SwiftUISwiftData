@@ -9,7 +9,8 @@ import Foundation
 import SwiftData
 
 @Model
-final class Memo {
+final class Memo: Identifiable, Hashable {
+    var id: UUID = UUID()
     var title: String
     var content: String
     var createdAt: Date
@@ -22,5 +23,13 @@ final class Memo {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.order = order
+    }
+
+    static func == (lhs: Memo, rhs: Memo) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
