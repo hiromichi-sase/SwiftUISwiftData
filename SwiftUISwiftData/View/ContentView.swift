@@ -61,6 +61,12 @@ struct ContentView: View {
                 }
                 .onMove(perform: moveMemo)
             }
+            .onChange(of: memos) { _, newMemos in
+                if editMode == .active,
+                   newMemos.isEmpty {
+                    editMode = .inactive
+                }
+            }
             .alert(item: $memoToDelete) { memo in
                 Alert(
                     title: Text("Delete this memo?"),
@@ -83,7 +89,9 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
-                    EditButton()
+                    if !memos.isEmpty {
+                        EditButton()
+                    }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     if editMode == .inactive {
