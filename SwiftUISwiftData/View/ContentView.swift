@@ -73,7 +73,7 @@ struct ContentView: View {
             .navigationDestination(item: $memoToPush) { memo in
                 EditMemoView(memo: memo, disabled: true)
             }
-            .navigationTitle(Text("Memos"))
+            .navigationTitle(editMode == .active ? Text("") : Text("Memos"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
@@ -136,14 +136,18 @@ struct ContentView: View {
                     selection = Set(memos.map { $0.id })
                 } label: {
                     Text("Select All")
+                    Image(systemName: "checkmark.circle")
                 }
+                .disabled(selection.count == memos.count)
                 Button() {
                     selection.removeAll()
                 } label: {
                     Text("Deselect All")
+                    Image(systemName: "circle")
                 }
+                .disabled(selection.count == .zero)
             } label: {
-                Label("Menu", systemImage: "ellipsis.circle")
+                Image(systemName: "ellipsis.circle")
             }
             Button(role: .destructive) {
                 showDeleteSelectionAlert = true
