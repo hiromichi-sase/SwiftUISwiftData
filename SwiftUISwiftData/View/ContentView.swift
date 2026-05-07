@@ -42,27 +42,9 @@ struct ContentView: View {
             List(selection: $selection) {
                 ForEach(memos) { memo in
                     if editMode == .inactive {
-                        MemoRow(memo: memo) { _ in
-                            memoToPush = memo
-                        }
-                        .contextMenu {
-                            Button("Edit", systemImage: "pencil") {
-                                memoToPush = memo
-                            }
-                            Button("Delete", systemImage: "trash", role: .destructive) {
-                                memoToDelete = memo
-                            }
-                        } preview: {
-                            PreviewMemoView(memo: memo)
-                        }
-                        .listRowInsets(.init())
-                        .moveDisabled(true)
+                        inactiveRow(for: memo)
                     } else {
-                        MemoRow(memo: memo) { id in
-                            toggleSelection(for: id)
-                        }
-                        .listRowInsets(.init())
-                        .moveDisabled(false)
+                        activeRow(for: memo)
                     }
                 }
                 .onMove(perform: moveMemo)
@@ -95,28 +77,66 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
-                    if !memos.isEmpty {
-                        EditButton()
-                    }
+                    toolbarItemTopBarLeading
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    if editMode == .inactive {
-                        NavigationLink {
-                            AddMemoView()
-                        } label: {
-                            Text("Add")
-                        }
-                    } else {
-                        Button(role: .destructive) {
-                            showDeleteSelectionAlert = true
-                        } label: {
-                            Text("Delete")
-                        }
-                        .disabled(selection.isEmpty)
-                    }
+                    toolbarItemTopBarTrailing
                 }
             }
             .environment(\.editMode, $editMode)
+        }
+    }
+
+    @ViewBuilder
+    private func activeRow(for memo: Memo) -> some View {
+        MemoRow(memo: memo) { id in
+            toggleSelection(for: id)
+        }
+        .listRowInsets(.init())
+        .moveDisabled(false)
+    }
+
+    @ViewBuilder
+    private func inactiveRow(for memo: Memo) -> some View {
+        MemoRow(memo: memo) { _ in
+            memoToPush = memo
+        }
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") {
+                memoToPush = memo
+            }
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                memoToDelete = memo
+            }
+        } preview: {
+            PreviewMemoView(memo: memo)
+        }
+        .listRowInsets(.init())
+        .moveDisabled(true)
+    }
+
+    @ViewBuilder
+    private var toolbarItemTopBarLeading: some View {
+        if !memos.isEmpty {
+            EditButton()
+        }
+    }
+
+    @ViewBuilder
+    private var toolbarItemTopBarTrailing: some View {
+        if editMode == .inactive {
+            NavigationLink {
+                AddMemoView()
+            } label: {
+                Text("Add")
+            }
+        } else {
+            Button(role: .destructive) {
+                showDeleteSelectionAlert = true
+            } label: {
+                Text("Delete")
+            }
+            .disabled(selection.isEmpty)
         }
     }
 
