@@ -131,6 +131,20 @@ struct ContentView: View {
                 Text("Add")
             }
         } else {
+            Menu {
+                Button() {
+                    selection = Set(memos.map { $0.id })
+                } label: {
+                    Text("Select All")
+                }
+                Button() {
+                    selection.removeAll()
+                } label: {
+                    Text("Deselect All")
+                }
+            } label: {
+                Label("Menu", systemImage: "ellipsis.circle")
+            }
             Button(role: .destructive) {
                 showDeleteSelectionAlert = true
             } label: {
