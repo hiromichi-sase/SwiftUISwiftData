@@ -20,44 +20,50 @@ struct ContentView: View {
     @State private var selection: Set<UUID> = []
     @State private var showDeleteSelectionAlert = false
 
+    private struct MemoRow: View {
+        let memo: Memo
+        let onTap: (UUID) -> Void
+
+        var body: some View {
+            HStack {
+                Text(memo.title)
+                Spacer()
+            }
+            .padding()
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onTap(memo.id)
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack(path: $path) {
             List(selection: $selection) {
                 ForEach(memos) { memo in
-                    let _memo = memo
-                    HStack {
-                        Text(_memo.title)
-                        Spacer()
-                    }
-                    .padding()
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if editMode == .inactive {
-                            memoToPush = _memo
-                        } else {
-                            if selection.contains(_memo.id) {
-                                selection.remove(_memo.id)
-                            } else {
-                                selection.insert(_memo.id)
-                            }
+                    if editMode == .inactive {
+                        MemoRow(memo: memo) { _ in
+                            memoToPush = memo
                         }
-                    }
-                    .contextMenu {
-                        if editMode == .inactive {
+                        .contextMenu {
                             Button("Edit", systemImage: "pencil") {
-                                memoToPush = _memo
+                                memoToPush = memo
                             }
                             Button("Delete", systemImage: "trash", role: .destructive) {
-                                memoToDelete = _memo
+                                memoToDelete = memo
                             }
+                        } preview: {
+                            PreviewMemoView(memo: memo)
                         }
-                    } preview: {
-                        if editMode == .inactive {
-                            PreviewMemoView(memo: _memo)
+                        .listRowInsets(.init())
+                        .moveDisabled(true)
+                    } else {
+                        MemoRow(memo: memo) { id in
+                            toggleSelection(for: id)
                         }
+                        .listRowInsets(.init())
+                        .moveDisabled(false)
                     }
-                    .listRowInsets(.init())
-                    .moveDisabled(!editMode.isEditing)
                 }
                 .onMove(perform: moveMemo)
             }
@@ -111,6 +117,14 @@ struct ContentView: View {
                 }
             }
             .environment(\.editMode, $editMode)
+        }
+    }
+
+    private func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        } else {
+            selection.insert(id)
         }
     }
 
