@@ -117,8 +117,16 @@ struct ContentView: View {
 
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
-        if !memos.isEmpty {
-            EditButton()
+        if editMode == .inactive {
+            if !memos.isEmpty {
+                Button("Edit", systemImage: "pencil") {
+                    editMode = .active
+                }
+            }
+        } else {
+            Button("Done", systemImage: "checkmark") {
+                editMode = .inactive
+            }
         }
     }
 
@@ -128,31 +136,21 @@ struct ContentView: View {
             NavigationLink {
                 AddMemoView()
             } label: {
-                Text("Add")
+                Image(systemName: "plus.circle")
             }
         } else {
-            Menu {
-                Button() {
+            Menu("Menu", systemImage: "ellipsis.circle") {
+                Button("Select All", systemImage: "checkmark.circle") {
                     selection = Set(memos.map { $0.id })
-                } label: {
-                    Text("Select All")
-                    Image(systemName: "checkmark.circle")
                 }
                 .disabled(selection.count == memos.count)
-                Button() {
+                Button("Deselect All", systemImage: "circle") {
                     selection.removeAll()
-                } label: {
-                    Text("Deselect All")
-                    Image(systemName: "circle")
                 }
                 .disabled(selection.count == .zero)
-            } label: {
-                Image(systemName: "ellipsis.circle")
             }
-            Button(role: .destructive) {
+            Button("Delete", systemImage: "trash") {
                 showDeleteSelectionAlert = true
-            } label: {
-                Text("Delete")
             }
             .disabled(selection.isEmpty)
         }

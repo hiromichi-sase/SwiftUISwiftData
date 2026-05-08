@@ -29,7 +29,7 @@ struct AddMemoView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("Save") {
+                Button("Save", systemImage: "square.and.pencil") {
                     let order: Int
                     do {
                         order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1

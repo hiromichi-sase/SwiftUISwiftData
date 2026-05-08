@@ -45,7 +45,7 @@ struct EditMemoView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarLeading) {
                 if !disabled {
-                    Button("Cancel") {
+                    Button("Cancel", systemImage: "xmark") {
                         guard !disabled else { return }
                         title = memo.title
                         content = memo.content
@@ -55,11 +55,11 @@ struct EditMemoView: View {
             }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if disabled {
-                    Button("Edit") {
+                    Button("Edit", systemImage: "pencil") {
                         disabled = false
                     }
                 } else {
-                    Button("Save") {
+                    Button("Save", systemImage: "square.and.pencil") {
                         guard !disabled && memoUpdated else { return }
                         memo.title = title
                         memo.content = content
