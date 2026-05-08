@@ -12,6 +12,11 @@ extension View {
     func navigationTitle(_ title: Binding<String>, disabled: Bool) -> some View {
         if disabled {
             self.navigationTitle(Text(title.wrappedValue))
+                .toolbarTitleMenu {
+                    Button("Copy", systemImage: "doc.on.doc") {
+                        UIPasteboard.general.string = title.wrappedValue
+                    }
+                }
         } else {
             self.navigationTitle(title)
         }
