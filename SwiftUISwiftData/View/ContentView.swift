@@ -94,6 +94,7 @@ struct ContentView: View {
         }
         .listRowInsets(.init())
         .moveDisabled(false)
+        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
     @ViewBuilder
