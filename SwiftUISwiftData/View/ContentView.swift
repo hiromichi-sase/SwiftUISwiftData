@@ -14,8 +14,6 @@ struct ContentView: View {
 
     @State private var editMode: EditMode = .inactive
     @State private var memoToDelete: Memo?
-    @State private var memoToPush: Memo?
-
     @State private var selectedMemo: Memo?
     @State private var selection: Set<UUID> = []
     @State private var showDeleteSelectionAlert = false
@@ -126,7 +124,7 @@ struct ContentView: View {
         }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
-                memoToPush = memo
+                selectedMemo = memo
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
