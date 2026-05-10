@@ -25,15 +25,17 @@ struct ContentView: View {
         let onTap: (UUID) -> Void
 
         var body: some View {
-            HStack {
-                Text(memo.title)
-                Spacer()
+            Button(action: {
+                onTap(memo.id)
+            }) {
+                HStack {
+                    Text(memo.title)
+                    Spacer()
+                }
             }
+            .foregroundStyle(.primary)
             .padding()
             .contentShape(Rectangle())
-            .onTapGesture {
-                onTap(memo.id)
-            }
         }
     }
 
