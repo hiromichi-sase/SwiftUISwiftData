@@ -15,18 +15,18 @@ struct ContentView: View {
     @State private var editMode: EditMode = .inactive
     @State private var memoToDelete: Memo?
     @State private var memoToPush: Memo?
-    @State private var path = NavigationPath()
 
+    @State private var selectedMemo: Memo?
     @State private var selection: Set<UUID> = []
     @State private var showDeleteSelectionAlert = false
 
     private struct MemoRow: View {
         let memo: Memo
-        let onTap: (UUID) -> Void
+        let onTap: (Memo) -> Void
 
         var body: some View {
             Button(action: {
-                onTap(memo.id)
+                onTap(memo)
             }) {
                 HStack {
                     Text(memo.title)
@@ -39,21 +39,32 @@ struct ContentView: View {
         }
     }
 
-    var body: some View {
-        NavigationStack(path: $path) {
-            List(selection: $selection) {
-                ForEach(memos) { memo in
-                    if editMode == .inactive {
-                        inactiveRow(for: memo)
-                    } else {
+    var list: some View {
+        VStack {
+            if editMode == .active {
+                List(selection: $selection) {
+                    ForEach(memos) { memo in
                         activeRow(for: memo)
                     }
+                    .onMove(perform: moveMemo)
                 }
-                .onMove(perform: moveMemo)
+            } else {
+                List(selection: $selectedMemo) {
+                    ForEach(memos) { memo in
+                        inactiveRow(for: memo)
+                    }
+                }
             }
+        }
+    }
+
+    var body: some View {
+        NavigationSplitView {
+            list
             .onChange(of: memos) { _, newMemos in
                 if editMode == .active,
                    newMemos.isEmpty {
+                    selection.removeAll()
                     editMode = .inactive
                 }
             }
@@ -72,9 +83,6 @@ struct ContentView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-            .navigationDestination(item: $memoToPush) { memo in
-                EditMemoView(memo: memo, disabled: true)
-            }
             .navigationTitle(editMode == .active ? Text("") : Text("Memos"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -86,13 +94,25 @@ struct ContentView: View {
                 }
             }
             .environment(\.editMode, $editMode)
+        } detail: {
+            if editMode == .inactive {
+                if let selectedMemo {
+                    EditMemoView(memo: selectedMemo, disabled: true)
+                        .modelContext(modelContext)
+                        .id(selectedMemo.id)
+                } else {
+                    Text("Select a memo")
+                }
+            } else {
+                Text("Select memos to edit or delete")
+            }
         }
     }
 
     @ViewBuilder
     private func activeRow(for memo: Memo) -> some View {
-        MemoRow(memo: memo) { id in
-            toggleSelection(for: id)
+        MemoRow(memo: memo) { memo in
+            toggleSelection(for: memo.id)
         }
         .listRowInsets(.init())
         .moveDisabled(false)
@@ -102,7 +122,7 @@ struct ContentView: View {
     @ViewBuilder
     private func inactiveRow(for memo: Memo) -> some View {
         MemoRow(memo: memo) { _ in
-            memoToPush = memo
+            selectedMemo = memo
         }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
@@ -123,11 +143,13 @@ struct ContentView: View {
         if editMode == .inactive {
             if !memos.isEmpty {
                 Button("Edit", systemImage: "pencil") {
+                    selectedMemo = nil
                     editMode = .active
                 }
             }
         } else {
             Button("Done", systemImage: "checkmark") {
+                selection.removeAll()
                 editMode = .inactive
             }
         }
