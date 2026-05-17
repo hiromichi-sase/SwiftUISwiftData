@@ -24,32 +24,35 @@ struct AddMemoView: View {
                     .border(.primary)
             }
             .padding()
-        }
-        .navigationTitle($title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("Save", systemImage: "square.and.pencil") {
-                    let order: Int
-                    do {
-                        order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
-                    } catch {
-                        order = 1
+            .navigationTitle($title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
-                    let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
-                    modelContext.insert(memo)
-                    try? modelContext.save()
-                    dismiss()
+                }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button("Save", systemImage: "square.and.pencil") {
+                        let order: Int
+                        do {
+                            order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
+                        } catch {
+                            order = 1
+                        }
+                        let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
+                        modelContext.insert(memo)
+                        try? modelContext.save()
+                        dismiss()
+                    }
                 }
             }
         }
     }
 }
 
-struct AddMemoView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            AddMemoView()
-        }
+#Preview {
+    NavigationStack {
+        AddMemoView()
     }
 }

@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var selectedMemo: Memo?
     @State private var selection: Set<UUID> = []
     @State private var showDeleteSelectionAlert = false
+    @State private var showingAddMemo = false
 
     private struct MemoRow: View {
         let memo: Memo
@@ -92,6 +93,9 @@ struct ContentView: View {
                 }
             }
             .environment(\.editMode, $editMode)
+            .fullScreenCover(isPresented: $showingAddMemo) {
+                AddMemoView()
+            }
         } detail: {
             if editMode == .inactive {
                 if let selectedMemo {
@@ -156,10 +160,8 @@ struct ContentView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
-            NavigationLink {
-                AddMemoView()
-            } label: {
-                Image(systemName: "plus.circle")
+            Button("Add", systemImage: "plus.circle") {
+                showingAddMemo = true
             }
         } else {
             Menu("Menu", systemImage: "ellipsis.circle") {
