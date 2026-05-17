@@ -28,7 +28,7 @@ struct AddMemoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("Cancel", systemImage: "xmark") {
                         dismiss()
                     }
                 }
