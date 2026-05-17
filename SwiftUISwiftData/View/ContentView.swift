@@ -123,9 +123,13 @@ struct ContentView: View {
 
     @ViewBuilder
     private func inactiveRow(for memo: Memo) -> some View {
-        MemoRow(memo: memo) { _ in
-            selectedMemo = memo
-        }
+        Text(memo.title)
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                NavigationLink("Memo", value: memo)
+                    .opacity(0)
+            }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
                 selectedMemo = memo
