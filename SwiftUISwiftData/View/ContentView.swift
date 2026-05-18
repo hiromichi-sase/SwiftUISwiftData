@@ -82,7 +82,7 @@ struct ContentView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-            .navigationTitle(editMode == .active ? Text("") : Text("Memos"))
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
@@ -109,6 +109,10 @@ struct ContentView: View {
                 Text("Select memos to edit or delete")
             }
         }
+    }
+
+    private var navigationTitle: String {
+        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(memos.count))"
     }
 
     @ViewBuilder
