@@ -14,10 +14,11 @@ struct ContentView: View {
 
     @State private var editMode: EditMode = .inactive
     @State private var memoToDelete: Memo?
-    @State private var selectedMemo: Memo?
+    @State private var selectedMemoId: UUID?
     @State private var selection: Set<UUID> = []
     @State private var showDeleteSelectionAlert = false
     @State private var showingAddMemo = false
+    @State private var scrollViewProxy: ScrollViewProxy?
 
     private struct MemoRow: View {
         let memo: Memo
@@ -39,20 +40,29 @@ struct ContentView: View {
     }
 
     var list: some View {
-        VStack {
-            if editMode == .active {
-                List(selection: $selection) {
-                    ForEach(memos) { memo in
-                        activeRow(for: memo)
+        ScrollViewReader { proxy in
+            VStack {
+                if editMode == .active {
+                    List(selection: $selection) {
+                        ForEach(memos) { memo in
+                            activeRow(for: memo)
+                                .id(memo.id)
+                                .tag(memo.id)
+                        }
+                        .onMove(perform: moveMemo)
                     }
-                    .onMove(perform: moveMemo)
-                }
-            } else {
-                List(selection: $selectedMemo) {
-                    ForEach(memos) { memo in
-                        inactiveRow(for: memo)
+                } else {
+                    List(selection: $selectedMemoId) {
+                        ForEach(memos) { memo in
+                            inactiveRow(for: memo)
+                                .id(memo.id)
+                                .tag(memo.id)
+                        }
                     }
                 }
+            }
+            .onAppear {
+                scrollViewProxy = proxy
             }
         }
     }
@@ -60,12 +70,8 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             list
-            .onChange(of: memos) { _, newMemos in
-                if editMode == .active,
-                   newMemos.isEmpty {
-                    selection.removeAll()
-                    editMode = .inactive
-                }
+            .onChange(of: memos) { oldMemos, newMemos in
+                onChange(oldMemos: oldMemos, newMemos: newMemos)
             }
             .alert(item: $memoToDelete) { memo in
                 Alert(
@@ -98,10 +104,11 @@ struct ContentView: View {
             }
         } detail: {
             if editMode == .inactive {
-                if let selectedMemo {
-                    EditMemoView(memo: selectedMemo, disabled: true)
+                if let id = selectedMemoId,
+                   let memo = memos.first(where: { $0.id == id }) {
+                    EditMemoView(memo: memo, disabled: true)
                         .modelContext(modelContext)
-                        .id(selectedMemo.id)
+                        .id(memo.id)
                 } else {
                     Text("Select a memo")
                 }
@@ -127,16 +134,19 @@ struct ContentView: View {
 
     @ViewBuilder
     private func inactiveRow(for memo: Memo) -> some View {
-        Text(memo.title)
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                NavigationLink("Memo", value: memo)
-                    .opacity(0)
-            }
+        HStack {
+            Text(memo.title)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            selectedMemoId = memo.id
+        }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
-                selectedMemo = memo
+                selectedMemoId = memo.id
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
@@ -153,7 +163,7 @@ struct ContentView: View {
         if editMode == .inactive {
             if !memos.isEmpty {
                 Button("Edit", systemImage: "pencil") {
-                    selectedMemo = nil
+                    selectedMemoId = nil
                     editMode = .active
                 }
             }
@@ -204,6 +214,9 @@ struct ContentView: View {
     private func deleteMemos(_ memos: [Memo]) {
         for memo in memos {
             modelContext.delete(memo)
+            if selectedMemoId == memo.id {
+                selectedMemoId = nil
+            }
         }
         try? modelContext.save()
         selection.removeAll()
@@ -228,6 +241,30 @@ struct ContentView: View {
             memo.order = index + 1
         }
         try? modelContext.save()
+    }
+
+    private func onChange(oldMemos: [Memo], newMemos: [Memo]) {
+        switch editMode {
+        case .active:
+            if newMemos.isEmpty {
+                selection.removeAll()
+                editMode = .inactive
+            }
+        case .inactive:
+            if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
+                DispatchQueue.main.async {
+                    self.selection.removeAll()
+                    self.selectedMemoId = newMemo.id
+                    if let proxy = self.scrollViewProxy {
+                        withAnimation {
+                            proxy.scrollTo(newMemo.id, anchor: .center)
+                        }
+                    }
+                }
+            }
+        default:
+            break
+        }
     }
 }
 
