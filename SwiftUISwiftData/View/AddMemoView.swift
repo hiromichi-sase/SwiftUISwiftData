@@ -11,6 +11,7 @@ import SwiftUI
 struct AddMemoView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) var sizeClass
 
     @State private var title: String = "(Title)"
     @State private var content: String = ""
@@ -45,7 +46,7 @@ struct AddMemoView: View {
                         try? modelContext.save()
 
                         var transaction = Transaction(animation: .none)
-                        transaction.disablesAnimations = true
+                        transaction.disablesAnimations = sizeClass == .compact
                         withTransaction(transaction) {
                             dismiss()
                         }
