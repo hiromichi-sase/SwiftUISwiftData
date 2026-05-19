@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var showDeleteSelectionAlert = false
     @State private var showingAddMemo = false
     @State private var scrollViewProxy: ScrollViewProxy?
+    @State private var editModeViewDisabled: Bool = false
 
     private struct MemoRow: View {
         let memo: Memo
@@ -106,7 +107,7 @@ struct ContentView: View {
             if editMode == .inactive {
                 if let id = selectedMemoId,
                    let memo = memos.first(where: { $0.id == id }) {
-                    EditMemoView(memo: memo, disabled: true)
+                    EditMemoView(memo: memo, disabled: editModeViewDisabled)
                         .modelContext(modelContext)
                         .id(memo.id)
                 } else {
@@ -142,10 +143,12 @@ struct ContentView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
+            editModeViewDisabled = true
             selectedMemoId = memo.id
         }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
+                editModeViewDisabled = false
                 selectedMemoId = memo.id
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
@@ -257,6 +260,7 @@ struct ContentView: View {
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
                         self.selection.removeAll()
+                        self.editModeViewDisabled = true
                         self.selectedMemoId = newMemo.id
                         if let proxy = self.scrollViewProxy {
                             proxy.scrollTo(newMemo.id, anchor: .center)
