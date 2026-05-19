@@ -43,7 +43,12 @@ struct AddMemoView: View {
                         let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
                         modelContext.insert(memo)
                         try? modelContext.save()
-                        dismiss()
+
+                        var transaction = Transaction(animation: .none)
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            dismiss()
+                        }
                     }
                 }
             }

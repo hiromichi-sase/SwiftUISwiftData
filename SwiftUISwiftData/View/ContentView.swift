@@ -253,10 +253,12 @@ struct ContentView: View {
         case .inactive:
             if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
                 DispatchQueue.main.async {
-                    self.selection.removeAll()
-                    self.selectedMemoId = newMemo.id
-                    if let proxy = self.scrollViewProxy {
-                        withAnimation {
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        self.selection.removeAll()
+                        self.selectedMemoId = newMemo.id
+                        if let proxy = self.scrollViewProxy {
                             proxy.scrollTo(newMemo.id, anchor: .center)
                         }
                     }
