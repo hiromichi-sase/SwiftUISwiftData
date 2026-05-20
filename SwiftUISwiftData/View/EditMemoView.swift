@@ -15,6 +15,7 @@ struct EditMemoView: View {
 
     @State private var title: String
     @State private var content: String
+    @State private var showConfirmationAlert = false
 
     @State var path = NavigationPath()
     @State var disabled: Bool
@@ -38,6 +39,17 @@ struct EditMemoView: View {
                 title = memo.title
                 content = memo.content
             }
+            .alert(isPresented: $showConfirmationAlert) {
+                Alert(
+                    title: Text("Discard changes?"),
+                    primaryButton: .destructive(Text("Discard")) {
+                        title = memo.title
+                        content = memo.content
+                        disabled = true
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
         }
         .navigationTitle($title, disabled: disabled)
         .navigationBarTitleDisplayMode(.inline)
@@ -47,9 +59,11 @@ struct EditMemoView: View {
                 if !disabled {
                     Button("Cancel", systemImage: "xmark") {
                         guard !disabled else { return }
-                        title = memo.title
-                        content = memo.content
-                        disabled = true
+                        if memoUpdated {
+                            showConfirmationAlert = true
+                        } else {
+                            disabled = true
+                        }
                     }
                 }
             }
