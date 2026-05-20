@@ -15,6 +15,7 @@ struct AddMemoView: View {
 
     @State private var title: String = "(Title)"
     @State private var content: String = ""
+    @State private var showConfirmationAlert = false
 
     @State var path = NavigationPath()
 
@@ -25,12 +26,25 @@ struct AddMemoView: View {
                     .border(.primary)
             }
             .padding()
+            .alert(isPresented: $showConfirmationAlert) {
+                Alert(
+                    title: Text("Discard changes?"),
+                    primaryButton: .destructive(Text("Discard")) {
+                        dismiss()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
             .navigationTitle($title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
-                        dismiss()
+                        if !title.isEmpty || !content.isEmpty {
+                            showConfirmationAlert = true
+                        } else {
+                            dismiss()
+                        }
                     }
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
