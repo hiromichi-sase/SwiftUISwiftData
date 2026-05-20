@@ -57,8 +57,9 @@ struct EditMemoView: View {
         .toolbar {
             if !disabled {
                 ToolbarItem(placement: .principal) {
-                    TextField("Title", text: $title)
+                    TextField("(Input Title)", text: $title)
                         .multilineTextAlignment(.center)
+                        .background(.secondary)
                 }
             }
             ToolbarItemGroup(placement: .topBarLeading) {
