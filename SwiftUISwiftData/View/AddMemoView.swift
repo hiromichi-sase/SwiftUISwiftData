@@ -38,8 +38,9 @@ struct AddMemoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    TextField("Title", text: $title)
+                    TextField("(Input Title)", text: $title)
                         .multilineTextAlignment(.center)
+                        .background(.secondary)
                 }
                 ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
