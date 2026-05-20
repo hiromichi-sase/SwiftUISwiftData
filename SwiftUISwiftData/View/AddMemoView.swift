@@ -13,7 +13,7 @@ struct AddMemoView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) var sizeClass
 
-    @State private var title: String = "(Title)"
+    @State private var title: String = ""
     @State private var content: String = ""
     @State private var showConfirmationAlert = false
 
@@ -35,9 +35,12 @@ struct AddMemoView: View {
                     secondaryButton: .cancel()
                 )
             }
-            .navigationTitle($title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    TextField("Title", text: $title)
+                        .multilineTextAlignment(.center)
+                }
                 ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
                         if !title.isEmpty || !content.isEmpty {

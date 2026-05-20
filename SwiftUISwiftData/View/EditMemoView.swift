@@ -55,6 +55,12 @@ struct EditMemoView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(!disabled)
         .toolbar {
+            if !disabled {
+                ToolbarItem(placement: .principal) {
+                    TextField("Title", text: $title)
+                        .multilineTextAlignment(.center)
+                }
+            }
             ToolbarItemGroup(placement: .topBarLeading) {
                 if !disabled {
                     Button("Cancel", systemImage: "xmark") {

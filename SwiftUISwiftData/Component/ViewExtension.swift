@@ -11,14 +11,24 @@ extension View {
     @ViewBuilder
     func navigationTitle(_ title: Binding<String>, disabled: Bool) -> some View {
         if disabled {
-            self.navigationTitle(Text(title.wrappedValue))
-                .toolbarTitleMenu {
-                    Button("Copy", systemImage: "doc.on.doc") {
-                        UIPasteboard.general.string = title.wrappedValue
+            if title.wrappedValue.isEmpty {
+                navigationTitle("")
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("(No Title)")
+                                .foregroundStyle(.secondary)
+                        }
                     }
-                }
+            } else {
+                navigationTitle(title.wrappedValue)
+                    .toolbarTitleMenu {
+                        Button("Copy", systemImage: "doc.on.doc") {
+                            UIPasteboard.general.string = title.wrappedValue
+                        }
+                    }
+            }
         } else {
-            self.navigationTitle(title)
+            navigationTitle("")
         }
     }
 }
