@@ -140,6 +140,8 @@ struct ContentView: View {
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
             TitleText(memo.title)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }
         .contentShape(Rectangle())
