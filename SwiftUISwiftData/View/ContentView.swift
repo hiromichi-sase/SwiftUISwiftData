@@ -112,7 +112,7 @@ struct ContentView: View {
             if editMode == .inactive {
                 if let id = selectedMemoId,
                    let memo = memos.first(where: { $0.id == id }) {
-                    EditMemoView(memo: memo, disabled: editModeViewDisabled)
+                    BrowseMemoView(memo: memo)
                         .modelContext(modelContext)
                         .id(memo.id)
                 } else {

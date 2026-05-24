@@ -10,6 +10,7 @@ import SwiftUI
 
 struct EditMemoView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     private var memo: Memo
 
@@ -18,79 +19,52 @@ struct EditMemoView: View {
     @State private var showConfirmationAlert = false
 
     @State var path = NavigationPath()
-    @State var disabled: Bool
 
-    init(memo: Memo, disabled: Bool) {
+    init(memo: Memo) {
         self.memo = memo
         self._title = State(initialValue: memo.title)
         self._content = State(initialValue: memo.content)
-        self._disabled = State(initialValue: disabled)
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                TextView(text: $content, isEditable: .constant(!disabled))
-                    .border(disabled ? .clear : .primary)
+                TextView(text: $content, isEditable: .constant(true))
+                    .border(.primary)
             }
             .padding()
-            .onReceive(didSavePublisher) { _ in
-                guard disabled else { return }
-                title = memo.title
-                content = memo.content
-            }
             .alert(isPresented: $showConfirmationAlert) {
                 Alert(
                     title: Text("Discard changes?"),
                     primaryButton: .destructive(Text("Discard")) {
-                        title = memo.title
-                        content = memo.content
-                        disabled = true
+                        dismiss()
                     },
                     secondaryButton: .cancel()
                 )
             }
-        }
-        .navigationTitle($title, disabled: disabled)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(!disabled)
-        .toolbar {
-            if !disabled {
-                ToolbarItem(placement: .principal) {
-                    TextField("(Input Title)", text: $title)
-                        .multilineTextAlignment(.center)
-                        .background(.secondary)
-                }
-            }
-            ToolbarItemGroup(placement: .topBarLeading) {
-                if !disabled {
+            .navigationTitle($title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
-                        guard !disabled else { return }
                         if memoUpdated {
                             showConfirmationAlert = true
                         } else {
-                            disabled = true
+                            dismiss()
                         }
                     }
                 }
-            }
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                if disabled {
-                    Button("Edit", systemImage: "pencil") {
-                        disabled = false
-                    }
-                } else {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Save", systemImage: "square.and.pencil") {
-                        guard !disabled && memoUpdated else { return }
+                        guard memoUpdated else { return }
                         memo.title = title
                         memo.content = content
                         memo.updatedAt = Date()
                         try? modelContext.save()
-                        disabled = true
+                        dismiss()
                     }
                     .disabled(!memoUpdated)
                 }
-
             }
         }
     }
@@ -98,27 +72,13 @@ struct EditMemoView: View {
     private var memoUpdated: Bool {
         memo.title != title || memo.content != content
     }
-
-    private var didSavePublisher: NotificationCenter.Publisher {
-        NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: modelContext)
-    }
 }
 
-struct Disabled_True_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationStack {
         let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
         return NavigationStack {
-            EditMemoView(memo: memo, disabled: true)
-        }
-    }
-}
-
-struct Disabled_False_Previews: PreviewProvider {
-    static var previews: some View {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
-        return NavigationStack {
-            EditMemoView(memo: memo, disabled: false)
+            EditMemoView(memo: memo)
         }
     }
 }

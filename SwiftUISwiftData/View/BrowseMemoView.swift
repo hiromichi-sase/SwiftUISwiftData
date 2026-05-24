@@ -1,0 +1,69 @@
+//
+//  BrowseMemoView.swift
+//  SwiftUISwiftData
+//
+//  Created by Hiromichi Sase on 2026/05/23.
+//
+
+import SwiftData
+import SwiftUI
+
+struct BrowseMemoView: View {
+    @Environment(\.modelContext) private var modelContext
+
+    private var memo: Memo
+
+    @State private var title: String
+    @State private var content: String
+    @State private var showingEditMemo = false
+
+    @State var path = NavigationPath()
+
+    init(memo: Memo) {
+        self.memo = memo
+        self._title = State(initialValue: memo.title)
+        self._content = State(initialValue: memo.content)
+    }
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            VStack {
+                TextView(text: $content, isEditable: .constant(false))
+                    .border(.clear)
+            }
+            .padding()
+            .onReceive(willSavePublisher) { _ in
+                title = memo.title
+                content = memo.content
+            }
+            .fullScreenCover(isPresented: $showingEditMemo) {
+                EditMemoView(memo: memo)
+            }
+            .navigationTitle($title, disabled: true)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("Edit", systemImage: "pencil") {
+                        showingEditMemo = true
+                    }
+                }
+            }
+        }
+    }
+
+    private var memoUpdated: Bool {
+        memo.title != title || memo.content != content
+    }
+
+    private var willSavePublisher: NotificationCenter.Publisher {
+        NotificationCenter.default
+            .publisher(for: ModelContext.willSave, object: modelContext)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
+        BrowseMemoView(memo: memo)
+    }
+}
