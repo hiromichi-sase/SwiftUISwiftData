@@ -35,7 +35,6 @@ struct BrowseMemoView: View {
             }
             .padding()
             .onAppear {
-                print("===== BrowseMemoView openEditMemoView: \(openEditMemoView)")
                 if openEditMemoView {
                     showingEditMemo = true
                     openEditMemoView = false
