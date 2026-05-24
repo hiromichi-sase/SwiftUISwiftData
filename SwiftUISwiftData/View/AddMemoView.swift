@@ -81,39 +81,7 @@ struct AddMemoView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showTitleSheet) {
-                VStack(spacing: 16) {
-                    Text("Input Title")
-                        .font(.headline)
-
-                    HStack(spacing: 0) {
-                        TextField("Title", text: $title)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(height: 44)
-                            .padding(.horizontal)
-                        Button("", systemImage: "x.circle") {
-                            title = ""
-                        }
-                    }
-
-                    HStack {
-                        Button("Cancel", role: .cancel) {
-                            title = titleToStore
-                            showTitleSheet = false
-                        }
-                        Spacer()
-                        Button("OK") {
-                            titleToStore = title
-                            showTitleSheet = false
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical, 20)
-                .presentationDetents([.fraction(0.25)])
-                .interactiveDismissDisabled()
-            }
+            .titleSheet(isPresented: $showTitleSheet, title: $title, titleToStore: $titleToStore)
         }
     }
 }

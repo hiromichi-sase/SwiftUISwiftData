@@ -8,27 +8,39 @@
 import SwiftUI
 
 extension View {
-    @ViewBuilder
-    func navigationTitle(_ title: Binding<String>, disabled: Bool) -> some View {
-        if disabled {
-            if title.wrappedValue.isEmpty {
-                navigationTitle("")
-                    .toolbar {
-                        ToolbarItem(placement: .principal) {
-                            Text("(No Title)")
-                                .foregroundStyle(.secondary)
-                        }
+    func titleSheet(isPresented: Binding<Bool>, title: Binding<String>, titleToStore: Binding<String>) -> some View {
+        self.sheet(isPresented: isPresented) {
+            VStack(spacing: 16) {
+                Text("Input Title")
+                    .font(.headline)
+
+                HStack(spacing: 0) {
+                    TextField("Title", text: title)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(height: 44)
+                        .padding(.horizontal)
+                    Button("", systemImage: "x.circle") {
+                        title.wrappedValue = ""
                     }
-            } else {
-                navigationTitle(title.wrappedValue)
-                    .toolbarTitleMenu {
-                        Button("Copy", systemImage: "doc.on.doc") {
-                            UIPasteboard.general.string = title.wrappedValue
-                        }
+                }
+
+                HStack {
+                    Button("Cancel", role: .cancel) {
+                        title.wrappedValue = titleToStore.wrappedValue
+                        isPresented.wrappedValue = false
                     }
+                    Spacer()
+                    Button("OK") {
+                        titleToStore.wrappedValue = title.wrappedValue
+                        isPresented.wrappedValue = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding(.horizontal)
             }
-        } else {
-            navigationTitle("")
+            .padding(.vertical, 20)
+            .presentationDetents([.fraction(0.25)])
+            .interactiveDismissDisabled()
         }
     }
 }
