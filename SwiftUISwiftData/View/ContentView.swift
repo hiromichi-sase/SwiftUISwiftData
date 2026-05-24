@@ -19,7 +19,6 @@ struct ContentView: View {
     @State private var showDeleteSelectionAlert = false
     @State private var showingAddMemo = false
     @State private var scrollViewProxy: ScrollViewProxy?
-    @State private var editModeViewDisabled: Bool = false
     @State private var openEditMemoView = false
 
     private struct MemoRow: View {
@@ -159,12 +158,10 @@ struct ContentView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            editModeViewDisabled = true
             selectedMemoId = memo.id
         }
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
-                editModeViewDisabled = false
                 openEditMemoView = true
                 selectedMemoId = memo.id
             }
@@ -277,7 +274,6 @@ struct ContentView: View {
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
                         self.selection.removeAll()
-                        self.editModeViewDisabled = true
                         self.selectedMemoId = newMemo.id
                         if let proxy = self.scrollViewProxy {
                             proxy.scrollTo(newMemo.id, anchor: .center)
