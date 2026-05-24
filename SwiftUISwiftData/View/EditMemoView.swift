@@ -15,8 +15,10 @@ struct EditMemoView: View {
     private var memo: Memo
 
     @State private var title: String
+    @State private var titleToStore: String = ""
     @State private var content: String
     @State private var showConfirmationAlert = false
+    @State private var showTitleSheet = false
 
     @State var path = NavigationPath()
 
@@ -24,6 +26,7 @@ struct EditMemoView: View {
         self.memo = memo
         self._title = State(initialValue: memo.title)
         self._content = State(initialValue: memo.content)
+        self._titleToStore = State(initialValue: memo.title)
     }
 
     var body: some View {
@@ -42,9 +45,17 @@ struct EditMemoView: View {
                     secondaryButton: .cancel()
                 )
             }
-            .navigationTitle($title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack {
+                        Text(titleToStore.isEmpty ? "(No Title)" : titleToStore)
+                            .foregroundStyle(titleToStore.isEmpty ? .secondary : .primary)
+                        Button("Rename", systemImage: "pencil") {
+                            showTitleSheet = true
+                        }
+                    }
+                }
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
                         if memoUpdated {
@@ -65,6 +76,39 @@ struct EditMemoView: View {
                     }
                     .disabled(!memoUpdated)
                 }
+            }
+            .sheet(isPresented: $showTitleSheet) {
+                VStack(spacing: 16) {
+                    Text("Input Title")
+                        .font(.headline)
+
+                    HStack(spacing: 0) {
+                        TextField("Title", text: $title)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(height: 44)
+                            .padding(.horizontal)
+                        Button("", systemImage: "x.circle") {
+                            title = ""
+                        }
+                    }
+
+                    HStack {
+                        Button("Cancel", role: .cancel) {
+                            title = titleToStore
+                            showTitleSheet = false
+                        }
+                        Spacer()
+                        Button("OK") {
+                            titleToStore = title
+                            showTitleSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical, 20)
+                .presentationDetents([.fraction(0.25)])
+                .interactiveDismissDisabled()
             }
         }
     }
