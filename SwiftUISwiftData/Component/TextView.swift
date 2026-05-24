@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextView: UIViewRepresentable {
     @Binding var text: String
-    @Binding var isEditable: Bool
+    var isEditable: Bool
 
     func makeCoordinator() -> Coordinator {
         Coordinator($text)

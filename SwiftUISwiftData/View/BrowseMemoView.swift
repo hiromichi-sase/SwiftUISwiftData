@@ -28,7 +28,7 @@ struct BrowseMemoView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                TextView(text: $content, isEditable: .constant(false))
+                TextView(text: $content, isEditable: false)
                     .border(.clear)
             }
             .padding()
