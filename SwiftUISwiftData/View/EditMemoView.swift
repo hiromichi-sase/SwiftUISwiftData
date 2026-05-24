@@ -81,7 +81,7 @@ struct EditMemoView: View {
     }
 
     private var memoUpdated: Bool {
-        memo.title != title || memo.content != content
+        memo.title != titleToStore || memo.content != content
     }
 }
 

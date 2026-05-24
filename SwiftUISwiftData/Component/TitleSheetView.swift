@@ -24,9 +24,11 @@ struct TitleSheetView: View {
                     .frame(height: 44)
                     .padding(.horizontal)
                     .focused($textFieldFocus)
-                Button("", systemImage: "x.circle") {
+                Button("", systemImage: "xmark.circle") {
                     title = ""
                 }
+                Spacer()
+                    .frame(width: 8)
             }
 
             HStack {
