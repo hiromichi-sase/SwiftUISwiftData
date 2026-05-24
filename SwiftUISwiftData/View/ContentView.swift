@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var showingAddMemo = false
     @State private var scrollViewProxy: ScrollViewProxy?
     @State private var editModeViewDisabled: Bool = false
+    @State private var openEditMemoView = false
 
     private struct MemoRow: View {
         let memo: Memo
@@ -108,11 +109,14 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showingAddMemo) {
                 AddMemoView()
             }
+            .onDisappear {
+                openEditMemoView = false
+            }
         } detail: {
             if editMode == .inactive {
                 if let id = selectedMemoId,
                    let memo = memos.first(where: { $0.id == id }) {
-                    BrowseMemoView(memo: memo)
+                    BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
                         .modelContext(modelContext)
                         .id(memo.id)
                 } else {
@@ -161,6 +165,7 @@ struct ContentView: View {
         .contextMenu {
             Button("Edit", systemImage: "pencil") {
                 editModeViewDisabled = false
+                openEditMemoView = true
                 selectedMemoId = memo.id
             }
             Button("Delete", systemImage: "trash", role: .destructive) {

@@ -12,6 +12,7 @@ struct BrowseMemoView: View {
     @Environment(\.modelContext) private var modelContext
 
     private var memo: Memo
+    @State private var openEditMemoView = false
 
     @State private var title: String
     @State private var content: String
@@ -19,10 +20,11 @@ struct BrowseMemoView: View {
 
     @State var path = NavigationPath()
 
-    init(memo: Memo) {
+    init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
         self._title = State(initialValue: memo.title)
         self._content = State(initialValue: memo.content)
+        self._openEditMemoView = State(initialValue: openEditMemoView)
     }
 
     var body: some View {
@@ -32,6 +34,13 @@ struct BrowseMemoView: View {
                     .border(.clear)
             }
             .padding()
+            .onAppear {
+                print("===== BrowseMemoView openEditMemoView: \(openEditMemoView)")
+                if openEditMemoView {
+                    showingEditMemo = true
+                    openEditMemoView = false
+                }
+            }
             .onReceive(willSavePublisher) { _ in
                 title = memo.title
                 content = memo.content
