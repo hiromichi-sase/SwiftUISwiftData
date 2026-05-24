@@ -47,9 +47,19 @@ struct BrowseMemoView: View {
             .fullScreenCover(isPresented: $showingEditMemo) {
                 EditMemoView(memo: memo)
             }
-            .navigationTitle($title, disabled: true)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack {
+                        Text(title.isEmpty ? "(No Title)" : title)
+                            .foregroundStyle(title.isEmpty ? .secondary : .primary)
+                        if !title.isEmpty {
+                            Button("Copy", systemImage: "doc.on.doc") {
+                                UIPasteboard.general.string = $title.wrappedValue
+                            }
+                        }
+                    }
+                }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Edit", systemImage: "pencil") {
                         showingEditMemo = true
