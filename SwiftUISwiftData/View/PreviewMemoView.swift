@@ -24,11 +24,9 @@ struct PreviewMemoView: View {
     }
 }
 
-struct PreviewMemoView_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationStack {
         let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
-        return NavigationStack {
-            PreviewMemoView(memo: memo)
-        }
+        PreviewMemoView(memo: memo)
     }
 }
