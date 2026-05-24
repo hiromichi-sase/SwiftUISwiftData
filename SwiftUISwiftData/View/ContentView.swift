@@ -30,12 +30,7 @@ struct ContentView: View {
                 onTap(memo)
             }) {
                 HStack {
-                    if memo.title.isEmpty {
-                        Text("(No Title)")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(memo.title)
-                    }
+                    TitleText(memo.title)
                     Spacer()
                 }
             }
@@ -144,16 +139,7 @@ struct ContentView: View {
     @ViewBuilder
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
-            if memo.title.isEmpty {
-                Text("(No Title)")
-                    .foregroundStyle(.secondary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                Text(memo.title)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            TitleText(memo.title)
             Spacer()
         }
         .contentShape(Rectangle())

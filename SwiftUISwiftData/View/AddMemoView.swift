@@ -45,8 +45,7 @@ struct AddMemoView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack {
-                        Text(titleToStore.isEmpty ? "(No Title)" : titleToStore)
-                            .foregroundStyle(titleToStore.isEmpty ? .secondary : .primary)
+                        TitleText(titleToStore)
                         Button("Rename", systemImage: "pencil") {
                             showTitleSheet = true
                         }

@@ -51,8 +51,7 @@ struct BrowseMemoView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     HStack {
-                        Text(title.isEmpty ? "(No Title)" : title)
-                            .foregroundStyle(title.isEmpty ? .secondary : .primary)
+                        TitleText(title)
                         if !title.isEmpty {
                             Button("Copy", systemImage: "doc.on.doc") {
                                 UIPasteboard.general.string = $title.wrappedValue
