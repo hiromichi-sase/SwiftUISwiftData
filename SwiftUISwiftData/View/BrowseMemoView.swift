@@ -17,8 +17,6 @@ struct BrowseMemoView: View {
     @State private var title: String
     @State private var content: String
     @State private var showingEditMemo = false
-    @State private var contentToStore: String
-    @State private var contentColor: UIColor
 
     @State var path = NavigationPath()
 
@@ -27,14 +25,12 @@ struct BrowseMemoView: View {
         self._title = State(initialValue: memo.title)
         self._content = State(initialValue: memo.content)
         self._openEditMemoView = State(initialValue: openEditMemoView)
-        self._contentToStore = State(initialValue: memo.content.isEmpty ? "(No content)" : memo.content)
-        self._contentColor = State(initialValue: memo.content.isEmpty ? .secondaryLabel : .label)
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                TextView(text: $contentToStore, isEditable: false, textColor: contentColor)
+                BrowseTextView(text: $content)
                     .border(.clear)
             }
             .padding()
@@ -47,8 +43,6 @@ struct BrowseMemoView: View {
             .onReceive(willSavePublisher) { _ in
                 title = memo.title
                 content = memo.content
-                contentToStore = memo.content.isEmpty ? "(No content)" : memo.content
-                contentColor = memo.content.isEmpty ? .secondaryLabel : .label
             }
             .fullScreenCover(isPresented: $showingEditMemo) {
                 EditMemoView(memo: memo)

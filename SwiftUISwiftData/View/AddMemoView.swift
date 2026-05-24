@@ -28,7 +28,7 @@ struct AddMemoView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                TextView(text: $content, isEditable: true)
+                TextView(text: $content)
                     .border(.primary)
             }
             .padding()

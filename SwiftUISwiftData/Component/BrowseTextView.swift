@@ -1,13 +1,13 @@
 //
-//  TextView.swift
-//  SwiftUICoreData
+//  BrowseTextView.swift
+//  SwiftUISwiftData
 //
-//  Created by Hiromichi Sase on 2026/05/04.
+//  Created by Hiromichi Sase on 2026/05/24.
 //
 
 import SwiftUI
 
-struct TextView: UIViewRepresentable {
+struct BrowseTextView: UIViewRepresentable {
     @Binding var text: String
 
     func makeCoordinator() -> Coordinator {
@@ -18,6 +18,7 @@ struct TextView: UIViewRepresentable {
         let textView = UITextView()
         textView.delegate = context.coordinator
         textView.font = UIFont.systemFont(ofSize: 16)
+        textView.isEditable = false
         textView.dataDetectorTypes = .all
         return textView
     }
@@ -26,17 +27,9 @@ struct TextView: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text
         }
-    }
-}
-
-class Coordinator: NSObject, UITextViewDelegate {
-    var text: Binding<String>
-
-    init(_ text: Binding<String>) {
-        self.text = text
-    }
-
-    func textViewDidChange(_ textView: UITextView) {
-        self.text.wrappedValue = textView.text
+        if text.isEmpty {
+            uiView.text = "(No content)"
+        }
+        uiView.textColor = text.isEmpty ? .secondaryLabel : .label
     }
 }
