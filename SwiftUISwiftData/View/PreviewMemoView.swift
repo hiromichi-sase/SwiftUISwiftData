@@ -14,7 +14,8 @@ struct PreviewMemoView: View {
     var body: some View {
         NavigationStack() {
             VStack(alignment: .leading) {
-                Text(memo.content)
+                Text(memo.content.isEmpty ? "(No Content)" : memo.content)
+                    .foregroundStyle(memo.content.isEmpty ? .secondary : .primary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
             }
