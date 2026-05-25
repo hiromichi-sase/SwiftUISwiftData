@@ -40,7 +40,7 @@ struct ContentView: View {
         }
     }
 
-    var list: some View {
+    private var list: some View {
         ScrollViewReader { proxy in
             VStack {
                 if editMode == .active {
@@ -126,7 +126,6 @@ struct ContentView: View {
         "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(memos.count))"
     }
 
-    @ViewBuilder
     private func activeRow(for memo: Memo) -> some View {
         MemoRow(memo: memo) { memo in
             toggleSelection(for: memo.id)
@@ -136,7 +135,6 @@ struct ContentView: View {
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
-    @ViewBuilder
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
             TitleText(memo.title)
