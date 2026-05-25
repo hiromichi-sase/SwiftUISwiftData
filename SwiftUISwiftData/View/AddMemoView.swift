@@ -31,7 +31,8 @@ struct AddMemoView: View {
                 TextView(text: $content)
                     .border(.primary)
             }
-            .padding()
+            .padding(.top, 0)
+            .padding([.horizontal, .bottom], 16)
             .alert(isPresented: $showConfirmationAlert) {
                 Alert(
                     title: Text("Discard changes?"),

@@ -33,7 +33,8 @@ struct BrowseMemoView: View {
                 BrowseTextView(text: $content)
                     .border(.clear)
             }
-            .padding()
+            .padding(.top, 0)
+            .padding([.horizontal, .bottom], 16)
             .onAppear {
                 if openEditMemoView {
                     showingEditMemo = true
