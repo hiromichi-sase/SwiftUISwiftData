@@ -71,6 +71,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             list
+                .contentMargins([.top], 0)
             .onChange(of: memos) { oldMemos, newMemos in
                 onChange(oldMemos: oldMemos, newMemos: newMemos)
             }
