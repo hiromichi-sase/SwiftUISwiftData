@@ -46,16 +46,9 @@ struct EditMemoView: View {
                     secondaryButton: .cancel()
                 )
             }
+            .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    HStack {
-                        TitleText(titleToStore)
-                        Button("Rename", systemImage: "pencil") {
-                            showTitleSheet = true
-                        }
-                    }
-                }
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
                         if memoUpdated {
@@ -66,6 +59,9 @@ struct EditMemoView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("Rename", systemImage: "pencil") {
+                        showTitleSheet = true
+                    }
                     Button("Save", systemImage: "square.and.pencil") {
                         guard memoUpdated else { return }
                         memo.title = title

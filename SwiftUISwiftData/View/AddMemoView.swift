@@ -42,16 +42,9 @@ struct AddMemoView: View {
                     secondaryButton: .cancel()
                 )
             }
+            .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    HStack {
-                        TitleText(titleToStore)
-                        Button("Rename", systemImage: "pencil") {
-                            showTitleSheet = true
-                        }
-                    }
-                }
                 ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button("Cancel", systemImage: "xmark") {
                         if !title.isEmpty || !content.isEmpty {
@@ -62,6 +55,9 @@ struct AddMemoView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button("Rename", systemImage: "pencil") {
+                        showTitleSheet = true
+                    }
                     Button("Save", systemImage: "square.and.pencil") {
                         let order: Int
                         do {
