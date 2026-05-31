@@ -18,7 +18,8 @@ struct EditMemoView: View {
     @State private var titleToStore: String = ""
     @State private var content: String
     @State private var showConfirmationAlert = false
-    @State private var showTitleSheet = false
+    @State private var showTitleView = false
+    @FocusState private var textFieldFocus: Bool
 
     @State var path = NavigationPath()
 
@@ -31,9 +32,13 @@ struct EditMemoView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack {
+            VStack(spacing: 8) {
+                if showTitleView {
+                    titleView
+                }
                 TextView(text: $content)
                     .border(.primary)
+                    .disabled(showTitleView)
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
@@ -57,11 +62,14 @@ struct EditMemoView: View {
                             dismiss()
                         }
                     }
+                    .disabled(showTitleView)
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("Rename", systemImage: "pencil") {
-                        showTitleSheet = true
+                    Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
+                        showTitleView = true
+                        textFieldFocus = true
                     }
+                    .disabled(showTitleView)
                     Button("Save", systemImage: "square.and.pencil") {
                         guard memoUpdated else { return }
 
@@ -83,10 +91,28 @@ struct EditMemoView: View {
 
                         try? modelContext.save()
                     }
-                    .disabled(!memoUpdated)
+                    .disabled(!memoUpdated || showTitleView)
                 }
             }
-            .titleSheet(isPresented: $showTitleSheet, title: $title, titleToStore: $titleToStore)
+        }
+    }
+
+    private var titleView: some View {
+        HStack(spacing: 8) {
+            Button("", systemImage: "xmark") {
+                title = titleToStore
+                showTitleView = false
+            }
+            TextField("Title", text: $title)
+                .border(.primary)
+                .focused($textFieldFocus)
+                .onSubmit {
+                    titleToStore = title
+                    showTitleView = false
+                }
+            Button("", systemImage: "eraser") {
+                title = ""
+            }
         }
     }
 
