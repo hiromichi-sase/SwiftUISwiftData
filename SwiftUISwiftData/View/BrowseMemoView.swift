@@ -30,7 +30,7 @@ struct BrowseMemoView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                BrowseTextView(text: $content)
+                TextView(text: $content, isEditable: false, defaultText: "(No Contents)")
                     .border(.clear)
             }
             .padding(.top, 0)

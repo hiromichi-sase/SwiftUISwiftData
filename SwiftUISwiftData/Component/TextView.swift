@@ -10,10 +10,12 @@ import SwiftUI
 struct TextView: UIViewRepresentable {
     @Binding var text: String
     var isEditable: Bool
+    var defaultText: String?
 
-    init(text: Binding<String>, isEditable: Bool) {
+    init(text: Binding<String>, isEditable: Bool, defaultText: String? = nil) {
         self._text = text
         self.isEditable = isEditable
+        self.defaultText = defaultText
     }
 
     func makeCoordinator() -> Coordinator {
@@ -25,7 +27,6 @@ struct TextView: UIViewRepresentable {
         textView.delegate = context.coordinator
         textView.font = UIFont.systemFont(ofSize: 16)
         textView.isEditable = isEditable
-        textView.textColor = textColor
         textView.dataDetectorTypes = .all
         return textView
     }
@@ -34,11 +35,12 @@ struct TextView: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text
         }
-        uiView.textColor = textColor
-    }
 
-    private var textColor: UIColor {
-        isEditable ? .label : .secondaryLabel
+        if let defaultText, text.isEmpty {
+            uiView.text = defaultText
+        }
+
+        uiView.textColor = text.isEmpty ? .secondaryLabel : .label
     }
 }
 
