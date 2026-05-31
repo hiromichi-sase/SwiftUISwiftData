@@ -102,7 +102,7 @@ struct ContentView: View {
             }
             .environment(\.editMode, $editMode)
             .fullScreenCover(isPresented: $showingAddMemo) {
-                AddMemoView()
+                EditMemoView()
             }
             .onDisappear {
                 openEditMemoView = false

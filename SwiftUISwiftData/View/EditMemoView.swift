@@ -12,7 +12,7 @@ struct EditMemoView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    private var memo: Memo
+    @State private var memo: Memo?
 
     @State private var title: String
     @State private var titleToStore: String = ""
@@ -22,11 +22,11 @@ struct EditMemoView: View {
 
     @State var path = NavigationPath()
 
-    init(memo: Memo) {
+    init(memo: Memo? = nil) {
         self.memo = memo
-        self._title = State(initialValue: memo.title)
-        self._content = State(initialValue: memo.content)
-        self._titleToStore = State(initialValue: memo.title)
+        self._title = State(initialValue: memo?.title ?? "")
+        self._content = State(initialValue: memo?.content ?? "")
+        self._titleToStore = State(initialValue: memo?.title ?? "")
     }
 
     var body: some View {
@@ -64,11 +64,24 @@ struct EditMemoView: View {
                     }
                     Button("Save", systemImage: "square.and.pencil") {
                         guard memoUpdated else { return }
-                        memo.title = title
-                        memo.content = content
-                        memo.updatedAt = Date()
+
+                        if let memo {
+                            memo.title = title
+                            memo.content = content
+                            memo.updatedAt = Date()
+                        } else {
+                            let order: Int
+                            do {
+                                order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
+                            } catch {
+                                order = 1
+                            }
+                            let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
+                            modelContext.insert(memo)
+                            self.memo = memo
+                        }
+
                         try? modelContext.save()
-                        dismiss()
                     }
                     .disabled(!memoUpdated)
                 }
@@ -78,15 +91,17 @@ struct EditMemoView: View {
     }
 
     private var memoUpdated: Bool {
-        memo.title != titleToStore || memo.content != content
+        if let memo {
+            memo.title != titleToStore || memo.content != content
+        } else {
+            !titleToStore.isEmpty || !content.isEmpty
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
-        return NavigationStack {
-            EditMemoView(memo: memo)
-        }
+        EditMemoView(memo: memo)
     }
 }
