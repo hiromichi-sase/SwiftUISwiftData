@@ -19,6 +19,8 @@ struct EditMemoView: View {
     @State private var content: String
     @State private var showConfirmationAlert = false
     @State private var showTitleView = false
+    @State private var toastMessage = ""
+
     @FocusState private var textViewFocus: Bool
     @FocusState private var textFieldFocus: Bool
 
@@ -29,6 +31,7 @@ struct EditMemoView: View {
         self._title = State(initialValue: memo?.title ?? "")
         self._content = State(initialValue: memo?.content ?? "")
         self._titleToStore = State(initialValue: memo?.title ?? "")
+        self._toastMessage = State(initialValue: "")
     }
 
     var body: some View {
@@ -92,10 +95,12 @@ struct EditMemoView: View {
                         }
 
                         try? modelContext.save()
+                        toastMessage = "Successfully saved!"
                     }
                     .disabled(!memoUpdated || showTitleView)
                 }
             }
+            .toast(message: $toastMessage)
         }
     }
 
