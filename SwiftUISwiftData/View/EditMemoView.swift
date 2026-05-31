@@ -19,6 +19,7 @@ struct EditMemoView: View {
     @State private var content: String
     @State private var showConfirmationAlert = false
     @State private var showTitleView = false
+    @FocusState private var textViewFocus: Bool
     @FocusState private var textFieldFocus: Bool
 
     @State var path = NavigationPath()
@@ -38,10 +39,14 @@ struct EditMemoView: View {
                 }
                 TextView(text: $content)
                     .border(.primary)
+                    .focused($textViewFocus)
                     .disabled(showTitleView)
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
+            .onAppear {
+                textViewFocus = true
+            }
             .alert(isPresented: $showConfirmationAlert) {
                 Alert(
                     title: Text("Discard changes?"),
