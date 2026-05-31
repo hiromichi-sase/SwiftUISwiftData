@@ -37,10 +37,7 @@ struct EditMemoView: View {
                 if showTitleView {
                     titleView
                 }
-                TextView(text: $content)
-                    .border(.primary)
-                    .focused($textViewFocus)
-                    .disabled(showTitleView)
+                contentView
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
@@ -109,8 +106,10 @@ struct EditMemoView: View {
                 showTitleView = false
             }
             TextField("Title", text: $title)
+                .padding(6)
                 .border(.primary)
                 .focused($textFieldFocus)
+                .submitLabel(.done)
                 .onSubmit {
                     titleToStore = title
                     showTitleView = false
@@ -119,6 +118,21 @@ struct EditMemoView: View {
                 title = ""
             }
         }
+    }
+
+    private var contentView: some View {
+        TextView(text: $content, isEditable: !showTitleView)
+            .border(showTitleView ? .secondary : .primary)
+            .focused($textViewFocus)
+            .disabled(showTitleView)
+            .overlay(alignment: .topLeading) {
+                if content.isEmpty {
+                    Text("Input Content")
+                        .allowsHitTesting(false)
+                        .foregroundColor(Color(uiColor: .placeholderText))
+                        .padding(6)
+                }
+            }
     }
 
     private var memoUpdated: Bool {
