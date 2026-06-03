@@ -60,44 +60,10 @@ struct EditMemoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
-                    Button("Cancel", systemImage: "xmark") {
-                        if memoUpdated {
-                            showConfirmationAlert = true
-                        } else {
-                            dismiss()
-                        }
-                    }
-                    .disabled(showTitleView)
+                    toolbarItemTopBarLeading
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
-                        showTitleView = true
-                        textFieldFocus = true
-                    }
-                    .disabled(showTitleView)
-                    Button("Save", systemImage: "square.and.pencil") {
-                        guard memoUpdated else { return }
-
-                        if let memo {
-                            memo.title = title
-                            memo.content = content
-                            memo.updatedAt = Date()
-                        } else {
-                            let order: Int
-                            do {
-                                order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
-                            } catch {
-                                order = 1
-                            }
-                            let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
-                            modelContext.insert(memo)
-                            self.memo = memo
-                        }
-
-                        try? modelContext.save()
-                        toastMessage = "Successfully saved!"
-                    }
-                    .disabled(!memoUpdated || showTitleView)
+                    toolbarItemTopBarTrailing
                 }
             }
             .toast(message: $toastMessage)
@@ -138,6 +104,53 @@ struct EditMemoView: View {
                         .padding(6)
                 }
             }
+    }
+
+    @ViewBuilder
+    private var toolbarItemTopBarLeading: some View {
+        Button("Cancel", systemImage: "xmark") {
+            if memoUpdated {
+                showConfirmationAlert = true
+            } else {
+                dismiss()
+            }
+        }
+        .disabled(showTitleView)
+    }
+
+    @ViewBuilder
+    private var toolbarItemTopBarTrailing: some View {
+        Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
+            showTitleView = true
+            textFieldFocus = true
+        }
+        .disabled(showTitleView)
+        Button("Save", systemImage: "square.and.pencil") {
+            if let memo {
+                memo.title = title
+                memo.content = content
+                memo.updatedAt = Date()
+            } else {
+                let order: Int
+                do {
+                    order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
+                } catch {
+                    print("Failed to fetch memo count: \(error)")
+                    return
+                }
+                let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
+                modelContext.insert(memo)
+                self.memo = memo
+            }
+
+            do {
+                try modelContext.save()
+                toastMessage = "Successfully saved!"
+            } catch {
+                print("Failed to save memo: \(error)")
+            }
+        }
+        .disabled(!memoUpdated || showTitleView)
     }
 
     private var memoUpdated: Bool {
