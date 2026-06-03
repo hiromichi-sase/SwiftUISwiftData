@@ -276,5 +276,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Memo.self, inMemory: true)
+        .modelContainer(ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
 }
