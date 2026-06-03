@@ -52,14 +52,7 @@ struct BrowseMemoView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    if !title.isEmpty {
-                        Button("Copy", systemImage: "doc.on.doc") {
-                            UIPasteboard.general.string = $title.wrappedValue
-                        }
-                    }
-                    Button("Edit", systemImage: "pencil") {
-                        showingEditMemo = true
-                    }
+                    toolbarItemTopBarTrailing
                 }
             }
         }
@@ -72,6 +65,18 @@ struct BrowseMemoView: View {
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave, object: modelContext)
+    }
+
+    @ViewBuilder
+    private var toolbarItemTopBarTrailing: some View {
+        if !title.isEmpty {
+            Button("Copy", systemImage: "doc.on.doc") {
+                UIPasteboard.general.string = $title.wrappedValue
+            }
+        }
+        Button("Edit", systemImage: "pencil") {
+            showingEditMemo = true
+        }
     }
 }
 
