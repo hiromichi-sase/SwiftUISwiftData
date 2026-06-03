@@ -16,57 +16,10 @@ struct ContentView: View {
     @State private var memoToDelete: Memo?
     @State private var selectedMemoId: UUID?
     @State private var selection: Set<UUID> = []
+    @State private var scrollViewProxy: ScrollViewProxy?
     @State private var showDeleteSelectionAlert = false
     @State private var showingAddMemo = false
-    @State private var scrollViewProxy: ScrollViewProxy?
     @State private var openEditMemoView = false
-
-    private struct MemoRow: View {
-        let memo: Memo
-        let onTap: (Memo) -> Void
-
-        var body: some View {
-            Button(action: {
-                onTap(memo)
-            }) {
-                HStack {
-                    TitleText(memo.title)
-                    Spacer()
-                }
-            }
-            .foregroundStyle(.primary)
-            .padding()
-            .contentShape(Rectangle())
-        }
-    }
-
-    private var list: some View {
-        ScrollViewReader { proxy in
-            VStack {
-                if editMode == .active {
-                    List(selection: $selection) {
-                        ForEach(memos) { memo in
-                            activeRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
-                        }
-                        .onMove(perform: moveMemo)
-                    }
-                } else {
-                    List(selection: $selectedMemoId) {
-                        ForEach(memos) { memo in
-                            inactiveRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
-                        }
-                    }
-                }
-            }
-            .onAppear {
-                scrollViewProxy = proxy
-            }
-        }
-    }
 
     var body: some View {
         NavigationSplitView {
@@ -123,43 +76,36 @@ struct ContentView: View {
         }
     }
 
+    private var list: some View {
+        ScrollViewReader { proxy in
+            VStack {
+                if editMode == .active {
+                    List(selection: $selection) {
+                        ForEach(memos) { memo in
+                            activeRow(for: memo)
+                                .id(memo.id)
+                                .tag(memo.id)
+                        }
+                        .onMove(perform: moveMemo)
+                    }
+                } else {
+                    List(selection: $selectedMemoId) {
+                        ForEach(memos) { memo in
+                            inactiveRow(for: memo)
+                                .id(memo.id)
+                                .tag(memo.id)
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                scrollViewProxy = proxy
+            }
+        }
+    }
+
     private var navigationTitle: String {
         "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(memos.count))"
-    }
-
-    private func activeRow(for memo: Memo) -> some View {
-        MemoRow(memo: memo) { memo in
-            toggleSelection(for: memo.id)
-        }
-        .listRowInsets(.init())
-        .moveDisabled(false)
-        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
-    }
-
-    private func inactiveRow(for memo: Memo) -> some View {
-        HStack {
-            TitleText(memo.title)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Spacer()
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            selectedMemoId = memo.id
-        }
-        .contextMenu {
-            Button("Edit", systemImage: "pencil") {
-                openEditMemoView = true
-                selectedMemoId = memo.id
-            }
-            Button("Delete", systemImage: "trash", role: .destructive) {
-                memoToDelete = memo
-            }
-        } preview: {
-            PreviewMemoView(memo: memo)
-        }
-        .listRowInsets(.init())
-        .moveDisabled(true)
     }
 
     @ViewBuilder
@@ -203,48 +149,8 @@ struct ContentView: View {
         }
     }
 
-    private func toggleSelection(for id: UUID) {
-        if selection.contains(id) {
-            selection.remove(id)
-        } else {
-            selection.insert(id)
-        }
-    }
-
     private var selectedMemos: [Memo] {
         memos.filter { selection.contains($0.id) }
-    }
-
-    private func deleteMemos(_ memos: [Memo]) {
-        for memo in memos {
-            modelContext.delete(memo)
-            if selectedMemoId == memo.id {
-                selectedMemoId = nil
-            }
-        }
-        try? modelContext.save()
-        selection.removeAll()
-        moveAllMemos()
-    }
-
-    private func moveMemo(from source: IndexSet, to destination: Int) {
-        guard editMode == .active else { return }
-
-        var orderedMemos = memos.sorted(by: { $0.order < $1.order })
-        orderedMemos.move(fromOffsets: source, toOffset: destination)
-        for (index, memo) in orderedMemos.enumerated() {
-            if let existingMemo = memos.first(where: { $0.id == memo.id }) {
-                existingMemo.order = index + 1
-            }
-        }
-        try? modelContext.save()
-    }
-
-    private func moveAllMemos() {
-        for (index, memo) in memos.enumerated() {
-            memo.order = index + 1
-        }
-        try? modelContext.save()
     }
 
     private func onChange(oldMemos: [Memo], newMemos: [Memo]) {
@@ -270,6 +176,113 @@ struct ContentView: View {
             }
         default:
             break
+        }
+    }
+}
+
+extension ContentView {
+    private func activeRow(for memo: Memo) -> some View {
+        activeMemoRow(memo: memo) { memo in
+            if selection.contains(memo.id) {
+                selection.remove(memo.id)
+            } else {
+                selection.insert(memo.id)
+            }
+        }
+        .listRowInsets(.init())
+        .moveDisabled(false)
+        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
+    }
+
+    private struct activeMemoRow: View {
+        let memo: Memo
+        let onTap: (Memo) -> Void
+
+        var body: some View {
+            Button(action: {
+                onTap(memo)
+            }) {
+                HStack {
+                    TitleText(memo.title)
+                    Spacer()
+                }
+            }
+            .foregroundStyle(.primary)
+            .padding()
+            .contentShape(Rectangle())
+        }
+    }
+
+    private func inactiveRow(for memo: Memo) -> some View {
+        HStack {
+            TitleText(memo.title)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            selectedMemoId = memo.id
+        }
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") {
+                openEditMemoView = true
+                selectedMemoId = memo.id
+            }
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                memoToDelete = memo
+            }
+        } preview: {
+            PreviewMemoView(memo: memo)
+        }
+        .listRowInsets(.init())
+        .moveDisabled(true)
+    }
+}
+
+extension ContentView {
+    private func deleteMemos(_ memos: [Memo]) {
+        for memo in memos {
+            modelContext.delete(memo)
+            if selectedMemoId == memo.id {
+                selectedMemoId = nil
+            }
+        }
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete memos: \(error)")
+        }
+        selection.removeAll()
+        moveAllMemos()
+    }
+
+    private func moveMemo(from source: IndexSet, to destination: Int) {
+        var orderedMemos = memos.sorted(by: { $0.order < $1.order })
+        orderedMemos.move(fromOffsets: source, toOffset: destination)
+        for (index, memo) in orderedMemos.enumerated() {
+            if let existingMemo = memos.first(where: { $0.id == memo.id }) {
+                existingMemo.order = index + 1
+            }
+        }
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to move memos: \(error)")
+        }
+    }
+
+    private func moveAllMemos() {
+        for (index, memo) in memos.enumerated() {
+            memo.order = index + 1
+        }
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to renumber memos: \(error)")
         }
     }
 }
