@@ -8,17 +8,28 @@
 import SwiftUI
 import SwiftData
 
+/// メモのリストを表示するビュー
 struct ContentView: View {
+    /// モデルコンテキストを環境から取得
     @Environment(\.modelContext) private var modelContext
+    /// メモのクエリを定義し、orderプロパティでソート
     @Query(sort: [SortDescriptor(\Memo.order)]) private var memos: [Memo]
 
+    /// 編集モードの状態を管理する状態変数
     @State private var editMode: EditMode = .inactive
+    /// 削除するメモを保持する状態変数
     @State private var memoToDelete: Memo?
+    /// 選択されたメモのIDを保持する状態変数
     @State private var selectedMemoId: UUID?
+    /// 複数選択されたメモのIDを保持する状態変数
     @State private var selection: Set<UUID> = []
+    /// スクロールビューのプロキシを保持する状態変数
     @State private var scrollViewProxy: ScrollViewProxy?
+    /// 選択されたメモを削除するかどうかの確認アラートを表示するフラグ
     @State private var showDeleteSelectionAlert = false
+    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ
     @State private var showingAddMemo = false
+    /// メモの内容を編集するビューを開くかどうかのフラグ
     @State private var openEditMemoView = false
 
     var body: some View {
@@ -76,6 +87,7 @@ struct ContentView: View {
         }
     }
 
+    /// メモのリストを表示するビュー
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
@@ -104,10 +116,12 @@ struct ContentView: View {
         }
     }
 
+    /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ
     private var navigationTitle: String {
         "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(memos.count))"
     }
 
+    /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
         if editMode == .inactive {
@@ -125,6 +139,7 @@ struct ContentView: View {
         }
     }
 
+    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
@@ -149,10 +164,15 @@ struct ContentView: View {
         }
     }
 
+    /// 選択されたメモの配列を返す計算プロパティ
     private var selectedMemos: [Memo] {
         memos.filter { selection.contains($0.id) }
     }
 
+    /// メモの配列が変更されたときに呼び出される関数。編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
+    /// - Parameters:
+    ///   - oldMemos: 以前のメモの配列
+    ///   - newMemos: 新しいメモの配列
     private func onChange(oldMemos: [Memo], newMemos: [Memo]) {
         switch editMode {
         case .active:
@@ -181,6 +201,9 @@ struct ContentView: View {
 }
 
 extension ContentView {
+    /// 編集モードで表示する行のビューを生成する関数。メモをタップすると選択状態が切り替わるようになっている。
+    /// - Parameter memo: 表示するメモ
+    /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
         activeMemoRow(memo: memo) { memo in
             if selection.contains(memo.id) {
@@ -194,6 +217,7 @@ extension ContentView {
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
+    /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
     private struct activeMemoRow: View {
         let memo: Memo
         let onTap: (Memo) -> Void
@@ -213,6 +237,9 @@ extension ContentView {
         }
     }
 
+    /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
+    /// - Parameter memo: 表示するメモ
+    /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
             TitleText(memo.title)
@@ -241,6 +268,8 @@ extension ContentView {
 }
 
 extension ContentView {
+    /// 指定されたメモを削除する関数。削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
+    /// - Parameter memos: 削除するメモの配列
     private func deleteMemos(_ memos: [Memo]) {
         for memo in memos {
             modelContext.delete(memo)
@@ -258,6 +287,10 @@ extension ContentView {
         moveAllMemos()
     }
 
+    /// 指定されたメモを新しい位置に移動する関数。移動後にすべてのメモの順序を再計算して保存する。
+    /// - Parameters:
+    ///   - source: 移動するメモのインデックスセット
+    ///   - destination: 移動先のインデックス
     private func moveMemo(from source: IndexSet, to destination: Int) {
         var orderedMemos = memos.sorted(by: { $0.order < $1.order })
         orderedMemos.move(fromOffsets: source, toOffset: destination)
@@ -274,6 +307,7 @@ extension ContentView {
         }
     }
 
+    /// すべてのメモの順序を再計算して保存する関数。メモの順序は1から始まる整数で、配列のインデックスに基づいて割り当てられる。
     private func moveAllMemos() {
         for (index, memo) in memos.enumerated() {
             memo.order = index + 1

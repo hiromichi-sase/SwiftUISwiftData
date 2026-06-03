@@ -8,24 +8,39 @@
 import SwiftData
 import SwiftUI
 
+/// メモの内容を編集するビュー
 struct EditMemoView: View {
+    /// モデルコンテキストへのアクセス
     @Environment(\.modelContext) private var modelContext
+    /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
 
+    /// 編集中のメモ
     @State private var memo: Memo?
 
+    /// タイトルと内容の状態変数
     @State private var title: String
+    /// 保存前のタイトルを保持する状態変数
     @State private var titleToStore: String = ""
+    /// 内容の状態変数
     @State private var content: String
+    /// 変更を破棄するかどうかの確認アラートを表示するフラグ
     @State private var showConfirmationAlert = false
+    /// タイトル編集ビューを表示するフラグ
     @State private var showTitleView = false
+    /// トーストメッセージの状態変数
     @State private var toastMessage = ""
 
+    /// テキストフィールドとテキストビューのフォーカス状態
     @FocusState private var textViewFocus: Bool
+    /// テキストフィールドのフォーカス状態
     @FocusState private var textFieldFocus: Bool
 
+    /// ナビゲーションパスの状態変数
     @State var path = NavigationPath()
 
+    /// イニシャライザ
+    /// - Parameter memo: 編集するメモ（デフォルトはnilで新規作成）
     init(memo: Memo? = nil) {
         self.memo = memo
         self._title = State(initialValue: memo?.title ?? "")
@@ -70,6 +85,7 @@ struct EditMemoView: View {
         }
     }
 
+    /// タイトル編集ビュー
     private var titleView: some View {
         HStack(spacing: 8) {
             Button("", systemImage: "xmark") {
@@ -91,6 +107,7 @@ struct EditMemoView: View {
         }
     }
 
+    /// 内容編集ビュー
     private var contentView: some View {
         TextView(text: $content, isEditable: !showTitleView)
             .border(showTitleView ? .secondary : .primary)
@@ -106,6 +123,7 @@ struct EditMemoView: View {
             }
     }
 
+    /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
         Button("Cancel", systemImage: "xmark") {
@@ -118,6 +136,7 @@ struct EditMemoView: View {
         .disabled(showTitleView)
     }
 
+    /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はリネームのボタンを表示し、常に保存のボタンを表示する。保存のボタンは変更がある場合のみ有効になる。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
@@ -153,6 +172,7 @@ struct EditMemoView: View {
         .disabled(!memoUpdated || showTitleView)
     }
 
+    /// メモが更新されたかどうかを判定するプロパティ。既存のメモがある場合はタイトルまたは内容が変更されたかどうかを確認し、既存のメモがない場合はタイトルまたは内容が空でないかどうかを確認する。
     private var memoUpdated: Bool {
         if let memo {
             memo.title != titleToStore || memo.content != content

@@ -8,18 +8,30 @@
 import SwiftData
 import SwiftUI
 
+/// メモの内容を表示するビュー
 struct BrowseMemoView: View {
+    /// モデルコンテキストを環境変数から取得
     @Environment(\.modelContext) private var modelContext
 
+    /// 表示するメモ
     private var memo: Memo
+    /// 編集画面を開くかどうかのフラグ
     @State private var openEditMemoView = false
 
+    /// タイトルと内容の状態変数
     @State private var title: String
+    /// 内容の状態変数
     @State private var content: String
+    /// 編集画面を表示するかどうかのフラグ
     @State private var showingEditMemo = false
 
+    /// ナビゲーションパスの状態変数
     @State var path = NavigationPath()
 
+    /// イニシャライザ
+    /// - Parameters:
+    ///   - memo: 表示するメモ
+    ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
     init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
         self._title = State(initialValue: memo.title)
@@ -58,15 +70,18 @@ struct BrowseMemoView: View {
         }
     }
 
+    /// メモが更新されたかどうかを判定するプロパティ
     private var memoUpdated: Bool {
         memo.title != title || memo.content != content
     }
 
+    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave, object: modelContext)
     }
 
+    /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if !title.isEmpty {

@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+/// A view modifier that displays a toast message at the top of the screen when the message is not empty. The toast automatically disappears after 2 seconds or when tapped.
 struct Toast: ViewModifier {
+    /// The message to be displayed in the toast. When this string is empty, the toast will not be shown.
     @Binding var message: String
 
+    /// Defines the content and behavior of the view modifier. It overlays the toast view at the top of the content when the message is not empty.
+    /// - Parameter content: The original content view to which the toast will be added as an overlay.
+    /// - Returns: A modified view that includes the toast overlay when the message is not empty.
     func body(content: Content) -> some View {
         content
             .overlay(alignment: .top) {
@@ -18,6 +23,7 @@ struct Toast: ViewModifier {
             }
     }
 
+    /// A private computed property that defines the view for the toast message. It displays the message in a styled text view with a background and border. The toast disappears after 2 seconds or when tapped.
     private var toastView: some View {
         VStack {
             if !message.isEmpty {

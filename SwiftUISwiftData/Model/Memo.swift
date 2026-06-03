@@ -8,15 +8,29 @@
 import Foundation
 import SwiftData
 
+/// メモのモデル
 @Model
 final class Memo: Identifiable, Hashable {
+    /// UUIDを使用して一意の識別子を生成
     @Attribute(.unique) var id: UUID = UUID()
+    /// タイトル
     var title: String
+    /// 内容
     var content: String
+    /// 作成日時
     var createdAt: Date
+    /// 更新日時
     var updatedAt: Date
+    /// 順番
     var order: Int
 
+    /// イニシャライザ
+    /// - Parameters:
+    ///   - title: タイトル
+    ///   - content: 内容
+    ///   - createdAt: 作成日時
+    ///   - updatedAt: 更新日時
+    ///   - order: 順番
     init(title: String, content: String, createdAt: Date, updatedAt: Date, order: Int) {
         self.title = title
         self.content = content
@@ -25,10 +39,17 @@ final class Memo: Identifiable, Hashable {
         self.order = order
     }
 
+    /// Equatableプロトコルの実装
+    /// - Parameters:
+    ///   - lhs: Memo(左側)
+    ///   - rhs: Memo(右側)
+    /// - Returns: 両方のMemoのidが等しい場合にtrueを返す
     static func == (lhs: Memo, rhs: Memo) -> Bool {
         return lhs.id == rhs.id
     }
 
+    /// Hashableプロトコルの実装
+    /// - Parameter hasher: Hasherオブジェクトにidを組み込む
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

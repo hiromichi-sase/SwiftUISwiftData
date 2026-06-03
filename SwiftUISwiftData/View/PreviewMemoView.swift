@@ -8,7 +8,9 @@
 import SwiftUI
 import SwiftData
 
+/// メモの内容をプレビュー表示するビュー
 struct PreviewMemoView: View {
+    /// 表示するメモのデータ
     var memo: Memo
 
     var body: some View {
