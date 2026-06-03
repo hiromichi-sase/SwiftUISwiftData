@@ -8,6 +8,6 @@
 import SwiftUI
 
 func TitleText(_ title: String) -> Text {
-    Text(title.isEmpty ? "(No Title)" : title)
+    Text(title.isEmpty ? CommonString.emptyTitle.rawValue : title)
         .foregroundStyle(title.isEmpty ? .secondary : .primary)
 }
