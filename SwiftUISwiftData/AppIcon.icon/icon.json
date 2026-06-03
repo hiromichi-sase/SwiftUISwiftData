@@ -1,0 +1,60 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.74902,0.99608,1.00000,1.00000",
+      "srgb:0.25000,0.98828,1.00000,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "SwiftUI.svg",
+          "name" : "SwiftUI",
+          "position" : {
+            "scale" : 4,
+            "translation-in-points" : [
+              5.060000000000059,
+              -96
+            ]
+          }
+        },
+        {
+          "image-name" : "SwiftData.svg",
+          "name" : "SwiftData",
+          "position" : {
+            "scale" : 4,
+            "translation-in-points" : [
+              3.340000000000032,
+              111.8
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
