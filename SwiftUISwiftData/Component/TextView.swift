@@ -40,7 +40,7 @@ struct TextView: UIViewRepresentable {
             uiView.text = defaultText
         }
 
-        uiView.textColor = text.isEmpty ? .secondaryLabel : .label
+        uiView.textColor = !text.isEmpty && isEditable ? .label : .secondaryLabel
     }
 }
 
