@@ -10,8 +10,8 @@ import SwiftUI
 
 /// メモの内容を表示するビュー
 struct BrowseMemoView: View {
-    /// モデルコンテキストを環境変数から取得
-    @Environment(\.modelContext) private var modelContext
+    /// ビューの状態を管理するViewModel
+    @ObservedObject var viewModel = BrowseMemoViewModel()
 
     /// 表示するメモ
     private var memo: Memo
@@ -78,7 +78,7 @@ struct BrowseMemoView: View {
     /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: modelContext)
+            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
