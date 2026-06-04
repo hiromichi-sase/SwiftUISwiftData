@@ -297,13 +297,17 @@ extension ContentView {
 
     /// 指定されたメモを新しい位置に移動する関数。移動後にすべてのメモの順序を再計算して保存する。
     /// - Parameters:
-    ///   - source: 移動するメモのインデックスセット
+    ///   - source: 移動するメモのインデックス
     ///   - destination: 移動先のインデックス
     private func moveMemo(from source: IndexSet, to destination: Int) {
-        do {
-            try viewModel.moveMemo(from: source, to: destination)
-        } catch {
-            print("Failed to move memo: \(error)")
+        let indices = source.map { $0 }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            do {
+                try viewModel.moveMemo(from: indices, to: destination)
+            } catch {
+                print("Failed to move memo: \(error)")
+            }
         }
     }
 

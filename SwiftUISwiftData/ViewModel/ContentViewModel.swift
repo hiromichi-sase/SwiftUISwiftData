@@ -6,7 +6,6 @@
 //
 
 import SwiftData
-import SwiftUI
 internal import Combine
 
 /// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
@@ -47,12 +46,10 @@ class ContentViewModel: ObservableObject {
     
     /// Moves memos from the specified source indices to the destination index in the repository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI. If an error occurs during the moving, it throws an error.
     /// - Parameters:
-    ///   - source: An IndexSet representing the indices of the memos to be moved.
+    ///   - source: An integer array representing the indices of the memo to be moved.
     ///   - destination: An integer representing the index to which the memos should be moved.
-    func moveMemo(from source: IndexSet, to destination: Int) throws {
+    func moveMemo(from source: [Int], to destination: Int) throws {
         try repository.moveMemo(from: source, to: destination)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.fetchMemos()
-        }
+        fetchMemos()
     }
 }

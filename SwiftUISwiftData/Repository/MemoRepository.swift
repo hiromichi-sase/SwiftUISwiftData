@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftData
-import SwiftUI
 
 /// MemoRepository is responsible for managing the CRUD operations for Memo entities, including fetching, adding, updating, deleting, and reordering memos in the SwiftData model context.
 class MemoRepository {
@@ -64,12 +63,12 @@ class MemoRepository {
 
     /// Moves memos from the specified source indices to the destination index in the model context. This function first fetches the current list of memos, sorts them by their order, and then moves the memos based on the provided source and destination indices. After reordering, it updates the order property of each memo to reflect their new positions and saves the context.  If an error occurs during saving, it throws an error.
     /// - Parameters:
-    ///   - source: An IndexSet representing the indices of the memos to be moved from their current positions.
+    ///   - source: An integer array representing the indices of the memos to be moved from their current positions.
     ///   - destination: An integer representing the index to which the memos should be moved in the list.
-    func moveMemo(from source: IndexSet, to destination: Int) throws {
+    func moveMemo(from source: [Int], to destination: Int) throws {
         let memos = self.memos()
         var orderedMemos = memos.sorted(by: { $0.order < $1.order })
-        orderedMemos.move(fromOffsets: source, toOffset: destination)
+        orderedMemos.move(from: source, to: destination)
 
         for (index, memo) in orderedMemos.enumerated() {
             if let existingMemo = memos.first(where: { $0.id == memo.id }) {
