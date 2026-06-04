@@ -14,13 +14,12 @@ class MemoRepository {
     /// The model context used for performing SwiftData operations, accessed from the model container.
     var modelContext: ModelContext
     /// The model container that holds the data model for the application, allowing access to the main context for performing data operations.
-    var modelContainer: ModelContainer
+    private var modelContainer: ModelContainer
     /// A fetch descriptor that defines how to fetch Memo entities from the model context, sorted by the 'order' property to maintain the correct sequence of memos.
     let descriptor = FetchDescriptor<Memo>(sortBy: [SortDescriptor(\.order)])
 
-    @MainActor
-    init() {
-        modelContainer = ModelContainerManager.shared.modelContainer
+    init(modelContainer: ModelContainer) {
+        self.modelContainer = modelContainer
         modelContext = modelContainer.mainContext
     }
     
@@ -37,8 +36,9 @@ class MemoRepository {
     /// Adds a new memo to the model context. This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the model context.
     func add(_ memo: Memo) throws {
-        memo.createdAt = Date()
-        memo.updatedAt = Date()
+        let now = Date()
+        memo.createdAt = now
+        memo.updatedAt = now
         memo.order = memos().count + 1
         modelContext.insert(memo)
         try modelContext.save()

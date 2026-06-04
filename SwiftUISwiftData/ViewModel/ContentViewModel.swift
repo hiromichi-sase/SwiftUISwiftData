@@ -14,10 +14,10 @@ class ContentViewModel: ObservableObject {
     @Published var memos: [Memo] = []
 
     /// The repository property is an instance of MemoRepository, which is used to manage the memos in the application. It provides functions to add and update memos in the repository.
-    private let repository = MemoRepository()
+    private let repository: MemoRepository
     
-    /// Initializes the ContentViewModel and fetches the initial list of memos.
-    init() {
+    init(repository: MemoRepository) {
+        self.repository = repository
         fetchMemos()
     }
     
