@@ -10,7 +10,7 @@ import SwiftData
 
 /// MemoRepository is responsible for managing the CRUD operations for Memo entities, including fetching, adding, updating, deleting, and reordering memos in the SwiftData model context.
 class MemoRepository {
-    
+
     /// The model context used for performing SwiftData operations, accessed from the model container.
     var modelContext: ModelContext
     /// The model container that holds the data model for the application, allowing access to the main context for performing data operations.
@@ -22,7 +22,7 @@ class MemoRepository {
         self.modelContainer = modelContainer
         modelContext = modelContainer.mainContext
     }
-    
+
     /// Fetches the list of memos from the model context using the defined fetch descriptor. If an error occurs during fetching, it returns an empty array.
     /// - Returns: An array of Memo objects fetched from the model context, sorted by their order.
     func memos() -> [Memo] {
@@ -32,7 +32,7 @@ class MemoRepository {
             return []
         }
     }
-    
+
     /// Adds a new memo to the model context. This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the model context.
     func add(_ memo: Memo) throws {
@@ -43,14 +43,14 @@ class MemoRepository {
         modelContext.insert(memo)
         try modelContext.save()
     }
-    
+
     /// Updates an existing memo in the model context. This function updates the updatedAt timestamp of the memo and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be updated in the model context.
     func update(_ memo: Memo) throws {
         memo.updatedAt = Date()
         try modelContext.save()
     }
-    
+
     /// Deletes the specified memos from the model context and saves the context. This function iterates through the array of memos to be deleted, removes them from the context, and then saves the changes.  If an error occurs during saving, it throws an error.
     /// - Parameter memos: An array of Memo objects that need to be deleted from the model context.
     func delete(_ memos: [Memo]) throws {
@@ -78,7 +78,7 @@ class MemoRepository {
 
         try modelContext.save()
     }
-    
+
     /// Renumbers the order of memos in the model context. This function iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context.  If an error occurs during saving, it throws an error.
     func renumberOrder() throws {
         for (index, memo) in memos().enumerated() {

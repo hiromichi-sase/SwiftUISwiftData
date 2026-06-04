@@ -16,13 +16,13 @@ class EditMemoViewModel: ObservableObject {
     init(repository: MemoRepository) {
         self.repository = repository
     }
-    
+
     /// Adds a new memo to the repository. This function takes a Memo object as a parameter and attempts to add it to the repository. If an error occurs during the addition, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the repository.
     func add(_ memo: Memo) throws {
         try repository.add(memo)
     }
-    
+
     /// Updates an existing memo in the repository. This function takes a Memo object as a parameter and attempts to update it in the repository. If an error occurs during the update, it throws an error.
     /// - Parameter memo: The Memo object that needs to be updated in the repository.
     func update(_ memo: Memo) throws {

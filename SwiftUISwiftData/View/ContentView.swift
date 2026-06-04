@@ -199,7 +199,7 @@ struct ContentView: View {
             break
         }
     }
-    
+
     /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー。これを使用して、メモが更新されたときにビューを更新することができる。
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
