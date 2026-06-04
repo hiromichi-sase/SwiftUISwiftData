@@ -10,10 +10,8 @@ import SwiftData
 
 /// メモのリストを表示するビュー
 struct ContentView: View {
-    /// モデルコンテキストを環境から取得
-    @Environment(\.modelContext) private var modelContext
-    /// メモのクエリを定義し、orderプロパティでソート
-    @Query(sort: [SortDescriptor(\Memo.order)]) private var memos: [Memo]
+    /// ビューの状態を管理するViewModel
+    @ObservedObject var viewModel = ContentViewModel()
 
     /// 編集モードの状態を管理する状態変数
     @State private var editMode: EditMode = .inactive
@@ -36,8 +34,11 @@ struct ContentView: View {
         NavigationSplitView {
             list
                 .contentMargins([.top], 0)
-            .onChange(of: memos) { oldMemos, newMemos in
+            .onChange(of: viewModel.memos) { oldMemos, newMemos in
                 onChange(oldMemos: oldMemos, newMemos: newMemos)
+            }
+            .onReceive(willSavePublisher) { _ in
+                viewModel.fetchMemos()
             }
             .alert(item: $memoToDelete) { memo in
                 Alert(
@@ -74,9 +75,9 @@ struct ContentView: View {
         } detail: {
             if editMode == .inactive {
                 if let id = selectedMemoId,
-                   let memo = memos.first(where: { $0.id == id }) {
+                   let memo = viewModel.memos.first(where: { $0.id == id }) {
                     BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
-                        .modelContext(modelContext)
+                        .modelContext(viewModel.modelContext)
                         .id(memo.id)
                 } else {
                     Text("Select a memo")
@@ -93,7 +94,7 @@ struct ContentView: View {
             VStack {
                 if editMode == .active {
                     List(selection: $selection) {
-                        ForEach(memos) { memo in
+                        ForEach(viewModel.memos) { memo in
                             activeRow(for: memo)
                                 .id(memo.id)
                                 .tag(memo.id)
@@ -102,7 +103,7 @@ struct ContentView: View {
                     }
                 } else {
                     List(selection: $selectedMemoId) {
-                        ForEach(memos) { memo in
+                        ForEach(viewModel.memos) { memo in
                             inactiveRow(for: memo)
                                 .id(memo.id)
                                 .tag(memo.id)
@@ -118,14 +119,14 @@ struct ContentView: View {
 
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ
     private var navigationTitle: String {
-        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(memos.count))"
+        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(viewModel.memos.count))"
     }
 
     /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
         if editMode == .inactive {
-            if !memos.isEmpty {
+            if !viewModel.memos.isEmpty {
                 Button("Edit", systemImage: "pencil") {
                     selectedMemoId = nil
                     editMode = .active
@@ -149,9 +150,9 @@ struct ContentView: View {
         } else {
             Menu("Menu", systemImage: "ellipsis.circle") {
                 Button("Select All", systemImage: "checkmark.circle") {
-                    selection = Set(memos.map { $0.id })
+                    selection = Set(viewModel.memos.map { $0.id })
                 }
-                .disabled(selection.count == memos.count)
+                .disabled(selection.count == viewModel.memos.count)
                 Button("Deselect All", systemImage: "circle") {
                     selection.removeAll()
                 }
@@ -166,7 +167,7 @@ struct ContentView: View {
 
     /// 選択されたメモの配列を返す計算プロパティ
     private var selectedMemos: [Memo] {
-        memos.filter { selection.contains($0.id) }
+        viewModel.memos.filter { selection.contains($0.id) }
     }
 
     /// メモの配列が変更されたときに呼び出される関数。編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
@@ -197,6 +198,12 @@ struct ContentView: View {
         default:
             break
         }
+    }
+    
+    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー。これを使用して、メモが更新されたときにビューを更新することができる。
+    private var willSavePublisher: NotificationCenter.Publisher {
+        NotificationCenter.default
+            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
     }
 }
 
@@ -271,52 +278,45 @@ extension ContentView {
     /// 指定されたメモを削除する関数。削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
     /// - Parameter memos: 削除するメモの配列
     private func deleteMemos(_ memos: [Memo]) {
-        for memo in memos {
-            modelContext.delete(memo)
-            if selectedMemoId == memo.id {
-                selectedMemoId = nil
-            }
-        }
 
         do {
-            try modelContext.save()
+            try viewModel.delete(memos)
+
+            for memo in memos {
+                if selectedMemoId == memo.id {
+                    selectedMemoId = nil
+                }
+            }
+
+            selection.removeAll()
+            moveAllMemos()
         } catch {
             print("Failed to delete memos: \(error)")
         }
-        selection.removeAll()
-        moveAllMemos()
     }
 
     /// 指定されたメモを新しい位置に移動する関数。移動後にすべてのメモの順序を再計算して保存する。
     /// - Parameters:
-    ///   - source: 移動するメモのインデックスセット
+    ///   - source: 移動するメモのインデックス
     ///   - destination: 移動先のインデックス
     private func moveMemo(from source: IndexSet, to destination: Int) {
-        var orderedMemos = memos.sorted(by: { $0.order < $1.order })
-        orderedMemos.move(fromOffsets: source, toOffset: destination)
-        for (index, memo) in orderedMemos.enumerated() {
-            if let existingMemo = memos.first(where: { $0.id == memo.id }) {
-                existingMemo.order = index + 1
-            }
-        }
+        let indices = source.map { $0 }
 
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to move memos: \(error)")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            do {
+                try viewModel.moveMemo(from: indices, to: destination)
+            } catch {
+                print("Failed to move memo: \(error)")
+            }
         }
     }
 
     /// すべてのメモの順序を再計算して保存する関数。メモの順序は1から始まる整数で、配列のインデックスに基づいて割り当てられる。
     private func moveAllMemos() {
-        for (index, memo) in memos.enumerated() {
-            memo.order = index + 1
-        }
-
         do {
-            try modelContext.save()
+            try viewModel.renumberOrder()
         } catch {
-            print("Failed to renumber memos: \(error)")
+            print("Failed to renumber order: \(error)")
         }
     }
 }

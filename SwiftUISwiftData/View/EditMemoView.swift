@@ -10,8 +10,9 @@ import SwiftUI
 
 /// メモの内容を編集するビュー
 struct EditMemoView: View {
-    /// モデルコンテキストへのアクセス
-    @Environment(\.modelContext) private var modelContext
+    /// ビューモデルの状態変数
+    @ObservedObject var viewModel = EditMemoViewModel()
+
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
 
@@ -148,25 +149,23 @@ struct EditMemoView: View {
             if let memo {
                 memo.title = title
                 memo.content = content
-                memo.updatedAt = Date()
-            } else {
-                let order: Int
-                do {
-                    order = try modelContext.fetchCount(FetchDescriptor<Memo>()) + 1
-                } catch {
-                    print("Failed to fetch memo count: \(error)")
-                    return
-                }
-                let memo = Memo(title: title, content: content, createdAt: Date(), updatedAt: Date(), order: order)
-                modelContext.insert(memo)
-                self.memo = memo
-            }
 
-            do {
-                try modelContext.save()
-                toastMessage = "Successfully saved!"
-            } catch {
-                print("Failed to save memo: \(error)")
+                do {
+                    try viewModel.update(memo)
+                    toastMessage = "Successfully saved!"
+                } catch {
+                    print("Failed to update memo: \(error)")
+                }
+            } else {
+                let memo = Memo(title: title, content: content)
+
+                do {
+                    try viewModel.add(memo)
+                    self.memo = memo
+                    toastMessage = "Successfully saved!"
+                } catch {
+                    print("Failed to add memo: \(error)")
+                }
             }
         }
         .disabled(!memoUpdated || showTitleView)
