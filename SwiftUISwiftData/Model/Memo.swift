@@ -28,10 +28,10 @@ final class Memo: Identifiable, Hashable {
     /// - Parameters:
     ///   - title: タイトル
     ///   - content: 内容
-    ///   - createdAt: 作成日時
-    ///   - updatedAt: 更新日時
-    ///   - order: 順番
-    init(title: String, content: String, createdAt: Date, updatedAt: Date, order: Int) {
+    ///   - createdAt: 作成日時（デフォルトは現在日時）
+    ///   - updatedAt: 更新日時（デフォルトは現在日時）
+    ///   - order: 順番（デフォルトはゼロ）
+    init(title: String, content: String, createdAt: Date = Date(), updatedAt: Date = Date(), order: Int = .zero) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
