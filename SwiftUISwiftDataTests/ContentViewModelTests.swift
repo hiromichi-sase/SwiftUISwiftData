@@ -10,10 +10,14 @@ import Testing
 
 struct ContentViewModelTests {
 
-    private let repository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
+    private let viewModel = ContentViewModel(
+        repository: MemoRepository(
+            modelContainer:
+                ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+        )
+    )
 
     @Test func deleteMemos() async throws {
-        let viewModel = await ContentViewModel(repository: repository)
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1")
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2")
 
@@ -26,7 +30,6 @@ struct ContentViewModelTests {
     }
 
     @Test func renumberOrder() async throws {
-        let viewModel = await ContentViewModel(repository: repository)
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
@@ -52,7 +55,6 @@ struct ContentViewModelTests {
     }
 
     @Test func moveMemo() async throws {
-        let viewModel = await ContentViewModel(repository: repository)
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)

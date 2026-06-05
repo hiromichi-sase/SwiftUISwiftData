@@ -10,10 +10,14 @@ import Testing
 
 struct EditMemoViewModelTests {
 
-    private let repository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
+    private let viewModel = EditMemoViewModel(
+        repository: MemoRepository(
+            modelContainer:
+                ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+        )
+    )
 
     @Test func addMemo() async throws {
-        let viewModel = await EditMemoViewModel(repository: repository)
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await viewModel.add(memo)
 
@@ -29,7 +33,6 @@ struct EditMemoViewModelTests {
     }
 
     @Test func updateMemo() async throws {
-        let viewModel = await EditMemoViewModel(repository: repository)
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await viewModel.add(memo)
 

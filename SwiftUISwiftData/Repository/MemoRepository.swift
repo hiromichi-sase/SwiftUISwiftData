@@ -16,7 +16,7 @@ class MemoRepository {
     /// The model container that holds the data model for the application, allowing access to the main context for performing data operations.
     private var modelContainer: ModelContainer
     /// A fetch descriptor that defines how to fetch Memo entities from the model context, sorted by the 'order' property to maintain the correct sequence of memos.
-    let descriptor = FetchDescriptor<Memo>(sortBy: [SortDescriptor(\.order)])
+    private let descriptor = FetchDescriptor<Memo>(sortBy: [SortDescriptor(\.order)])
 
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
