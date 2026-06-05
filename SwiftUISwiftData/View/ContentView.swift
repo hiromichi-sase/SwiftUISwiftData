@@ -29,6 +29,13 @@ struct ContentView: View {
     @State private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ
     @State private var openEditMemoView = false
+    /// トーストメッセージの状態変数
+    @State private var toastMessage = ""
+
+    /// イニシャライザ
+    init() {
+        self._toastMessage = State(initialValue: "")
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -72,6 +79,7 @@ struct ContentView: View {
             .onDisappear {
                 openEditMemoView = false
             }
+            .toast(message: $toastMessage)
         } detail: {
             if editMode == .inactive {
                 if let id = selectedMemoId,
@@ -290,6 +298,7 @@ extension ContentView {
 
             selection.removeAll()
             moveAllMemos()
+            toastMessage = "Successfully deleted!"
         } catch {
             print("Failed to delete memos: \(error)")
         }

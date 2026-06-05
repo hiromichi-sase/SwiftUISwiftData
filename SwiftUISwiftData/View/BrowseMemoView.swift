@@ -24,6 +24,8 @@ struct BrowseMemoView: View {
     @State private var content: String
     /// 編集画面を表示するかどうかのフラグ
     @State private var showingEditMemo = false
+    /// トーストメッセージの状態変数
+    @State private var toastMessage = ""
 
     /// ナビゲーションパスの状態変数
     @State var path = NavigationPath()
@@ -37,6 +39,7 @@ struct BrowseMemoView: View {
         self._title = State(initialValue: memo.title)
         self._content = State(initialValue: memo.content)
         self._openEditMemoView = State(initialValue: openEditMemoView)
+        self._toastMessage = State(initialValue: "")
     }
 
     var body: some View {
@@ -67,6 +70,7 @@ struct BrowseMemoView: View {
                     toolbarItemTopBarTrailing
                 }
             }
+            .toast(message: $toastMessage)
         }
     }
 
@@ -87,6 +91,7 @@ struct BrowseMemoView: View {
         if !title.isEmpty {
             Button("Copy", systemImage: "doc.on.doc") {
                 UIPasteboard.general.string = $title.wrappedValue
+                toastMessage = "Successfully copied!"
             }
         }
         Button("Edit", systemImage: "pencil") {
