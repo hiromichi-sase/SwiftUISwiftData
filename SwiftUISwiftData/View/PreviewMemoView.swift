@@ -23,6 +23,7 @@ struct PreviewMemoView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding()
+            .background(Color(uiColor: .systemGray5))
         }
     }
 }
