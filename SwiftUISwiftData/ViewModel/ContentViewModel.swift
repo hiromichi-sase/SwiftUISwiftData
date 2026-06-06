@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  ContentViewModel.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/04.

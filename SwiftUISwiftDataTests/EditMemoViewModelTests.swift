@@ -1,5 +1,5 @@
 //
-//  EditMemoViewModel.swift
+//  EditMemoViewModelTests.swift
 //  EditMemoViewModel
 //
 //  Created by Hiromichi Sase on 2026/05/04.

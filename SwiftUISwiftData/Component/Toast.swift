@@ -1,6 +1,6 @@
 //
-//  TextView.swift
-//  SwiftUICoreData
+//  Toast.swift
+//  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/05/31.
 //

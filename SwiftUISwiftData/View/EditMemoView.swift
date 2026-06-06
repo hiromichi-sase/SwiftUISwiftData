@@ -1,6 +1,6 @@
 //
 //  EditMemoView.swift
-//  SwiftUICoreData
+//  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/05/04.
 //
