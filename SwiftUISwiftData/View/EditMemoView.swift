@@ -93,6 +93,7 @@ struct EditMemoView: View {
                 title = titleToStore
                 showTitleView = false
             }
+            .imageScale(.large)
             TextField("Title", text: $title)
                 .padding(6)
                 .border(.primary)
@@ -105,6 +106,7 @@ struct EditMemoView: View {
             Button("", systemImage: "eraser") {
                 title = ""
             }
+            .imageScale(.large)
         }
     }
 
