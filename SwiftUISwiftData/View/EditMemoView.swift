@@ -112,18 +112,22 @@ struct EditMemoView: View {
 
     /// 内容編集ビュー
     private var contentView: some View {
-        TextView(text: $content, isEditable: !showTitleView)
-            .border(showTitleView ? .secondary : .primary)
-            .focused($textViewFocus)
-            .disabled(showTitleView)
-            .overlay(alignment: .topLeading) {
-                if content.isEmpty {
-                    Text("Input Content")
-                        .allowsHitTesting(false)
-                        .foregroundColor(Color(uiColor: .placeholderText))
-                        .padding(6)
-                }
+        TextView(
+            text: $content,
+            isEditable: !showTitleView,
+            isTextColorSolid: !showTitleView
+        )
+        .border(showTitleView ? .secondary : .primary)
+        .focused($textViewFocus)
+        .disabled(showTitleView)
+        .overlay(alignment: .topLeading) {
+            if content.isEmpty && !showTitleView {
+                Text("Input Content")
+                    .allowsHitTesting(false)
+                    .foregroundColor(Color(uiColor: .placeholderText))
+                    .padding(6)
             }
+        }
     }
 
     /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。

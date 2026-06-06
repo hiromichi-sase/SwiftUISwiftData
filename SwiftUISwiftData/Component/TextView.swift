@@ -13,6 +13,8 @@ struct TextView: UIViewRepresentable {
     @Binding var text: String
     /// A flag indicating whether the TextView is editable or read-only.
     var isEditable: Bool
+    /// A flag indicating whether the text color of TextView is solid.
+    var isTextColorSolid: Bool
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
 
@@ -20,10 +22,12 @@ struct TextView: UIViewRepresentable {
     /// - Parameters:
     ///   - text: The text content of the TextView, bound to a SwiftUI state variable.
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
+    ///   - isTextColorSolid: A flag indicating whether the text color of TextView is solid.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
-    init(text: Binding<String>, isEditable: Bool, defaultText: String? = nil) {
+    init(text: Binding<String>, isEditable: Bool, isTextColorSolid: Bool, defaultText: String? = nil) {
         self._text = text
         self.isEditable = isEditable
+        self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
     }
 
@@ -58,7 +62,7 @@ struct TextView: UIViewRepresentable {
             uiView.text = defaultText
         }
 
-        uiView.textColor = !text.isEmpty && isEditable ? .label : .secondaryLabel
+        uiView.textColor = isTextColorSolid ? .label : .secondaryLabel
     }
 }
 

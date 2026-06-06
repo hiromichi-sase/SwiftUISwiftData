@@ -45,8 +45,14 @@ struct BrowseMemoView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack {
-                TextView(text: $content, isEditable: false, defaultText: CommonString.emptyContent.rawValue)
-                    .border(.clear)
+                TextView(
+                    text: $content,
+                    isEditable: false,
+                    isTextColorSolid: !content.isEmpty,
+                    defaultText: CommonString.emptyContent.rawValue
+                )
+                .border(.clear)
+                .disabled(content.isEmpty)
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
