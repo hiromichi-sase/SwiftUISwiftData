@@ -297,7 +297,6 @@ extension ContentView {
             }
 
             selection.removeAll()
-            moveAllMemos()
             toastMessage = "Successfully deleted!"
         } catch {
             print("Failed to delete memos: \(error)")
@@ -317,15 +316,6 @@ extension ContentView {
             } catch {
                 print("Failed to move memo: \(error)")
             }
-        }
-    }
-
-    /// すべてのメモの順序を再計算して保存する関数。メモの順序は1から始まる整数で、配列のインデックスに基づいて割り当てられる。
-    private func moveAllMemos() {
-        do {
-            try viewModel.renumberOrder()
-        } catch {
-            print("Failed to renumber order: \(error)")
         }
     }
 }

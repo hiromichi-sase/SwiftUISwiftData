@@ -18,18 +18,6 @@ struct ContentViewModelTests {
     )
 
     @Test func deleteMemos() async throws {
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1")
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2")
-
-        try await viewModel.repository.add(memo1)
-        try await viewModel.repository.add(memo2)
-        try await viewModel.delete([memo1, memo2])
-
-        let memos = await viewModel.repository.memos()
-        #expect(memos.isEmpty)
-    }
-
-    @Test func renumberOrder() async throws {
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
@@ -38,7 +26,6 @@ struct ContentViewModelTests {
         try await viewModel.repository.add(memo2)
         try await viewModel.repository.add(memo3)
         try await viewModel.delete([memo2])
-        try await viewModel.renumberOrder()
 
         let memos = await viewModel.repository.memos()
         if memos.count > 2 {

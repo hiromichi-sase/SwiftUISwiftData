@@ -31,15 +31,10 @@ class ContentViewModel: ObservableObject {
         self.memos = repository.memos()
     }
 
-    /// Deletes the specified memos from the repository and refreshes the memos list. If an error occurs during the deletion, it throws an error.
+    /// Deletes the specified memos from the repository and refreshes the memos list, and renumbers the order of memos in the repository and refreshes the memos list. If an error occurs during the deletion, it throws an error.
     /// - Parameter memos: An array of Memo objects to be deleted.
     func delete(_ memos: [Memo]) throws {
         try repository.delete(memos)
-        fetchMemos()
-    }
-
-    /// Renumbers the order of memos in the repository and refreshes the memos list. If an error occurs during the renumbering, it throws an error.
-    func renumberOrder() throws {
         try repository.renumberOrder()
         fetchMemos()
     }
