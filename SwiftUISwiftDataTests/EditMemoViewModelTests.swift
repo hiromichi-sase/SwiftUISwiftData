@@ -11,7 +11,7 @@ import Testing
 struct EditMemoViewModelTests {
 
     private let viewModel = EditMemoViewModel(
-        repository: MemoRepository(
+        memoRepository: MemoRepository(
             modelContainer:
                 ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
         )
@@ -21,11 +21,11 @@ struct EditMemoViewModelTests {
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await viewModel.add(memo)
 
-        guard let newMemo = await viewModel.repository.memos().first else {
-            throw TestError(message: "Memo was not added to the repository.")
+        guard let newMemo = await viewModel.memoRepository.memos().first else {
+            throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
-        await #expect(viewModel.repository.memos().count == 1)
+        await #expect(viewModel.memoRepository.memos().count == 1)
         #expect(newMemo.title == "Test Title")
         #expect(newMemo.content == "Test Memo")
         #expect(newMemo.createdAt == newMemo.updatedAt)
@@ -40,8 +40,8 @@ struct EditMemoViewModelTests {
         memo.content = "Updated Content"
         try await viewModel.update(memo)
 
-        guard let newMemo = await viewModel.repository.memos().first else {
-            throw TestError(message: "Memo was not added to the repository.")
+        guard let newMemo = await viewModel.memoRepository.memos().first else {
+            throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
         #expect(newMemo.title == "Updated Title")

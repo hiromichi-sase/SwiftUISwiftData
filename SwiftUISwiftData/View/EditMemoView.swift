@@ -11,7 +11,7 @@ import SwiftUI
 /// メモの内容を編集するビュー
 struct EditMemoView: View {
     /// ビューモデルの状態変数
-    @ObservedObject var viewModel = EditMemoViewModel(repository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = EditMemoViewModel(memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
 
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
