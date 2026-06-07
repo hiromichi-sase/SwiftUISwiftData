@@ -15,7 +15,7 @@ struct SettingsView: View {
         userDefaultsRepository: UserDefaultsRepository()
     )
 
-    @State private var browseLink: Bool = false
+    @State private var hasLink: Bool = false
     @State private var contentFontSize: Float = .zero
     @State private var contentLineSpacing: Float = .zero
     @State private var titleLineLimit: Int = .zero
@@ -24,7 +24,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     init() {
-        self._browseLink = State(initialValue: viewModel.getBrowseLink())
+        self._hasLink = State(initialValue: viewModel.getHasLink())
         self._contentFontSize = State(initialValue: viewModel.getContentFontSize())
         self._contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
         self._titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
@@ -33,9 +33,9 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack() {
             Form {
-                Section(header: Text("Browse Link")) {
-                    Toggle(isOn: $browseLink) {
-                        Text(browseLink ? "ON" : "OFF")
+                Section(header: Text("Has Link")) {
+                    Toggle(isOn: $hasLink) {
+                        Text(hasLink ? "ON" : "OFF")
                     }
                 }
                 Section(header: Text("Content Font Size")) {
@@ -59,8 +59,8 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Save", systemImage: "checkmark") {
-                        if viewModel.getBrowseLink() != browseLink {
-                            viewModel.setBrowseLink(browseLink)
+                        if viewModel.getHasLink() != hasLink {
+                            viewModel.setHasLink(hasLink)
                         }
                         if viewModel.getContentFontSize() != contentFontSize {
                             viewModel.setContentFontSize(contentFontSize)
@@ -81,7 +81,7 @@ struct SettingsView: View {
 
     /// 設定が更新されたかどうかを判定するプロパティ
     private var settingsUpdated: Bool {
-        viewModel.getBrowseLink() != browseLink ||
+        viewModel.getHasLink() != hasLink ||
         viewModel.getContentFontSize() != contentFontSize ||
         viewModel.getContentLineSpacing() != contentLineSpacing ||
         viewModel.getTitleLineLimit() != titleLineLimit

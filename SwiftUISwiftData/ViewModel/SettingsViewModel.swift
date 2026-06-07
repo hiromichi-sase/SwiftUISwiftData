@@ -20,12 +20,12 @@ class SettingsViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    func getBrowseLink() -> Bool {
-        userDefaultsRepository.getBrowseLink()
+    func getHasLink() -> Bool {
+        userDefaultsRepository.getHasLink()
     }
 
-    func setBrowseLink(_ value: Bool) {
-        userDefaultsRepository.setBrowseLink(value)
+    func setHasLink(_ value: Bool) {
+        userDefaultsRepository.setHasLink(value)
     }
 
     func getContentFontSize() -> Float {

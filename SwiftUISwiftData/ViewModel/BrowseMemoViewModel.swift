@@ -28,8 +28,8 @@ class BrowseMemoViewModel: ObservableObject {
         memoRepository.modelContext
     }
 
-    func getBrowseLink() -> Bool {
-        userDefaultsRepository.getBrowseLink()
+    func getHasLink() -> Bool {
+        userDefaultsRepository.getHasLink()
     }
 
     func getContentFontSize() -> Float {

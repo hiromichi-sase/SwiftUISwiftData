@@ -53,7 +53,7 @@ struct BrowseMemoView: View {
                     isEditable: false,
                     isTextColorSolid: !content.isEmpty,
                     defaultText: CommonString.emptyContent.rawValue,
-                    browseLink: viewModel.getBrowseLink(),
+                    hasLink: viewModel.getHasLink(),
                     contentFontSize: viewModel.getContentFontSize(),
                     contentLineSpacing: viewModel.getContentLineSpacing()
                 )

@@ -12,14 +12,14 @@ class UserDefaultsRepository {
     static var test: UserDefaults = .init(suiteName: "test")!
 
     private enum Key: String, CaseIterable {
-        case browseLink
+        case hasLink
         case contentFontSize
         case contentLineSpacing
         case titleLineLimit
 
         var defaultValue: Any? {
             switch self {
-            case .browseLink:
+            case .hasLink:
                 return true
             case .contentFontSize:
                 return 16.0
@@ -42,12 +42,12 @@ class UserDefaultsRepository {
         }
     }
 
-    func getBrowseLink() -> Bool {
-        userDefaults.bool(forKey: Key.browseLink.rawValue)
+    func getHasLink() -> Bool {
+        userDefaults.bool(forKey: Key.hasLink.rawValue)
     }
 
-    func setBrowseLink(_ value: Bool) {
-        userDefaults.set(value, forKey: Key.browseLink.rawValue)
+    func setHasLink(_ value: Bool) {
+        userDefaults.set(value, forKey: Key.hasLink.rawValue)
     }
 
     func getContentFontSize() -> Float {

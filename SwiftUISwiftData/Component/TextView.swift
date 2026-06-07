@@ -17,7 +17,7 @@ struct TextView: UIViewRepresentable {
     var isTextColorSolid: Bool
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
-    var browseLink: Bool
+    var hasLink: Bool
     var contentFontSize: Float
     var contentLineSpacing: Float
 
@@ -27,13 +27,13 @@ struct TextView: UIViewRepresentable {
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
     ///   - isTextColorSolid: A flag indicating whether the text color of TextView is solid.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
-    ///   - browseLink: An optional default flag indicating where the TextView has links.
+    ///   - hasLink: An optional default flag indicating where the TextView has links.
     init(
         text: Binding<String>,
         isEditable: Bool,
         isTextColorSolid: Bool,
         defaultText: String? = nil,
-        browseLink: Bool = false,
+        hasLink: Bool = false,
         contentFontSize: Float = .zero,
         contentLineSpacing: Float = .zero
     ) {
@@ -41,7 +41,7 @@ struct TextView: UIViewRepresentable {
         self.isEditable = isEditable
         self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
-        self.browseLink = browseLink
+        self.hasLink = hasLink
         self.contentFontSize = contentFontSize
         self.contentLineSpacing = contentLineSpacing
     }
@@ -59,7 +59,7 @@ struct TextView: UIViewRepresentable {
         let textView = UITextView()
         textView.delegate = context.coordinator
         textView.isEditable = isEditable
-        textView.dataDetectorTypes = browseLink ? .all : []
+        textView.dataDetectorTypes = hasLink ? .all : []
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
