@@ -61,17 +61,6 @@ struct TextView: UIViewRepresentable {
         textView.isEditable = isEditable
         textView.dataDetectorTypes = hasLink ? .all : []
 
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
-            .paragraphStyle: paragraphStyle
-        ]
-        textView.attributedText = NSAttributedString(
-            string: text,
-            attributes: attributes
-        )
-
         return textView
     }
 
@@ -87,6 +76,17 @@ struct TextView: UIViewRepresentable {
         if let defaultText, text.isEmpty {
             uiView.text = defaultText
         }
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
+            .paragraphStyle: paragraphStyle
+        ]
+        uiView.attributedText = NSAttributedString(
+            string: uiView.text,
+            attributes: attributes
+        )
 
         uiView.textColor = isTextColorSolid ? .label : .secondaryLabel
     }
