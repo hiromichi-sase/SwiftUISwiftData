@@ -12,8 +12,10 @@ struct EditMemoViewModelTests {
 
     private let viewModel = EditMemoViewModel(
         memoRepository: MemoRepository(
-            modelContainer:
-                ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+            modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+        ),
+        userDefaultsRepository: UserDefaultsRepository(
+            userDefaults: UserDefaultsRepository.test
         )
     )
 

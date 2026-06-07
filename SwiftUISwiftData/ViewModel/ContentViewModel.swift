@@ -15,9 +15,15 @@ class ContentViewModel: ObservableObject {
 
     /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application. It provides functions to add and update memos in the memoRepository.
     let memoRepository: MemoRepository
+    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application. It provides functions in the userDefaultsRepository.
+    private let userDefaultsRepository: UserDefaultsRepository
 
-    init(memoRepository: MemoRepository) {
+    init(
+        memoRepository: MemoRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
         self.memoRepository = memoRepository
+        self.userDefaultsRepository = userDefaultsRepository
         fetchMemos()
     }
 

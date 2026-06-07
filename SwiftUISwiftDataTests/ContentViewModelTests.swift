@@ -12,8 +12,10 @@ struct ContentViewModelTests {
 
     private let viewModel = ContentViewModel(
         memoRepository: MemoRepository(
-            modelContainer:
-                ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+            modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer
+        ),
+        userDefaultsRepository: UserDefaultsRepository(
+            userDefaults: UserDefaultsRepository.test
         )
     )
 

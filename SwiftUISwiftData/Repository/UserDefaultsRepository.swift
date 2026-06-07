@@ -9,6 +9,8 @@ import Foundation
 
 class UserDefaultsRepository {
 
+    static var test: UserDefaults = .init(suiteName: "test")!
+
     private enum Key: String, CaseIterable {
         case browseLink
         case contentFontSize

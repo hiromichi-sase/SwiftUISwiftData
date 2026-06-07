@@ -11,7 +11,10 @@ import SwiftUI
 /// メモの内容を表示するビュー
 struct BrowseMemoView: View {
     /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = BrowseMemoViewModel(memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = BrowseMemoViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
     /// 表示するメモ
     private var memo: Memo

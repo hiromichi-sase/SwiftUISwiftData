@@ -11,7 +11,10 @@ import SwiftData
 /// メモのリストを表示するビュー
 struct ContentView: View {
     /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = ContentViewModel(memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = ContentViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
     /// 編集モードの状態を管理する状態変数
     @State private var editMode: EditMode = .inactive
