@@ -17,6 +17,7 @@ struct TextView: UIViewRepresentable {
     var isTextColorSolid: Bool
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
+    var browseLink: Bool
 
     /// Initializes a new TextView with the specified parameters.
     /// - Parameters:
@@ -24,11 +25,19 @@ struct TextView: UIViewRepresentable {
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
     ///   - isTextColorSolid: A flag indicating whether the text color of TextView is solid.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
-    init(text: Binding<String>, isEditable: Bool, isTextColorSolid: Bool, defaultText: String? = nil) {
+    ///   - browseLink: An optional default flag indicating where the TextView has links.
+    init(
+        text: Binding<String>,
+        isEditable: Bool,
+        isTextColorSolid: Bool,
+        defaultText: String? = nil,
+        browseLink: Bool = false
+    ) {
         self._text = text
         self.isEditable = isEditable
         self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
+        self.browseLink = browseLink
     }
 
     /// Creates a coordinator to manage the communication between the UITextView and SwiftUI.
@@ -45,7 +54,7 @@ struct TextView: UIViewRepresentable {
         textView.delegate = context.coordinator
         textView.font = UIFont.systemFont(ofSize: 16)
         textView.isEditable = isEditable
-        textView.dataDetectorTypes = .all
+        textView.dataDetectorTypes = browseLink ? .all : []
         return textView
     }
 

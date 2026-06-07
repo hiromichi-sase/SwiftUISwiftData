@@ -52,7 +52,8 @@ struct BrowseMemoView: View {
                     text: $content,
                     isEditable: false,
                     isTextColorSolid: !content.isEmpty,
-                    defaultText: CommonString.emptyContent.rawValue
+                    defaultText: CommonString.emptyContent.rawValue,
+                    browseLink: viewModel.getBrowseLink()
                 )
                 .border(.clear)
                 .disabled(content.isEmpty)

@@ -27,4 +27,8 @@ class BrowseMemoViewModel: ObservableObject {
     var modelContext: ModelContext {
         memoRepository.modelContext
     }
+
+    func getBrowseLink() -> Bool {
+        userDefaultsRepository.getBrowseLink()
+    }
 }
