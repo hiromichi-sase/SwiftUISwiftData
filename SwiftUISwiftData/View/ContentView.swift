@@ -77,10 +77,7 @@ struct ContentView: View {
                     toolbarItemTopBarTrailing
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
-                    Spacer()
-                    Button("Settings", systemImage: "gearshape.fill") {
-                        showSettingsView = true
-                    }
+                    toolbarItemBottomBar
                 }
             }
             .environment(\.editMode, $editMode)
@@ -183,6 +180,19 @@ struct ContentView: View {
                 }
                 .disabled(selection.count == .zero)
             }
+        }
+    }
+
+    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー
+    @ViewBuilder
+    private var toolbarItemBottomBar: some View {
+        if editMode == .inactive {
+            Spacer()
+            Button("Settings", systemImage: "gearshape.fill") {
+                showSettingsView = true
+            }
+        } else {
+            Spacer()
             Button("Delete", systemImage: "trash") {
                 showDeleteSelectionAlert = true
             }
