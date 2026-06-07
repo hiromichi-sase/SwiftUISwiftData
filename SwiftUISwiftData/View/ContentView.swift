@@ -89,6 +89,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showSettingsView) {
                 SettingsView()
+                    .onDisappear {
+                        viewModel.fetchMemos()
+                    }
             }
             .onDisappear {
                 openEditMemoView = false
@@ -234,7 +237,7 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        activeMemoRow(memo: memo) { memo in
+        activeMemoRow(memo: memo, lineLimit: viewModel.getTitleLineLimit()) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             } else {
@@ -249,6 +252,7 @@ extension ContentView {
     /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
     private struct activeMemoRow: View {
         let memo: Memo
+        let lineLimit: Int
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -257,6 +261,7 @@ extension ContentView {
             }) {
                 HStack {
                     TitleText(memo.title)
+                        .lineLimit(lineLimit)
                     Spacer()
                 }
             }
@@ -273,6 +278,7 @@ extension ContentView {
         HStack {
             TitleText(memo.title)
                 .padding()
+                .lineLimit(viewModel.getTitleLineLimit())
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }
