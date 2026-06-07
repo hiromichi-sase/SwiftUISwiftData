@@ -31,4 +31,12 @@ class BrowseMemoViewModel: ObservableObject {
     func getBrowseLink() -> Bool {
         userDefaultsRepository.getBrowseLink()
     }
+
+    func getContentFontSize() -> Float {
+        userDefaultsRepository.getContentFontSize()
+    }
+
+    func getContentLineSpacing() -> Float {
+        userDefaultsRepository.getContentLineSpacing()
+    }
 }

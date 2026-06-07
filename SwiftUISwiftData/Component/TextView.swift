@@ -18,6 +18,8 @@ struct TextView: UIViewRepresentable {
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
     var browseLink: Bool
+    var contentFontSize: Float
+    var contentLineSpacing: Float
 
     /// Initializes a new TextView with the specified parameters.
     /// - Parameters:
@@ -31,13 +33,17 @@ struct TextView: UIViewRepresentable {
         isEditable: Bool,
         isTextColorSolid: Bool,
         defaultText: String? = nil,
-        browseLink: Bool = false
+        browseLink: Bool = false,
+        contentFontSize: Float = .zero,
+        contentLineSpacing: Float = .zero
     ) {
         self._text = text
         self.isEditable = isEditable
         self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
         self.browseLink = browseLink
+        self.contentFontSize = contentFontSize
+        self.contentLineSpacing = contentLineSpacing
     }
 
     /// Creates a coordinator to manage the communication between the UITextView and SwiftUI.
@@ -52,9 +58,20 @@ struct TextView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
-        textView.font = UIFont.systemFont(ofSize: 16)
         textView.isEditable = isEditable
         textView.dataDetectorTypes = browseLink ? .all : []
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
+            .paragraphStyle: paragraphStyle
+        ]
+        textView.attributedText = NSAttributedString(
+            string: text,
+            attributes: attributes
+        )
+
         return textView
     }
 

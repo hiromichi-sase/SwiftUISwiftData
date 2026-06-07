@@ -118,7 +118,9 @@ struct EditMemoView: View {
         TextView(
             text: $content,
             isEditable: !showTitleView,
-            isTextColorSolid: !showTitleView
+            isTextColorSolid: !showTitleView,
+            contentFontSize: viewModel.getContentFontSize(),
+            contentLineSpacing: viewModel.getContentLineSpacing()
         )
         .border(showTitleView ? .secondary : .primary)
         .focused($textViewFocus)

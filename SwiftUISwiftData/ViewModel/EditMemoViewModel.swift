@@ -34,4 +34,12 @@ class EditMemoViewModel: ObservableObject {
     func update(_ memo: Memo) throws {
         try memoRepository.update(memo)
     }
+
+    func getContentFontSize() -> Float {
+        userDefaultsRepository.getContentFontSize()
+    }
+
+    func getContentLineSpacing() -> Float {
+        userDefaultsRepository.getContentLineSpacing()
+    }
 }
