@@ -24,7 +24,7 @@ class UserDefaultsRepository {
             case .contentFontSize:
                 return 16.0
             case .contentLineSpacing:
-                return 1.5
+                return Float.zero
             case .titleLineLimit:
                 return 3
             }

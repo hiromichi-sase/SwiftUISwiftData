@@ -32,6 +32,8 @@ struct ContentView: View {
     @State private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ
     @State private var openEditMemoView = false
+    /// 設定画面をフルスクリーンカバーで表示するフラグ
+    @State private var showSettingsView = false
     /// トーストメッセージの状態変数
     @State private var toastMessage = ""
 
@@ -74,10 +76,19 @@ struct ContentView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     toolbarItemTopBarTrailing
                 }
+                ToolbarItemGroup(placement: .bottomBar) {
+                    Spacer()
+                    Button("Settings", systemImage: "gearshape.fill") {
+                        showSettingsView = true
+                    }
+                }
             }
             .environment(\.editMode, $editMode)
             .fullScreenCover(isPresented: $showingAddMemo) {
                 EditMemoView()
+            }
+            .sheet(isPresented: $showSettingsView) {
+                SettingsView()
             }
             .onDisappear {
                 openEditMemoView = false
