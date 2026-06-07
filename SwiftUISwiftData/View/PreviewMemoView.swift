@@ -10,6 +10,11 @@ import SwiftData
 
 /// メモの内容をプレビュー表示するビュー
 struct PreviewMemoView: View {
+    /// ビューモデルの状態変数
+    @ObservedObject var viewModel = PreviewMemoViewModel(
+        userDefaultsRepository: UserDefaultsRepository()
+    )
+
     /// 表示するメモのデータ
     var memo: Memo
 
@@ -17,6 +22,8 @@ struct PreviewMemoView: View {
         NavigationStack() {
             VStack(alignment: .leading) {
                 Text(memo.content.isEmpty ? CommonString.emptyContent.rawValue : memo.content)
+                    .font(.system(size: CGFloat(viewModel.getContentFontSize())))
+                    .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
                     .foregroundStyle(memo.content.isEmpty ? .secondary : .primary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
