@@ -97,7 +97,7 @@ struct EditMemoView: View {
                 showTitleView = false
             }
             .imageScale(.large)
-            TextField("Title", text: $title)
+            TextField("Input Title", text: $title)
                 .padding(6)
                 .border(.primary)
                 .focused($textFieldFocus)
