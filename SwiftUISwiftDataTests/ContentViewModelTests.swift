@@ -67,7 +67,6 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-
     @Test func getTitleLineLimit()  {
         let titleLineLimit = 3
         let dependency = Dependency()
