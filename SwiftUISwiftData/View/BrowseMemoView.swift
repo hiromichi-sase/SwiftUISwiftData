@@ -11,7 +11,10 @@ import SwiftUI
 /// メモの内容を表示するビュー
 struct BrowseMemoView: View {
     /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = BrowseMemoViewModel(repository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = BrowseMemoViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
     /// 表示するメモ
     private var memo: Memo
@@ -48,8 +51,10 @@ struct BrowseMemoView: View {
                 TextView(
                     text: $content,
                     isEditable: false,
-                    isTextColorSolid: !content.isEmpty,
-                    defaultText: CommonString.emptyContent.rawValue
+                    defaultText: CommonString.emptyContent.rawValue,
+                    hasLink: viewModel.getHasLink(),
+                    contentFontSize: viewModel.getContentFontSize(),
+                    contentLineSpacing: viewModel.getContentLineSpacing()
                 )
                 .border(.clear)
                 .disabled(content.isEmpty)
@@ -78,11 +83,6 @@ struct BrowseMemoView: View {
             }
             .toast(message: $toastMessage)
         }
-    }
-
-    /// メモが更新されたかどうかを判定するプロパティ
-    private var memoUpdated: Bool {
-        memo.title != title || memo.content != content
     }
 
     /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー

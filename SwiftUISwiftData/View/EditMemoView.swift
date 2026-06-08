@@ -11,7 +11,10 @@ import SwiftUI
 /// メモの内容を編集するビュー
 struct EditMemoView: View {
     /// ビューモデルの状態変数
-    @ObservedObject var viewModel = EditMemoViewModel(repository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = EditMemoViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
@@ -74,6 +77,7 @@ struct EditMemoView: View {
             }
             .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     toolbarItemTopBarLeading
@@ -94,7 +98,7 @@ struct EditMemoView: View {
                 showTitleView = false
             }
             .imageScale(.large)
-            TextField("Title", text: $title)
+            TextField("Input Title", text: $title)
                 .padding(6)
                 .border(.primary)
                 .focused($textFieldFocus)
@@ -112,22 +116,22 @@ struct EditMemoView: View {
 
     /// 内容編集ビュー
     private var contentView: some View {
-        TextView(
-            text: $content,
-            isEditable: !showTitleView,
-            isTextColorSolid: !showTitleView
-        )
-        .border(showTitleView ? .secondary : .primary)
-        .focused($textViewFocus)
-        .disabled(showTitleView)
-        .overlay(alignment: .topLeading) {
-            if content.isEmpty && !showTitleView {
-                Text("Input Content")
-                    .allowsHitTesting(false)
-                    .foregroundColor(Color(uiColor: .placeholderText))
-                    .padding(6)
+        TextEditor(text: $content)
+            .disabled(showTitleView)
+            .foregroundStyle(showTitleView ? .secondary : .primary)
+            .font(.system(size: CGFloat(viewModel.getContentFontSize())))
+            .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
+            .border(showTitleView ? .secondary : .primary)
+            .focused($textViewFocus)
+            .overlay(alignment: .topLeading) {
+                if content.isEmpty && !showTitleView {
+                    Text("Input Content")
+                        .font(.system(size: CGFloat(viewModel.getContentFontSize())))
+                        .allowsHitTesting(false)
+                        .foregroundColor(Color(uiColor: .placeholderText))
+                        .padding(6)
+                }
             }
-        }
     }
 
     /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。

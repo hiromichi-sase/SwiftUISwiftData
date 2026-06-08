@@ -13,22 +13,32 @@ struct TextView: UIViewRepresentable {
     @Binding var text: String
     /// A flag indicating whether the TextView is editable or read-only.
     var isEditable: Bool
-    /// A flag indicating whether the text color of TextView is solid.
-    var isTextColorSolid: Bool
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
+    var hasLink: Bool
+    var contentFontSize: Float
+    var contentLineSpacing: Float
 
     /// Initializes a new TextView with the specified parameters.
     /// - Parameters:
     ///   - text: The text content of the TextView, bound to a SwiftUI state variable.
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
-    ///   - isTextColorSolid: A flag indicating whether the text color of TextView is solid.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
-    init(text: Binding<String>, isEditable: Bool, isTextColorSolid: Bool, defaultText: String? = nil) {
+    ///   - hasLink: An optional default flag indicating where the TextView has links.
+    init(
+        text: Binding<String>,
+        isEditable: Bool,
+        defaultText: String? = nil,
+        hasLink: Bool = false,
+        contentFontSize: Float = .zero,
+        contentLineSpacing: Float = .zero
+    ) {
         self._text = text
         self.isEditable = isEditable
-        self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
+        self.hasLink = hasLink
+        self.contentFontSize = contentFontSize
+        self.contentLineSpacing = contentLineSpacing
     }
 
     /// Creates a coordinator to manage the communication between the UITextView and SwiftUI.
@@ -43,9 +53,11 @@ struct TextView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
-        textView.font = UIFont.systemFont(ofSize: 16)
         textView.isEditable = isEditable
-        textView.dataDetectorTypes = .all
+        textView.dataDetectorTypes = hasLink ? .all : []
+        textView.font = UIFont.systemFont(ofSize: CGFloat(contentFontSize))
+        textView.attributedText = attributedText
+
         return textView
     }
 
@@ -54,6 +66,8 @@ struct TextView: UIViewRepresentable {
     ///   - uiView: The UITextView instance to be updated.
     ///   - context: The context for the UIView.
     func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.attributedText = attributedText
+
         if uiView.text != text {
             uiView.text = text
         }
@@ -62,12 +76,25 @@ struct TextView: UIViewRepresentable {
             uiView.text = defaultText
         }
 
-        uiView.textColor = isTextColorSolid ? .label : .secondaryLabel
+        uiView.textColor = !text.isEmpty ? .label : .secondaryLabel
+    }
+
+    private var attributedText: NSAttributedString {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
+            .paragraphStyle: paragraphStyle
+        ]
+        return NSAttributedString(
+            string: text,
+            attributes: attributes
+        )
     }
 }
 
 /// A coordinator class that serves as the delegate for the UITextView, allowing it to communicate changes back to SwiftUI.
-class Coordinator: NSObject, UITextViewDelegate {
+final class Coordinator: NSObject, UITextViewDelegate {
     /// A binding to the text content of the TextView, allowing it to update the SwiftUI state whenever the text changes.
     var text: Binding<String>
 

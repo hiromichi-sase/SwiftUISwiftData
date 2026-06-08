@@ -11,7 +11,10 @@ import SwiftData
 /// メモのリストを表示するビュー
 struct ContentView: View {
     /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = ContentViewModel(repository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer))
+    @ObservedObject var viewModel = ContentViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
     /// 編集モードの状態を管理する状態変数
     @State private var editMode: EditMode = .inactive
@@ -29,8 +32,12 @@ struct ContentView: View {
     @State private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ
     @State private var openEditMemoView = false
+    /// 設定画面をフルスクリーンカバーで表示するフラグ
+    @State private var showSettingsView = false
     /// トーストメッセージの状態変数
     @State private var toastMessage = ""
+    /// 設定画面で変更保存したかどうかのフラグ
+    @State private var settingsSaved = false
 
     /// イニシャライザ
     init() {
@@ -43,6 +50,11 @@ struct ContentView: View {
                 .contentMargins([.top], 0)
             .onChange(of: viewModel.memos) { oldMemos, newMemos in
                 onChange(oldMemos: oldMemos, newMemos: newMemos)
+            }
+            .onChange(of: settingsSaved) { _, _ in
+                guard settingsSaved else { return }
+                viewModel.fetchMemos()
+                settingsSaved = false
             }
             .onReceive(willSavePublisher) { _ in
                 viewModel.fetchMemos()
@@ -71,10 +83,16 @@ struct ContentView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     toolbarItemTopBarTrailing
                 }
+                ToolbarItemGroup(placement: .bottomBar) {
+                    toolbarItemBottomBar
+                }
             }
             .environment(\.editMode, $editMode)
             .fullScreenCover(isPresented: $showingAddMemo) {
                 EditMemoView()
+            }
+            .sheet(isPresented: $showSettingsView) {
+                SettingsView(settingsSaved: $settingsSaved)
             }
             .onDisappear {
                 openEditMemoView = false
@@ -166,6 +184,19 @@ struct ContentView: View {
                 }
                 .disabled(selection.count == .zero)
             }
+        }
+    }
+
+    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー
+    @ViewBuilder
+    private var toolbarItemBottomBar: some View {
+        if editMode == .inactive {
+            Spacer()
+            Button("Settings", systemImage: "gearshape.fill") {
+                showSettingsView = true
+            }
+        } else {
+            Spacer()
             Button("Delete", systemImage: "trash") {
                 showDeleteSelectionAlert = true
             }
@@ -220,7 +251,7 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        activeMemoRow(memo: memo) { memo in
+        activeMemoRow(memo: memo, lineLimit: viewModel.getTitleLineLimit()) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             } else {
@@ -235,6 +266,7 @@ extension ContentView {
     /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
     private struct activeMemoRow: View {
         let memo: Memo
+        let lineLimit: Int
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -243,6 +275,7 @@ extension ContentView {
             }) {
                 HStack {
                     TitleText(memo.title)
+                        .lineLimit(lineLimit)
                     Spacer()
                 }
             }
@@ -259,6 +292,7 @@ extension ContentView {
         HStack {
             TitleText(memo.title)
                 .padding()
+                .lineLimit(viewModel.getTitleLineLimit())
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }
@@ -286,7 +320,6 @@ extension ContentView {
     /// 指定されたメモを削除する関数。削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
     /// - Parameter memos: 削除するメモの配列
     private func deleteMemos(_ memos: [Memo]) {
-
         do {
             try viewModel.delete(memos)
 
