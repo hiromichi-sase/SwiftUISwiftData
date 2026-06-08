@@ -51,7 +51,6 @@ struct BrowseMemoView: View {
                 TextView(
                     text: $content,
                     isEditable: false,
-                    isTextColorSolid: !content.isEmpty,
                     defaultText: CommonString.emptyContent.rawValue,
                     hasLink: viewModel.getHasLink(),
                     contentFontSize: viewModel.getContentFontSize(),

@@ -13,8 +13,6 @@ struct TextView: UIViewRepresentable {
     @Binding var text: String
     /// A flag indicating whether the TextView is editable or read-only.
     var isEditable: Bool
-    /// A flag indicating whether the text color of TextView is solid.
-    var isTextColorSolid: Bool
     /// An optional default text to display when the TextView is empty and not editable.
     var defaultText: String?
     var hasLink: Bool
@@ -25,13 +23,11 @@ struct TextView: UIViewRepresentable {
     /// - Parameters:
     ///   - text: The text content of the TextView, bound to a SwiftUI state variable.
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
-    ///   - isTextColorSolid: A flag indicating whether the text color of TextView is solid.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
     ///   - hasLink: An optional default flag indicating where the TextView has links.
     init(
         text: Binding<String>,
         isEditable: Bool,
-        isTextColorSolid: Bool,
         defaultText: String? = nil,
         hasLink: Bool = false,
         contentFontSize: Float = .zero,
@@ -39,7 +35,6 @@ struct TextView: UIViewRepresentable {
     ) {
         self._text = text
         self.isEditable = isEditable
-        self.isTextColorSolid = isTextColorSolid
         self.defaultText = defaultText
         self.hasLink = hasLink
         self.contentFontSize = contentFontSize
@@ -60,6 +55,8 @@ struct TextView: UIViewRepresentable {
         textView.delegate = context.coordinator
         textView.isEditable = isEditable
         textView.dataDetectorTypes = hasLink ? .all : []
+        textView.font = UIFont.systemFont(ofSize: CGFloat(contentFontSize))
+        textView.attributedText = attributedText
 
         return textView
     }
@@ -69,6 +66,8 @@ struct TextView: UIViewRepresentable {
     ///   - uiView: The UITextView instance to be updated.
     ///   - context: The context for the UIView.
     func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.attributedText = attributedText
+
         if uiView.text != text {
             uiView.text = text
         }
@@ -77,18 +76,20 @@ struct TextView: UIViewRepresentable {
             uiView.text = defaultText
         }
 
+        uiView.textColor = !text.isEmpty ? .label : .secondaryLabel
+    }
+
+    private var attributedText: NSAttributedString {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
             .paragraphStyle: paragraphStyle
         ]
-        uiView.attributedText = NSAttributedString(
-            string: uiView.text,
+        return NSAttributedString(
+            string: text,
             attributes: attributes
         )
-
-        uiView.textColor = isTextColorSolid ? .label : .secondaryLabel
     }
 }
 
