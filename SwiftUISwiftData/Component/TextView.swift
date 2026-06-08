@@ -93,7 +93,7 @@ struct TextView: UIViewRepresentable {
 }
 
 /// A coordinator class that serves as the delegate for the UITextView, allowing it to communicate changes back to SwiftUI.
-class Coordinator: NSObject, UITextViewDelegate {
+final class Coordinator: NSObject, UITextViewDelegate {
     /// A binding to the text content of the TextView, allowing it to update the SwiftUI state whenever the text changes.
     var text: Binding<String>
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class UserDefaultsRepository {
+final class UserDefaultsRepository {
 
     private enum Key: String, CaseIterable {
         case hasLink
