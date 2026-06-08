@@ -21,7 +21,7 @@ struct PreviewMemoView: View {
     var body: some View {
         NavigationStack() {
             VStack(alignment: .leading) {
-                Text(memo.content.isEmpty ? CommonString.emptyContent.rawValue : memo.content)
+                Text(memo.content.isEmpty ? CommonString.noContent : memo.content)
                     .font(.system(size: CGFloat(viewModel.getContentFontSize())))
                     .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
                     .foregroundStyle(memo.content.isEmpty ? .secondary : .primary)

@@ -274,7 +274,8 @@ extension ContentView {
                 onTap(memo)
             }) {
                 HStack {
-                    TitleText(memo.title)
+                    Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
+                        .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
                         .lineLimit(lineLimit)
                     Spacer()
                 }
@@ -290,7 +291,8 @@ extension ContentView {
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
-            TitleText(memo.title)
+            Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
+                .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
                 .padding()
                 .lineLimit(viewModel.getTitleLineLimit())
                 .frame(maxWidth: .infinity, alignment: .leading)
