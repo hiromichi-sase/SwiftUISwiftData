@@ -36,6 +36,8 @@ struct ContentView: View {
     @State private var showSettingsView = false
     /// トーストメッセージの状態変数
     @State private var toastMessage = ""
+    /// 設定画面で変更保存したかどうかのフラグ
+    @State private var settingsSaved = false
 
     /// イニシャライザ
     init() {
@@ -48,6 +50,11 @@ struct ContentView: View {
                 .contentMargins([.top], 0)
             .onChange(of: viewModel.memos) { oldMemos, newMemos in
                 onChange(oldMemos: oldMemos, newMemos: newMemos)
+            }
+            .onChange(of: settingsSaved) { _, _ in
+                guard settingsSaved else { return }
+                viewModel.fetchMemos()
+                settingsSaved = false
             }
             .onReceive(willSavePublisher) { _ in
                 viewModel.fetchMemos()
@@ -85,10 +92,7 @@ struct ContentView: View {
                 EditMemoView()
             }
             .sheet(isPresented: $showSettingsView) {
-                SettingsView()
-                    .onDisappear {
-                        viewModel.fetchMemos()
-                    }
+                SettingsView(settingsSaved: $settingsSaved)
             }
             .onDisappear {
                 openEditMemoView = false

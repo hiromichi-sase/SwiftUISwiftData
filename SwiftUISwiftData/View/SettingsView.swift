@@ -15,6 +15,7 @@ struct SettingsView: View {
         userDefaultsRepository: UserDefaultsRepository()
     )
 
+    @Binding private var settingsSaved: Bool
     @State private var hasLink: Bool = false
     @State private var contentFontSize: Float = .zero
     @State private var contentLineSpacing: Float = .zero
@@ -23,7 +24,8 @@ struct SettingsView: View {
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
 
-    init() {
+    init(settingsSaved: Binding<Bool>) {
+        self._settingsSaved = settingsSaved
         self._hasLink = State(initialValue: viewModel.getHasLink())
         self._contentFontSize = State(initialValue: viewModel.getContentFontSize())
         self._contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
@@ -71,6 +73,7 @@ struct SettingsView: View {
                         if viewModel.getTitleLineLimit() != titleLineLimit {
                             viewModel.setTitleLineLimit(titleLineLimit)
                         }
+                        settingsSaved = true
                         dismiss()
                     }
                     .disabled(!settingsUpdated)
