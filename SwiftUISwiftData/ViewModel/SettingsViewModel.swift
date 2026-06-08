@@ -20,6 +20,14 @@ final class SettingsViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
+    var settingsChanged: Bool {
+        userDefaultsRepository.settingsChanged
+    }
+
+    func reset() {
+        userDefaultsRepository.reset()
+    }
+
     func getHasLink() -> Bool {
         userDefaultsRepository.getHasLink()
     }

@@ -20,6 +20,7 @@ struct SettingsView: View {
     @State private var contentFontSize: Float = .zero
     @State private var contentLineSpacing: Float = .zero
     @State private var titleLineLimit: Int = .zero
+    @State private var showResetConfirmationAlert = false
 
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
@@ -60,6 +61,10 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button("Reset", systemImage: "xmark.circle.fill") {
+                        showResetConfirmationAlert = true
+                    }
+                    .disabled(!viewModel.settingsChanged)
                     Button("Save", systemImage: "checkmark") {
                         if viewModel.getHasLink() != hasLink {
                             viewModel.setHasLink(hasLink)
@@ -78,6 +83,22 @@ struct SettingsView: View {
                     }
                     .disabled(!settingsUpdated)
                 }
+            }
+            .alert(isPresented: $showResetConfirmationAlert) {
+                Alert(
+                    title: Text("Reset all settings?"),
+                    primaryButton: .destructive(Text("Reset")) {
+                        viewModel.reset()
+
+                        hasLink = viewModel.getHasLink()
+                        contentFontSize = viewModel.getContentFontSize()
+                        contentLineSpacing = viewModel.getContentLineSpacing()
+                        titleLineLimit = viewModel.getTitleLineLimit()
+
+                        settingsSaved = true
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }

@@ -20,7 +20,7 @@ final class UserDefaultsRepository {
             case .hasLink:
                 return true
             case .contentFontSize:
-                return 16.0
+                return Float(16.0)
             case .contentLineSpacing:
                 return Float.zero
             case .titleLineLimit:
@@ -38,6 +38,34 @@ final class UserDefaultsRepository {
             guard let defaultValue = key.defaultValue else { return }
             userDefaults.register(defaults: [key.rawValue: defaultValue])
         }
+    }
+
+    private var defaultValues: [Key: Any] {
+        Key.allCases.reduce(into: [:]) { result, key in
+            result[key] = key.defaultValue
+        }
+    }
+
+    var settingsChanged: Bool {
+        var changedCount = Int.zero
+        defaultValues.forEach { key, value in
+            switch key {
+            case .hasLink:
+                changedCount += getHasLink() != (value as! Bool) ? 1 : .zero
+            case .contentFontSize:
+                changedCount += getContentFontSize() != (value as! Float) ? 1 : .zero
+            case .contentLineSpacing:
+                changedCount += getContentLineSpacing() != (value as! Float) ? 1 : .zero
+            case .titleLineLimit:
+                changedCount += getTitleLineLimit() != (value as! Int) ? 1 : .zero
+            }
+        }
+        return changedCount > .zero
+    }
+
+    func reset() {
+        guard let appDomain = Bundle.main.bundleIdentifier else { return }
+        userDefaults.removePersistentDomain(forName: appDomain)
     }
 
     func getHasLink() -> Bool {
