@@ -13,11 +13,14 @@ final class SettingsViewModel: ObservableObject {
 
     /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application. It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
+    private let suiteName: String?
 
     init(
-        userDefaultsRepository: UserDefaultsRepository
+        userDefaultsRepository: UserDefaultsRepository,
+        suiteName: String? = nil
     ) {
         self.userDefaultsRepository = userDefaultsRepository
+        self.suiteName = suiteName
     }
 
     var settingsChanged: Bool {
@@ -25,7 +28,7 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func reset() {
-        userDefaultsRepository.reset()
+        userDefaultsRepository.reset(suiteName: suiteName)
     }
 
     func getHasLink() -> Bool {

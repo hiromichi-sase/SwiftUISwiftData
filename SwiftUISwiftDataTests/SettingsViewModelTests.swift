@@ -47,6 +47,18 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @Test func reset() {
+        let dependency = Dependency()
+        dependency.testTarget.setHasLink(false)
+        dependency.testTarget.setContentFontSize(30.0)
+        dependency.testTarget.setContentLineSpacing(5.0)
+        dependency.testTarget.setTitleLineLimit(5)
+        #expect(dependency.testTarget.settingsChanged)
+        dependency.testTarget.reset()
+
+        #expect(!dependency.testTarget.settingsChanged)
+        dependency.removeUserDefaults()
+    }
 }
 
 extension SettingsViewModelTests {
@@ -58,7 +70,8 @@ extension SettingsViewModelTests {
         init() {
             userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName)!
             testTarget = .init(
-                userDefaultsRepository: .init(userDefaults: userDefaults)
+                userDefaultsRepository: .init(userDefaults: userDefaults),
+                suiteName: SettingsViewModelTests.Dependency.suiteName
             )
         }
 
