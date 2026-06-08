@@ -320,7 +320,6 @@ extension ContentView {
     /// 指定されたメモを削除する関数。削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
     /// - Parameter memos: 削除するメモの配列
     private func deleteMemos(_ memos: [Memo]) {
-
         do {
             try viewModel.delete(memos)
 

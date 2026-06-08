@@ -85,11 +85,6 @@ struct BrowseMemoView: View {
         }
     }
 
-    /// メモが更新されたかどうかを判定するプロパティ
-    private var memoUpdated: Bool {
-        memo.title != title || memo.content != content
-    }
-
     /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
