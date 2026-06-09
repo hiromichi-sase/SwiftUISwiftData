@@ -54,16 +54,24 @@ struct SettingsView: View {
 
                 Section {
                     VStack(alignment: .leading) {
-                        Text("Font Size")
+                        Text("Font Size (\(rangeString(viewModel.contentFontSizeRange)))")
                             .font(.system(size: 12.0))
-                        Stepper(value: $contentFontSize, in: 5.0 ... 100, step: 0.5) {
+                        Stepper(
+                            value: $contentFontSize,
+                            in: viewModel.contentFontSizeRange,
+                            step: 0.5
+                        ) {
                             Text("\(contentFontSize, specifier: "%.1f")")
                         }
                     }
                     VStack(alignment: .leading) {
-                        Text("Line Spacing")
+                        Text("Line Spacing (\(rangeString(viewModel.contentLineSpacingRange)))")
                             .font(.system(size: 12.0))
-                        Stepper(value: $contentLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
+                        Stepper(
+                            value: $contentLineSpacing,
+                            in: viewModel.contentLineSpacingRange,
+                            step: 0.5
+                        ) {
                             Text("\(contentLineSpacing, specifier: "%.1f")")
                         }
                     }
@@ -73,23 +81,34 @@ struct SettingsView: View {
 
                 Section {
                     VStack(alignment: .leading) {
-                        Text("Line Limit")
+                        Text("Line Limit (\(rangeString(viewModel.titleLineLimitRange)))")
                             .font(.system(size: 12.0))
-                        Stepper(value: $titleLineLimit, in: 1 ... 5) {
+                        Stepper(
+                            value: $titleLineLimit,
+                            in: viewModel.titleLineLimitRange,
+                        ) {
                             Text("\(titleLineLimit)")
                         }
                     }
                     VStack(alignment: .leading) {
-                        Text("Font Size")
+                        Text("Font Size (\(rangeString(viewModel.titleFontSizeRange)))")
                             .font(.system(size: 12.0))
-                        Stepper(value: $titleFontSize, in: 5.0 ... 100, step: 0.5) {
+                        Stepper(
+                            value: $titleFontSize,
+                            in: viewModel.titleFontSizeRange,
+                            step: 0.5
+                        ) {
                             Text("\(titleFontSize, specifier: "%.1f")")
                         }
                     }
                     VStack(alignment: .leading) {
-                        Text("Line Spacing")
+                        Text("Line Spacing (\(rangeString(viewModel.titleLineSpacingRange)))")
                             .font(.system(size: 12.0))
-                        Stepper(value: $titleLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
+                        Stepper(
+                            value: $titleLineSpacing,
+                            in: viewModel.titleLineSpacingRange,
+                            step: 0.5
+                        ) {
                             Text("\(titleLineSpacing, specifier: "%.1f")")
                         }
                     }
@@ -160,6 +179,15 @@ struct SettingsView: View {
         viewModel.getTitleFontSize() != titleFontSize ||
         viewModel.getTitleLineSpacing() != titleLineSpacing
     }
+
+    private func rangeString(_ range: ClosedRange<Float>) -> String {
+        "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
+    }
+
+    private func rangeString(_ range: ClosedRange<Int>) -> String {
+        "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
+    }
+
 }
 
 #Preview {

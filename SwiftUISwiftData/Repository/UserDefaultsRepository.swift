@@ -9,7 +9,7 @@ import Foundation
 
 final class UserDefaultsRepository {
 
-    private enum Key: String, CaseIterable {
+    enum Key: String, CaseIterable {
         case hasLink
         case contentFontSize
         case contentLineSpacing
@@ -19,18 +19,34 @@ final class UserDefaultsRepository {
 
         var defaultValue: Any? {
             switch self {
-            case .hasLink:
-                return true
-            case .contentFontSize:
-                return Float(16.0)
-            case .contentLineSpacing:
-                return Float.zero
-            case .titleLineLimit:
-                return 3
-            case .titleFontSize:
-                return Float(16.0)
-            case .titleLineSpacing:
-                return Float.zero
+            case .hasLink: true
+            case .contentFontSize: Float(16.0)
+            case .contentLineSpacing: Float.zero
+            case .titleLineLimit: 3
+            case .titleFontSize: Float(16.0)
+            case .titleLineSpacing: Float.zero
+            }
+        }
+
+        var maxValue: Any? {
+            switch self {
+            case .hasLink: nil
+            case .contentFontSize: Float(100.0)
+            case .contentLineSpacing: Float(10.0)
+            case .titleLineLimit: 5
+            case .titleFontSize: Float(100.0)
+            case .titleLineSpacing: Float(10.0)
+            }
+        }
+
+        var minValue: Any? {
+            switch self {
+            case .hasLink: nil
+            case .contentFontSize: Float(5.0)
+            case .contentLineSpacing: Float.zero
+            case .titleLineLimit: 1
+            case .titleFontSize: Float(5.0)
+            case .titleLineSpacing: Float.zero
             }
         }
     }
@@ -71,6 +87,34 @@ final class UserDefaultsRepository {
             }
         }
         return changedCount > .zero
+    }
+
+    private func minValue(key: UserDefaultsRepository.Key) -> Any? {
+        Key.allCases.filter { $0 == key }.first?.minValue
+    }
+
+    private func maxValue(key: UserDefaultsRepository.Key) -> Any? {
+        Key.allCases.filter { $0 == key }.first?.maxValue
+    }
+
+    var contentFontSizeRange: ClosedRange<Float> {
+        (minValue(key: .contentFontSize) as! Float) ... (maxValue(key: .contentFontSize) as! Float)
+    }
+
+    var contentLineSpacingRange: ClosedRange<Float> {
+        (minValue(key: .contentLineSpacing) as! Float) ... (maxValue(key: .contentLineSpacing) as! Float)
+    }
+
+    var titleLineLimitRange: ClosedRange<Int> {
+        (minValue(key: .titleLineLimit) as! Int) ... (maxValue(key: .titleLineLimit) as! Int)
+    }
+
+    var titleFontSizeRange: ClosedRange<Float> {
+        (minValue(key: .titleFontSize) as! Float) ... (maxValue(key: .titleFontSize) as! Float)
+    }
+
+    var titleLineSpacingRange: ClosedRange<Float> {
+        (minValue(key: .titleLineSpacing) as! Float) ... (maxValue(key: .titleLineSpacing) as! Float)
     }
 
     func reset(suiteName: String? = nil) {

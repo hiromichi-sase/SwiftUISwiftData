@@ -27,6 +27,26 @@ final class SettingsViewModel: ObservableObject {
         userDefaultsRepository.settingsChanged
     }
 
+    var contentFontSizeRange: ClosedRange<Float> {
+        userDefaultsRepository.contentFontSizeRange
+    }
+
+    var contentLineSpacingRange: ClosedRange<Float> {
+        userDefaultsRepository.contentLineSpacingRange
+    }
+
+    var titleLineLimitRange: ClosedRange<Int> {
+        userDefaultsRepository.titleLineLimitRange
+    }
+
+    var titleFontSizeRange: ClosedRange<Float> {
+        userDefaultsRepository.titleFontSizeRange
+    }
+
+    var titleLineSpacingRange: ClosedRange<Float> {
+        userDefaultsRepository.titleLineSpacingRange
+    }
+
     func reset() {
         userDefaultsRepository.reset(suiteName: suiteName)
     }
