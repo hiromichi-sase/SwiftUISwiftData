@@ -42,7 +42,6 @@ final class ContentViewModel: ObservableObject {
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
         try memoRepository.renumberOrder()
-        fetchMemos()
     }
 
     /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI. If an error occurs during the moving, it throws an error.
@@ -51,7 +50,6 @@ final class ContentViewModel: ObservableObject {
     ///   - destination: An integer representing the index to which the memos should be moved.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try memoRepository.moveMemo(from: source, to: destination)
-        fetchMemos()
     }
 
     func getTitleLineLimit() -> Int {
