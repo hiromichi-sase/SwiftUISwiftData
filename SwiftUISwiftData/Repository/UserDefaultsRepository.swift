@@ -116,11 +116,8 @@ final class UserDefaultsRepository {
     }
 
     func reset(suiteName: String? = nil) {
-        if let suiteName {
-            userDefaults.removePersistentDomain(forName: suiteName)
-        } else if let appDomain = Bundle.main.bundleIdentifier {
-            userDefaults.removePersistentDomain(forName: appDomain)
-        }
+        guard let name = suiteName ?? Bundle.main.bundleIdentifier else { return }
+        userDefaults.removePersistentDomain(forName: name)
     }
 
     func getHasLink() -> Bool {

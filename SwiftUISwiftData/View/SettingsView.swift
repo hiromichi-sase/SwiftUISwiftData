@@ -40,122 +40,134 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack() {
             Form {
-                Section {
-                    VStack(alignment: .leading) {
-                        Text("Has Link")
-                            .font(.system(size: 12.0))
-                        Toggle(isOn: $hasLink) {
-                            Text(hasLink ? "ON" : "OFF")
-                        }
-                    }
-                } header: {
-                    Text("Preview")
-                }
-
-                Section {
-                    VStack(alignment: .leading) {
-                        Text("Font Size (\(rangeString(viewModel.contentFontSizeRange)))")
-                            .font(.system(size: 12.0))
-                        Stepper(
-                            value: $contentFontSize,
-                            in: viewModel.contentFontSizeRange,
-                            step: 0.5
-                        ) {
-                            Text("\(contentFontSize, specifier: "%.1f")")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("Line Spacing (\(rangeString(viewModel.contentLineSpacingRange)))")
-                            .font(.system(size: 12.0))
-                        Stepper(
-                            value: $contentLineSpacing,
-                            in: viewModel.contentLineSpacingRange,
-                            step: 0.5
-                        ) {
-                            Text("\(contentLineSpacing, specifier: "%.1f")")
-                        }
-                    }
-                } header: {
-                    Text("Content")
-                }
-
-                Section {
-                    VStack(alignment: .leading) {
-                        Text("Line Limit (\(rangeString(viewModel.titleLineLimitRange)))")
-                            .font(.system(size: 12.0))
-                        Stepper(
-                            value: $titleLineLimit,
-                            in: viewModel.titleLineLimitRange,
-                        ) {
-                            Text("\(titleLineLimit)")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("Font Size (\(rangeString(viewModel.titleFontSizeRange)))")
-                            .font(.system(size: 12.0))
-                        Stepper(
-                            value: $titleFontSize,
-                            in: viewModel.titleFontSizeRange,
-                            step: 0.5
-                        ) {
-                            Text("\(titleFontSize, specifier: "%.1f")")
-                        }
-                    }
-                    VStack(alignment: .leading) {
-                        Text("Line Spacing (\(rangeString(viewModel.titleLineSpacingRange)))")
-                            .font(.system(size: 12.0))
-                        Stepper(
-                            value: $titleLineSpacing,
-                            in: viewModel.titleLineSpacingRange,
-                            step: 0.5
-                        ) {
-                            Text("\(titleLineSpacing, specifier: "%.1f")")
-                        }
-                    }
-                } header: {
-                    Text("Title")
-                }
+                browseSection
+                contentSection
+                titleSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("Reset", systemImage: "xmark.circle.fill") {
-                        showResetConfirmationAlert = true
-                    }
-                    .disabled(!viewModel.settingsChanged)
-                    Button("Save", systemImage: "checkmark") {
-                        viewModel.setHasLink(hasLink)
-                        viewModel.setContentFontSize(contentFontSize)
-                        viewModel.setContentLineSpacing(contentLineSpacing)
-                        viewModel.setTitleLineLimit(titleLineLimit)
-                        viewModel.setTitleFontSize(titleFontSize)
-                        viewModel.setTitleLineSpacing(titleLineSpacing)
-                        settingsSaved = true
-                        dismiss()
-                    }
-                    .disabled(!settingsUpdated)
+                    toolbarItemTopBarTrailing
                 }
             }
             .alert(isPresented: $showResetConfirmationAlert) {
-                Alert(
-                    title: Text("Reset all settings?"),
-                    primaryButton: .destructive(Text("Reset")) {
-                        viewModel.reset()
-
-                        hasLink = viewModel.getHasLink()
-                        contentFontSize = viewModel.getContentFontSize()
-                        contentLineSpacing = viewModel.getContentLineSpacing()
-                        titleLineLimit = viewModel.getTitleLineLimit()
-                        titleFontSize = viewModel.getTitleFontSize()
-                        titleLineSpacing = viewModel.getTitleLineSpacing()
-
-                        settingsSaved = true
-                    },
-                    secondaryButton: .cancel()
-                )
+                resetConfirmationAlert
             }
         }
+    }
+
+    private var browseSection: some View {
+        Section("Browse") {
+            VStack(alignment: .leading) {
+                Text("Has Link")
+                    .font(.system(size: 12.0))
+                Toggle(isOn: $hasLink) {
+                    Text(hasLink ? "ON" : "OFF")
+                }
+            }
+        }
+    }
+
+    private var contentSection: some View {
+        Section("Content") {
+            VStack(alignment: .leading) {
+                Text("Font Size (\(rangeString(viewModel.contentFontSizeRange)))")
+                    .font(.system(size: 12.0))
+                Stepper(
+                    value: $contentFontSize,
+                    in: viewModel.contentFontSizeRange,
+                    step: 0.5
+                ) {
+                    Text("\(contentFontSize, specifier: "%.1f")")
+                }
+            }
+            VStack(alignment: .leading) {
+                Text("Line Spacing (\(rangeString(viewModel.contentLineSpacingRange)))")
+                    .font(.system(size: 12.0))
+                Stepper(
+                    value: $contentLineSpacing,
+                    in: viewModel.contentLineSpacingRange,
+                    step: 0.5
+                ) {
+                    Text("\(contentLineSpacing, specifier: "%.1f")")
+                }
+            }
+        }
+    }
+
+    private var titleSection: some View {
+        Section("Title") {
+            VStack(alignment: .leading) {
+                Text("Line Limit (\(rangeString(viewModel.titleLineLimitRange)))")
+                    .font(.system(size: 12.0))
+                Stepper(
+                    value: $titleLineLimit,
+                    in: viewModel.titleLineLimitRange,
+                ) {
+                    Text("\(titleLineLimit)")
+                }
+            }
+            VStack(alignment: .leading) {
+                Text("Font Size (\(rangeString(viewModel.titleFontSizeRange)))")
+                    .font(.system(size: 12.0))
+                Stepper(
+                    value: $titleFontSize,
+                    in: viewModel.titleFontSizeRange,
+                    step: 0.5
+                ) {
+                    Text("\(titleFontSize, specifier: "%.1f")")
+                }
+            }
+            VStack(alignment: .leading) {
+                Text("Line Spacing (\(rangeString(viewModel.titleLineSpacingRange)))")
+                    .font(.system(size: 12.0))
+                Stepper(
+                    value: $titleLineSpacing,
+                    in: viewModel.titleLineSpacingRange,
+                    step: 0.5
+                ) {
+                    Text("\(titleLineSpacing, specifier: "%.1f")")
+                }
+            }
+        }
+    }
+
+    private var resetConfirmationAlert: Alert {
+        Alert(
+            title: Text("Reset all settings?"),
+            primaryButton: .destructive(Text("Reset")) {
+                viewModel.reset()
+                hasLink = viewModel.getHasLink()
+                contentFontSize = viewModel.getContentFontSize()
+                contentLineSpacing = viewModel.getContentLineSpacing()
+                titleLineLimit = viewModel.getTitleLineLimit()
+                titleFontSize = viewModel.getTitleFontSize()
+                titleLineSpacing = viewModel.getTitleLineSpacing()
+                settingsSaved = true
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    /// ツールバーの右側のアイテムを生成するビュー
+    @ViewBuilder
+    private var toolbarItemTopBarTrailing: some View {
+        Button("Reset", systemImage: "xmark.circle.fill") {
+            showResetConfirmationAlert = true
+        }
+        .disabled(!viewModel.settingsChanged)
+        Button("Save", systemImage: "checkmark") {
+            viewModel.setHasLink(hasLink)
+            viewModel.setContentFontSize(contentFontSize)
+            viewModel.setContentLineSpacing(contentLineSpacing)
+            viewModel.setTitleLineLimit(titleLineLimit)
+            viewModel.setTitleFontSize(titleFontSize)
+            viewModel.setTitleLineSpacing(titleLineSpacing)
+            settingsSaved = true
+            dismiss()
+        }
+        .disabled(!settingsUpdated)
     }
 
     /// 設定が更新されたかどうかを判定するプロパティ
