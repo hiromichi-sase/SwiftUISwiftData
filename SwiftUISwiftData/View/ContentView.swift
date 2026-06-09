@@ -251,7 +251,12 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        activeMemoRow(memo: memo, lineLimit: viewModel.getTitleLineLimit()) { memo in
+        activeMemoRow(
+            memo: memo,
+            lineLimit: viewModel.getTitleLineLimit(),
+            fontSize: viewModel.getTitleFontSize(),
+            lineSpacing: viewModel.getTitleLineSpacing(),
+        ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             } else {
@@ -267,6 +272,8 @@ extension ContentView {
     private struct activeMemoRow: View {
         let memo: Memo
         let lineLimit: Int
+        let fontSize: Float
+        let lineSpacing: Float
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -277,6 +284,8 @@ extension ContentView {
                     Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
                         .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
                         .lineLimit(lineLimit)
+                        .font(.system(size: CGFloat(fontSize)))
+                        .lineSpacing(CGFloat(lineSpacing))
                     Spacer()
                 }
             }
@@ -295,6 +304,8 @@ extension ContentView {
                 .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
                 .padding()
                 .lineLimit(viewModel.getTitleLineLimit())
+                .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
+                .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
         }

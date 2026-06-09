@@ -14,6 +14,8 @@ final class UserDefaultsRepository {
         case contentFontSize
         case contentLineSpacing
         case titleLineLimit
+        case titleFontSize
+        case titleLineSpacing
 
         var defaultValue: Any? {
             switch self {
@@ -25,6 +27,10 @@ final class UserDefaultsRepository {
                 return Float.zero
             case .titleLineLimit:
                 return 3
+            case .titleFontSize:
+                return Float(16.0)
+            case .titleLineSpacing:
+                return Float.zero
             }
         }
     }
@@ -58,6 +64,10 @@ final class UserDefaultsRepository {
                 changedCount += getContentLineSpacing() != (value as! Float) ? 1 : .zero
             case .titleLineLimit:
                 changedCount += getTitleLineLimit() != (value as! Int) ? 1 : .zero
+            case .titleFontSize:
+                changedCount += getTitleFontSize() != (value as! Float) ? 1 : .zero
+            case .titleLineSpacing:
+                changedCount += getTitleLineSpacing() != (value as! Float) ? 1 : .zero
             }
         }
         return changedCount > .zero
@@ -103,4 +113,19 @@ final class UserDefaultsRepository {
         userDefaults.set(value, forKey: Key.titleLineLimit.rawValue)
     }
 
+    func getTitleFontSize() -> Float {
+        userDefaults.float(forKey: Key.titleFontSize.rawValue)
+    }
+
+    func setTitleFontSize(_ value: Float) {
+        userDefaults.set(value, forKey: Key.titleFontSize.rawValue)
+    }
+
+    func getTitleLineSpacing() -> Float {
+        userDefaults.float(forKey: Key.titleLineSpacing.rawValue)
+    }
+
+    func setTitleLineSpacing(_ value: Float) {
+        userDefaults.set(value, forKey: Key.titleLineSpacing.rawValue)
+    }
 }

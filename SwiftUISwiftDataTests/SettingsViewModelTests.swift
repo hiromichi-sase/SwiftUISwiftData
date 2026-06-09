@@ -47,12 +47,32 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @Test func titleFontSize()  {
+        let titleFontSize = Float(16.0)
+        let dependency = Dependency()
+        dependency.testTarget.setTitleFontSize(titleFontSize)
+
+        #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
+        dependency.removeUserDefaults()
+    }
+
+    @Test func titleLineSpacing()  {
+        let titleLineSpacing = Float.zero
+        let dependency = Dependency()
+        dependency.testTarget.setTitleLineSpacing(titleLineSpacing)
+
+        #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
+        dependency.removeUserDefaults()
+    }
+
     @Test func reset() {
         let dependency = Dependency()
         dependency.testTarget.setHasLink(false)
         dependency.testTarget.setContentFontSize(30.0)
         dependency.testTarget.setContentLineSpacing(5.0)
         dependency.testTarget.setTitleLineLimit(5)
+        dependency.testTarget.setTitleFontSize(30.0)
+        dependency.testTarget.setTitleLineSpacing(5.0)
         #expect(dependency.testTarget.settingsChanged)
         dependency.testTarget.reset()
 

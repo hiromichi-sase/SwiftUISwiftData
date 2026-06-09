@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var contentFontSize: Float = .zero
     @State private var contentLineSpacing: Float = .zero
     @State private var titleLineLimit: Int = .zero
+    @State private var titleFontSize: Float = .zero
+    @State private var titleLineSpacing: Float = .zero
     @State private var showResetConfirmationAlert = false
 
     /// ビューを閉じるための環境変数
@@ -31,6 +33,8 @@ struct SettingsView: View {
         self._contentFontSize = State(initialValue: viewModel.getContentFontSize())
         self._contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
         self._titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
+        self._titleFontSize = State(initialValue: viewModel.getTitleFontSize())
+        self._titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
     }
 
     var body: some View {
@@ -56,6 +60,16 @@ struct SettingsView: View {
                         Text("\(titleLineLimit)")
                     }
                 }
+                Section(header: Text("Title Font Size")) {
+                    Stepper(value: $titleFontSize, in: 5.0 ... 100, step: 0.5) {
+                        Text("\(titleFontSize, specifier: "%.1f")")
+                    }
+                }
+                Section(header: Text("Title Line Spacing")) {
+                    Stepper(value: $titleLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
+                        Text("\(titleLineSpacing, specifier: "%.1f")")
+                    }
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -78,6 +92,12 @@ struct SettingsView: View {
                         if viewModel.getTitleLineLimit() != titleLineLimit {
                             viewModel.setTitleLineLimit(titleLineLimit)
                         }
+                        if viewModel.getTitleFontSize() != titleFontSize {
+                            viewModel.setTitleFontSize(titleFontSize)
+                        }
+                        if viewModel.getTitleLineSpacing() != titleLineSpacing {
+                            viewModel.setTitleLineSpacing(titleLineSpacing)
+                        }
                         settingsSaved = true
                         dismiss()
                     }
@@ -94,6 +114,8 @@ struct SettingsView: View {
                         contentFontSize = viewModel.getContentFontSize()
                         contentLineSpacing = viewModel.getContentLineSpacing()
                         titleLineLimit = viewModel.getTitleLineLimit()
+                        titleFontSize = viewModel.getTitleFontSize()
+                        titleLineSpacing = viewModel.getTitleLineSpacing()
 
                         settingsSaved = true
                     },
@@ -108,6 +130,8 @@ struct SettingsView: View {
         viewModel.getHasLink() != hasLink ||
         viewModel.getContentFontSize() != contentFontSize ||
         viewModel.getContentLineSpacing() != contentLineSpacing ||
-        viewModel.getTitleLineLimit() != titleLineLimit
+        viewModel.getTitleLineLimit() != titleLineLimit ||
+        viewModel.getTitleFontSize() != titleFontSize ||
+        viewModel.getTitleLineSpacing() != titleLineSpacing
     }
 }

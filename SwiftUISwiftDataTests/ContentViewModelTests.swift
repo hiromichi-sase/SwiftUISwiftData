@@ -76,6 +76,24 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @Test func getTitleFontSize()  {
+        let titleFontSize = Float(16.0)
+        let dependency = Dependency()
+        dependency.testTarget.userDefaultsRepository.setTitleFontSize(titleFontSize)
+
+        #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
+        dependency.removeUserDefaults()
+    }
+
+    @Test func getTitleLineSpacing()  {
+        let titleLineSpacing = Float.zero
+        let dependency = Dependency()
+        dependency.testTarget.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
+
+        #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
+        dependency.removeUserDefaults()
+    }
+
 }
 
 extension ContentViewModelTests {

@@ -57,4 +57,12 @@ final class ContentViewModel: ObservableObject {
     func getTitleLineLimit() -> Int {
         userDefaultsRepository.getTitleLineLimit()
     }
+
+    func getTitleFontSize() -> Float {
+        userDefaultsRepository.getTitleFontSize()
+    }
+
+    func getTitleLineSpacing() -> Float {
+        userDefaultsRepository.getTitleLineSpacing()
+    }
 }

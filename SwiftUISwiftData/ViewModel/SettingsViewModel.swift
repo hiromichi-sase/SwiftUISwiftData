@@ -63,4 +63,19 @@ final class SettingsViewModel: ObservableObject {
         userDefaultsRepository.setTitleLineLimit(value)
     }
 
+    func getTitleFontSize() -> Float {
+        userDefaultsRepository.getTitleFontSize()
+    }
+
+    func setTitleFontSize(_ value: Float) {
+        userDefaultsRepository.setTitleFontSize(value)
+    }
+
+    func getTitleLineSpacing() -> Float {
+        userDefaultsRepository.getTitleLineSpacing()
+    }
+
+    func setTitleLineSpacing(_ value: Float) {
+        userDefaultsRepository.setTitleLineSpacing(value)
+    }
 }
