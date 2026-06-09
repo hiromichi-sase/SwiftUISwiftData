@@ -99,18 +99,7 @@ struct ContentView: View {
             }
             .toast(message: $toastMessage)
         } detail: {
-            if editMode == .inactive {
-                if let id = selectedMemoId,
-                   let memo = viewModel.memos.first(where: { $0.id == id }) {
-                    BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
-                        .modelContext(viewModel.modelContext)
-                        .id(memo.id)
-                } else {
-                    Text("Select a memo")
-                }
-            } else {
-                Text("Select memos to edit or delete")
-            }
+            detailView
         }
     }
 
@@ -236,6 +225,22 @@ struct ContentView: View {
             }
         default:
             break
+        }
+    }
+
+    @ViewBuilder
+    private var detailView: some View {
+        if editMode == .inactive {
+            if let id = selectedMemoId,
+               let memo = viewModel.memos.first(where: { $0.id == id }) {
+                BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
+                    .modelContext(viewModel.modelContext)
+                    .id(memo.id)
+            } else {
+                Text("Select a memo")
+            }
+        } else {
+            Text("Select memos to edit or delete")
         }
     }
 
