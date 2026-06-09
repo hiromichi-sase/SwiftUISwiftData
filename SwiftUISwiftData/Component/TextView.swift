@@ -77,6 +77,7 @@ struct TextView: UIViewRepresentable {
         }
 
         uiView.textColor = !text.isEmpty ? .label : .secondaryLabel
+        uiView.dataDetectorTypes = hasLink ? .all : []
     }
 
     private var attributedText: NSAttributedString {
