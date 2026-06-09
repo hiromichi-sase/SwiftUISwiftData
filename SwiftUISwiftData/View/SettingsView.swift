@@ -96,24 +96,6 @@ struct SettingsView: View {
                 } header: {
                     Text("Title")
                 }
-
-                /*
-                Section(header: Text("Title Line Limit")) {
-                    Stepper(value: $titleLineLimit, in: 1 ... 5) {
-                        Text("\(titleLineLimit)")
-                    }
-                }
-                Section(header: Text("Title Font Size")) {
-                    Stepper(value: $titleFontSize, in: 5.0 ... 100, step: 0.5) {
-                        Text("\(titleFontSize, specifier: "%.1f")")
-                    }
-                }
-                Section(header: Text("Title Line Spacing")) {
-                    Stepper(value: $titleLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
-                        Text("\(titleLineSpacing, specifier: "%.1f")")
-                    }
-                }
-                 */
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
