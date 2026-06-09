@@ -168,12 +168,14 @@ struct SettingsView: View {
         viewModel.getTitleLineSpacing() != titleLineSpacing
     }
 
-    private func rangeString(_ range: ClosedRange<Float>) -> String {
-        "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
-    }
-
-    private func rangeString(_ range: ClosedRange<Int>) -> String {
-        "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
+    private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
+        if let range = range as? ClosedRange<Int> {
+            "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
+        } else if let range = range as? ClosedRange<Float> {
+            "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
+        } else {
+            ""
+        }
     }
 
 }

@@ -55,10 +55,8 @@ final class UserDefaultsRepository {
 
     init(userDefaults: UserDefaults = UserDefaults.standard) {
         self.userDefaults = userDefaults
-
-        Key.allCases.forEach { key in
-            guard let defaultValue = key.defaultValue else { return }
-            userDefaults.register(defaults: [key.rawValue: defaultValue])
+        defaultValues.forEach { key, value in
+            userDefaults.register(defaults: [key.rawValue: value])
         }
     }
 
@@ -89,32 +87,32 @@ final class UserDefaultsRepository {
         return changedCount > .zero
     }
 
-    private func minValue(key: UserDefaultsRepository.Key) -> Any? {
-        Key.allCases.filter { $0 == key }.first?.minValue
-    }
-
-    private func maxValue(key: UserDefaultsRepository.Key) -> Any? {
-        Key.allCases.filter { $0 == key }.first?.maxValue
+    private func range<T: Equatable>(for key: UserDefaultsRepository.Key) -> ClosedRange<T> {
+        guard let minValue = key.minValue as! T?,
+              let maxValue = key.maxValue as! T? else {
+            fatalError("\(key) has no minValue or maxValue")
+        }
+        return minValue ... maxValue
     }
 
     var contentFontSizeRange: ClosedRange<Float> {
-        (minValue(key: .contentFontSize) as! Float) ... (maxValue(key: .contentFontSize) as! Float)
+        range(for: .contentFontSize) as ClosedRange<Float>
     }
 
     var contentLineSpacingRange: ClosedRange<Float> {
-        (minValue(key: .contentLineSpacing) as! Float) ... (maxValue(key: .contentLineSpacing) as! Float)
+        range(for: .contentLineSpacing) as ClosedRange<Float>
     }
 
     var titleLineLimitRange: ClosedRange<Int> {
-        (minValue(key: .titleLineLimit) as! Int) ... (maxValue(key: .titleLineLimit) as! Int)
+        range(for: .titleLineLimit) as ClosedRange<Int>
     }
 
     var titleFontSizeRange: ClosedRange<Float> {
-        (minValue(key: .titleFontSize) as! Float) ... (maxValue(key: .titleFontSize) as! Float)
+        range(for: .titleFontSize) as ClosedRange<Float>
     }
 
     var titleLineSpacingRange: ClosedRange<Float> {
-        (minValue(key: .titleLineSpacing) as! Float) ... (maxValue(key: .titleLineSpacing) as! Float)
+        range(for: .titleLineSpacing) as ClosedRange<Float>
     }
 
     func reset(suiteName: String? = nil) {
