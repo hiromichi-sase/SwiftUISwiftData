@@ -130,6 +130,7 @@ final class UserDefaultsRepository {
     }
 
     func setHasLink(_ value: Bool) {
+        guard getHasLink() != value else { return }
         userDefaults.set(value, forKey: Key.hasLink.rawValue)
     }
 
@@ -138,6 +139,7 @@ final class UserDefaultsRepository {
     }
 
     func setContentFontSize(_ value: Float) {
+        guard getContentFontSize() != value else { return }
         userDefaults.set(value, forKey: Key.contentFontSize.rawValue)
     }
 
@@ -146,6 +148,7 @@ final class UserDefaultsRepository {
     }
 
     func setContentLineSpacing(_ value: Float) {
+        guard getContentLineSpacing() != value else { return }
         userDefaults.set(value, forKey: Key.contentLineSpacing.rawValue)
     }
 
@@ -154,6 +157,7 @@ final class UserDefaultsRepository {
     }
 
     func setTitleLineLimit(_ value: Int) {
+        guard getTitleLineLimit() != value else { return }
         userDefaults.set(value, forKey: Key.titleLineLimit.rawValue)
     }
 
@@ -162,6 +166,7 @@ final class UserDefaultsRepository {
     }
 
     func setTitleFontSize(_ value: Float) {
+        guard getTitleFontSize() != value else { return }
         userDefaults.set(value, forKey: Key.titleFontSize.rawValue)
     }
 
@@ -170,6 +175,7 @@ final class UserDefaultsRepository {
     }
 
     func setTitleLineSpacing(_ value: Float) {
+        guard getTitleLineSpacing() != value else { return }
         userDefaults.set(value, forKey: Key.titleLineSpacing.rawValue)
     }
 }

@@ -125,24 +125,12 @@ struct SettingsView: View {
                     }
                     .disabled(!viewModel.settingsChanged)
                     Button("Save", systemImage: "checkmark") {
-                        if viewModel.getHasLink() != hasLink {
-                            viewModel.setHasLink(hasLink)
-                        }
-                        if viewModel.getContentFontSize() != contentFontSize {
-                            viewModel.setContentFontSize(contentFontSize)
-                        }
-                        if viewModel.getContentLineSpacing() != contentLineSpacing {
-                            viewModel.setContentLineSpacing(contentLineSpacing)
-                        }
-                        if viewModel.getTitleLineLimit() != titleLineLimit {
-                            viewModel.setTitleLineLimit(titleLineLimit)
-                        }
-                        if viewModel.getTitleFontSize() != titleFontSize {
-                            viewModel.setTitleFontSize(titleFontSize)
-                        }
-                        if viewModel.getTitleLineSpacing() != titleLineSpacing {
-                            viewModel.setTitleLineSpacing(titleLineSpacing)
-                        }
+                        viewModel.setHasLink(hasLink)
+                        viewModel.setContentFontSize(contentFontSize)
+                        viewModel.setContentLineSpacing(contentLineSpacing)
+                        viewModel.setTitleLineLimit(titleLineLimit)
+                        viewModel.setTitleFontSize(titleFontSize)
+                        viewModel.setTitleLineSpacing(titleLineSpacing)
                         settingsSaved = true
                         dismiss()
                     }
