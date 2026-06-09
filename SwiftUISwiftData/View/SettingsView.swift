@@ -40,21 +40,64 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack() {
             Form {
-                Section(header: Text("Has Link")) {
-                    Toggle(isOn: $hasLink) {
-                        Text(hasLink ? "ON" : "OFF")
+                Section {
+                    VStack(alignment: .leading) {
+                        Text("Has Link")
+                            .font(.system(size: 12.0))
+                        Toggle(isOn: $hasLink) {
+                            Text(hasLink ? "ON" : "OFF")
+                        }
                     }
+                } header: {
+                    Text("Preview")
                 }
-                Section(header: Text("Content Font Size")) {
-                    Stepper(value: $contentFontSize, in: 5.0 ... 100, step: 0.5) {
-                        Text("\(contentFontSize, specifier: "%.1f")")
+
+                Section {
+                    VStack(alignment: .leading) {
+                        Text("Font Size")
+                            .font(.system(size: 12.0))
+                        Stepper(value: $contentFontSize, in: 5.0 ... 100, step: 0.5) {
+                            Text("\(contentFontSize, specifier: "%.1f")")
+                        }
                     }
-                }
-                Section(header: Text("Content Line Spacing")) {
-                    Stepper(value: $contentLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
-                        Text("\(contentLineSpacing, specifier: "%.1f")")
+                    VStack(alignment: .leading) {
+                        Text("Line Spacing")
+                            .font(.system(size: 12.0))
+                        Stepper(value: $contentLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
+                            Text("\(contentLineSpacing, specifier: "%.1f")")
+                        }
                     }
+                } header: {
+                    Text("Content")
                 }
+
+                Section {
+                    VStack(alignment: .leading) {
+                        Text("Line Limit")
+                            .font(.system(size: 12.0))
+                        Stepper(value: $titleLineLimit, in: 1 ... 5) {
+                            Text("\(titleLineLimit)")
+                        }
+                    }
+                    VStack(alignment: .leading) {
+                        Text("Font Size")
+                            .font(.system(size: 12.0))
+                        Stepper(value: $titleFontSize, in: 5.0 ... 100, step: 0.5) {
+                            Text("\(titleFontSize, specifier: "%.1f")")
+                        }
+                    }
+                    VStack(alignment: .leading) {
+                        Text("Line Spacing")
+                            .font(.system(size: 12.0))
+                        Stepper(value: $titleLineSpacing, in: 0.0 ... 10.0, step: 0.5) {
+                            Text("\(titleLineSpacing, specifier: "%.1f")")
+                        }
+                    }
+                } header: {
+                    Text("Title")
+                }
+
+                /*
                 Section(header: Text("Title Line Limit")) {
                     Stepper(value: $titleLineLimit, in: 1 ... 5) {
                         Text("\(titleLineLimit)")
@@ -70,6 +113,7 @@ struct SettingsView: View {
                         Text("\(titleLineSpacing, specifier: "%.1f")")
                     }
                 }
+                 */
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -133,5 +177,11 @@ struct SettingsView: View {
         viewModel.getTitleLineLimit() != titleLineLimit ||
         viewModel.getTitleFontSize() != titleFontSize ||
         viewModel.getTitleLineSpacing() != titleLineSpacing
+    }
+}
+
+#Preview {
+    NavigationStack {
+        SettingsView(settingsSaved: .constant(true))
     }
 }
