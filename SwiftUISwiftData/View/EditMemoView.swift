@@ -67,13 +67,7 @@ struct EditMemoView: View {
                 textViewFocus = true
             }
             .alert(isPresented: $showConfirmationAlert) {
-                Alert(
-                    title: Text("Discard changes?"),
-                    primaryButton: .destructive(Text("Discard")) {
-                        dismiss()
-                    },
-                    secondaryButton: .cancel()
-                )
+                confirmationAlert
             }
             .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
@@ -132,6 +126,16 @@ struct EditMemoView: View {
                         .padding(6)
                 }
             }
+    }
+
+    private var confirmationAlert: Alert {
+        Alert(
+            title: Text("Discard changes?"),
+            primaryButton: .destructive(Text("Discard")) {
+                dismiss()
+            },
+            secondaryButton: .cancel()
+        )
     }
 
     /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
