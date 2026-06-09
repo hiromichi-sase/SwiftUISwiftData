@@ -48,56 +48,56 @@ struct ContentView: View {
         NavigationSplitView {
             list
                 .contentMargins([.top], 0)
-            .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                onChange(oldMemos: oldMemos, newMemos: newMemos)
-            }
-            .onChange(of: settingsSaved) { _, _ in
-                guard settingsSaved else { return }
-                viewModel.fetchMemos()
-                settingsSaved = false
-            }
-            .onReceive(willSavePublisher) { _ in
-                viewModel.fetchMemos()
-            }
-            .alert(item: $memoToDelete) { memo in
-                Alert(
-                    title: Text("Delete this memo?"),
-                    primaryButton: .destructive(Text("Delete")) {
-                        deleteMemos([memo])
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
-            .alert("Delete selected memos?", isPresented: $showDeleteSelectionAlert) {
-                Button("Delete", role: .destructive) {
-                    deleteMemos(selectedMemos)
+                .onChange(of: viewModel.memos) { oldMemos, newMemos in
+                    onChange(oldMemos: oldMemos, newMemos: newMemos)
                 }
-                Button("Cancel", role: .cancel) {}
-            }
-            .navigationTitle(navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItemGroup(placement: .topBarLeading) {
-                    toolbarItemTopBarLeading
+                .onChange(of: settingsSaved) { _, _ in
+                    guard settingsSaved else { return }
+                    viewModel.fetchMemos()
+                    settingsSaved = false
                 }
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    toolbarItemTopBarTrailing
+                .onReceive(willSavePublisher) { _ in
+                    viewModel.fetchMemos()
                 }
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarItemBottomBar
+                .alert(item: $memoToDelete) { memo in
+                    Alert(
+                        title: Text("Delete this memo?"),
+                        primaryButton: .destructive(Text("Delete")) {
+                            deleteMemos([memo])
+                        },
+                        secondaryButton: .cancel()
+                    )
                 }
-            }
-            .environment(\.editMode, $editMode)
-            .fullScreenCover(isPresented: $showingAddMemo) {
-                EditMemoView()
-            }
-            .sheet(isPresented: $showSettingsView) {
-                SettingsView(settingsSaved: $settingsSaved)
-            }
-            .onDisappear {
-                openEditMemoView = false
-            }
-            .toast(message: $toastMessage)
+                .alert("Delete selected memos?", isPresented: $showDeleteSelectionAlert) {
+                    Button("Delete", role: .destructive) {
+                        deleteMemos(selectedMemos)
+                    }
+                    Button("Cancel", role: .cancel) {}
+                }
+                .navigationTitle(navigationTitle)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarLeading) {
+                        toolbarItemTopBarLeading
+                    }
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        toolbarItemTopBarTrailing
+                    }
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        toolbarItemBottomBar
+                    }
+                }
+                .environment(\.editMode, $editMode)
+                .fullScreenCover(isPresented: $showingAddMemo) {
+                    EditMemoView()
+                }
+                .sheet(isPresented: $showSettingsView) {
+                    SettingsView(settingsSaved: $settingsSaved)
+                }
+                .onDisappear {
+                    openEditMemoView = false
+                }
+                .toast(message: $toastMessage)
         } detail: {
             detailView
         }
