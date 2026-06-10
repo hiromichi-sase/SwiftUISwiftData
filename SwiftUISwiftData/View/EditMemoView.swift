@@ -41,6 +41,9 @@ struct EditMemoView: View {
     /// テキストフィールドのフォーカス状態
     @FocusState private var textFieldFocus: Bool
 
+    @State private var error: Error?
+    @State private var showErrorAlert = false
+
     /// ナビゲーションパスの状態変数
     @State var path = NavigationPath()
 
@@ -52,6 +55,7 @@ struct EditMemoView: View {
         self._content = State(initialValue: memo?.content ?? "")
         self._titleToStore = State(initialValue: memo?.title ?? "")
         self._toastMessage = State(initialValue: "")
+        self._error = State(initialValue: nil)
     }
 
     var body: some View {
@@ -72,6 +76,11 @@ struct EditMemoView: View {
             }
             .alert(isPresented: $showConfirmationAlert) {
                 confirmationAlert
+            }
+            .alert("The Error occured.", isPresented: $showErrorAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(error?.localizedDescription ?? "")
             }
             .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
@@ -172,6 +181,8 @@ struct EditMemoView: View {
                     try viewModel.update(memo)
                     toastMessage = "Successfully saved!"
                 } catch {
+                    self.error = error
+                    showErrorAlert = true
                     print("Failed to update memo: \(error)")
                 }
             } else {
@@ -182,6 +193,8 @@ struct EditMemoView: View {
                     self.memo = memo
                     toastMessage = "Successfully saved!"
                 } catch {
+                    self.error = error
+                    showErrorAlert = true
                     print("Failed to add memo: \(error)")
                 }
             }
