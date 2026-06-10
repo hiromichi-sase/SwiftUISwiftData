@@ -14,7 +14,7 @@ struct BrowseMemoViewModelTests {
     @Test func getHasLink()  {
         let hasLink = true
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setHasLink(hasLink)
+        dependency.userDefaultsRepository.setHasLink(hasLink)
 
         #expect(dependency.testTarget.getHasLink() == hasLink)
         dependency.removeUserDefaults()
@@ -23,7 +23,7 @@ struct BrowseMemoViewModelTests {
     @Test func getContentFontSize()  {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setContentFontSize(contentFontSize)
+        dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
 
         #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
         dependency.removeUserDefaults()
@@ -32,7 +32,7 @@ struct BrowseMemoViewModelTests {
     @Test func getContentLineSpacing()  {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
+        dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
 
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
         dependency.removeUserDefaults()
@@ -44,13 +44,15 @@ extension BrowseMemoViewModelTests {
     struct Dependency {
         let testTarget: BrowseMemoViewModel
         let userDefaults: UserDefaults
+        let userDefaultsRepository: UserDefaultsRepository
         static let suiteName: String = "Test"
 
         init() {
             userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName)!
+            userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 memoRepository: .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer),
-                userDefaultsRepository: .init(userDefaults: userDefaults)
+                userDefaultsRepository: userDefaultsRepository
             )
         }
 
