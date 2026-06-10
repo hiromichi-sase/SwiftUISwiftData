@@ -174,11 +174,10 @@ struct EditMemoView: View {
         .disabled(showTitleView)
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {
-                memo.title = title
-                memo.content = content
-
                 do {
                     try viewModel.update(memo)
+                    memo.title = title
+                    memo.content = content
                     toastMessage = "Successfully saved!"
                 } catch {
                     self.error = error

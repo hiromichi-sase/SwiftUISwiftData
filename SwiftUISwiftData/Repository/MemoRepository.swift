@@ -36,19 +36,21 @@ final class MemoRepository {
     /// Adds a new memo to the model context. This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the model context.
     func add(_ memo: Memo) throws {
-        let now = Date()
-        memo.createdAt = now
-        memo.updatedAt = now
-        memo.order = memos().count + 1
-        modelContext.insert(memo)
-        try modelContext.save()
+        try modelContext.transaction {
+            let now = Date()
+            memo.createdAt = now
+            memo.updatedAt = now
+            memo.order = memos().count + 1
+            modelContext.insert(memo)
+        }
     }
 
     /// Updates an existing memo in the model context. This function updates the updatedAt timestamp of the memo and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be updated in the model context.
     func update(_ memo: Memo) throws {
-        memo.updatedAt = Date()
-        try modelContext.save()
+        try modelContext.transaction {
+            memo.updatedAt = Date()
+        }
     }
 
     /// Deletes the specified memos from the model context. This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
