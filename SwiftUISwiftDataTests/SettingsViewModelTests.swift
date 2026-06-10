@@ -84,8 +84,8 @@ struct SettingsViewModelTests {
 extension SettingsViewModelTests {
     struct Dependency {
         let testTarget: SettingsViewModel
-        let userDefaults: UserDefaults
-        static let suiteName: String = "Test"
+        private let userDefaults: UserDefaults
+        private static let suiteName: String = "Test"
 
         init() {
             userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName)!

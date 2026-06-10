@@ -34,9 +34,9 @@ struct PreviewMemoViewModelTests {
 extension PreviewMemoViewModelTests {
     struct Dependency {
         let testTarget: PreviewMemoViewModel
-        let userDefaults: UserDefaults
+        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        static let suiteName: String = "Test"
+        private static let suiteName: String = "Test"
 
         init() {
             userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName)!

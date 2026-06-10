@@ -100,9 +100,9 @@ extension ContentViewModelTests {
     struct Dependency {
         let testTarget: ContentViewModel
         let memoRepository: MemoRepository
-        let userDefaults: UserDefaults
+        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        static let suiteName: String = "Test"
+        private static let suiteName: String = "Test"
 
         init() {
             memoRepository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)

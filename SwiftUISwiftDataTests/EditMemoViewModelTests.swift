@@ -70,9 +70,9 @@ extension EditMemoViewModelTests {
     struct Dependency {
         let testTarget: EditMemoViewModel
         let memoRepository: MemoRepository
-        let userDefaults: UserDefaults
+        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        static let suiteName: String = "Test"
+        private static let suiteName: String = "Test"
 
         init() {
             memoRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)

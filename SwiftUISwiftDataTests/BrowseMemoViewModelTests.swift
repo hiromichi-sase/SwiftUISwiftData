@@ -43,9 +43,9 @@ struct BrowseMemoViewModelTests {
 extension BrowseMemoViewModelTests {
     struct Dependency {
         let testTarget: BrowseMemoViewModel
-        let userDefaults: UserDefaults
+        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        static let suiteName: String = "Test"
+        private static let suiteName: String = "Test"
 
         init() {
             userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName)!
