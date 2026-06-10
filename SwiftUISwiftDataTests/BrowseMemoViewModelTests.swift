@@ -51,7 +51,6 @@ extension BrowseMemoViewModelTests {
             userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName)!
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
-                memoRepository: .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer),
                 userDefaultsRepository: userDefaultsRepository
             )
         }

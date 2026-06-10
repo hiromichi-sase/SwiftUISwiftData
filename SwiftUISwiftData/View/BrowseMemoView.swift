@@ -12,7 +12,6 @@ import SwiftUI
 struct BrowseMemoView: View {
     /// ビューの状態を管理するViewModel
     @ObservedObject var viewModel = BrowseMemoViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
 
