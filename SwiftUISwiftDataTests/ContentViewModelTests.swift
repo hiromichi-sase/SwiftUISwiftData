@@ -17,12 +17,12 @@ struct ContentViewModelTests {
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
 
-        try await dependency.testTarget.memoRepository.add(memo1)
-        try await dependency.testTarget.memoRepository.add(memo2)
-        try await dependency.testTarget.memoRepository.add(memo3)
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
         try await dependency.testTarget.delete([memo2])
 
-        let memos = await dependency.testTarget.memoRepository.memos()
+        let memos = await dependency.memoRepository.memos()
         if memos.count > 2 {
             throw TestError(message: "Expected only 2 memos after deletion, but found \(memos.count).")
         }
@@ -43,12 +43,12 @@ struct ContentViewModelTests {
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
 
-        try await dependency.testTarget.memoRepository.add(memo1)
-        try await dependency.testTarget.memoRepository.add(memo2)
-        try await dependency.testTarget.memoRepository.add(memo3)
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
         try await dependency.testTarget.moveMemo(from: [2], to: 1)
 
-        let memos = await dependency.testTarget.memoRepository.memos()
+        let memos = await dependency.memoRepository.memos()
         if memos.count != 3 {
             throw TestError(message: "Expected 3 memos after moving, but found \(memos.count).")
         }
@@ -70,7 +70,7 @@ struct ContentViewModelTests {
     @Test func getTitleLineLimit()  {
         let titleLineLimit = 3
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
+        dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
 
         #expect(dependency.testTarget.getTitleLineLimit() == titleLineLimit)
         dependency.removeUserDefaults()
@@ -79,7 +79,7 @@ struct ContentViewModelTests {
     @Test func getTitleFontSize()  {
         let titleFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setTitleFontSize(titleFontSize)
+        dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
 
         #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
         dependency.removeUserDefaults()
@@ -88,7 +88,7 @@ struct ContentViewModelTests {
     @Test func getTitleLineSpacing()  {
         let titleLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
+        dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
 
         #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
         dependency.removeUserDefaults()
@@ -99,14 +99,18 @@ struct ContentViewModelTests {
 extension ContentViewModelTests {
     struct Dependency {
         let testTarget: ContentViewModel
+        let memoRepository: MemoRepository
         let userDefaults: UserDefaults
+        let userDefaultsRepository: UserDefaultsRepository
         static let suiteName: String = "Test"
 
         init() {
+            memoRepository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             userDefaults = UserDefaults(suiteName: ContentViewModelTests.Dependency.suiteName)!
+            userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
-                memoRepository: MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer),
-                userDefaultsRepository: .init(userDefaults: userDefaults)
+                memoRepository: memoRepository,
+                userDefaultsRepository: userDefaultsRepository
             )
         }
 
