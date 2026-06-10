@@ -39,9 +39,13 @@ struct ContentView: View {
     /// 設定画面で変更保存したかどうかのフラグ
     @State private var settingsSaved = false
 
+    @State private var error: Error?
+    @State private var showErrorAlert = false
+
     /// イニシャライザ
     init() {
         self._toastMessage = State(initialValue: "")
+        self._error = State(initialValue: nil)
     }
 
     var body: some View {
@@ -73,6 +77,11 @@ struct ContentView: View {
                         deleteMemos(selectedMemos)
                     }
                     Button("Cancel", role: .cancel) {}
+                }
+                .alert("The Error occured.", isPresented: $showErrorAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(error?.localizedDescription ?? "")
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
@@ -350,6 +359,8 @@ extension ContentView {
             selection.removeAll()
             toastMessage = "Successfully deleted!"
         } catch {
+            self.error = error
+            showErrorAlert = true
             print("Failed to delete memos: \(error)")
         }
     }
@@ -365,6 +376,8 @@ extension ContentView {
             do {
                 try viewModel.moveMemo(from: indices, to: destination)
             } catch {
+                self.error = error
+                showErrorAlert = true
                 print("Failed to move memo: \(error)")
             }
         }
