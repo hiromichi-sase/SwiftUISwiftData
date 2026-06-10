@@ -51,14 +51,18 @@ final class MemoRepository {
         try modelContext.save()
     }
 
-    /// Deletes the specified memos from the model context and saves the context. This function iterates through the array of memos to be deleted, removes them from the context, and then saves the changes.  If an error occurs during saving, it throws an error.
+    /// Deletes the specified memos from the model context. This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memos: An array of Memo objects that need to be deleted from the model context.
     func delete(_ memos: [Memo]) throws {
-        for memo in memos {
-            modelContext.delete(memo)
-        }
+        try modelContext.transaction {
+            for memo in memos {
+                modelContext.delete(memo)
+            }
 
-        try modelContext.save()
+            for (index, memo) in self.memos().enumerated() {
+                memo.order = index + 1
+            }
+        }
     }
 
     /// Moves memos from the specified source indices to the destination index in the model context. This function first fetches the current list of memos, sorts them by their order, and then moves the memos based on the provided source and destination indices. After reordering, it updates the order property of each memo to reflect their new positions and saves the context.  If an error occurs during saving, it throws an error.
@@ -66,25 +70,17 @@ final class MemoRepository {
     ///   - source: An integer array representing the indices of the memos to be moved from their current positions.
     ///   - destination: An integer representing the index to which the memos should be moved in the list.
     func moveMemo(from source: [Int], to destination: Int) throws {
-        let memos = self.memos()
-        var orderedMemos = memos.sorted(by: { $0.order < $1.order })
-        orderedMemos.move(from: source, to: destination)
+        try modelContext.transaction {
+            let memos = self.memos()
+            var orderedMemos = memos.sorted(by: { $0.order < $1.order })
+            orderedMemos.move(from: source, to: destination)
 
-        for (index, memo) in orderedMemos.enumerated() {
-            if let existingMemo = memos.first(where: { $0.id == memo.id }) {
-                existingMemo.order = index + 1
+            for (index, memo) in orderedMemos.enumerated() {
+                if let existingMemo = memos.first(where: { $0.id == memo.id }) {
+                    existingMemo.order = index + 1
+                }
             }
         }
-
-        try modelContext.save()
     }
 
-    /// Renumbers the order of memos in the model context. This function iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context.  If an error occurs during saving, it throws an error.
-    func renumberOrder() throws {
-        for (index, memo) in memos().enumerated() {
-            memo.order = index + 1
-        }
-
-        try modelContext.save()
-    }
 }

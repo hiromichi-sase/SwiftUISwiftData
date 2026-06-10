@@ -41,7 +41,6 @@ final class ContentViewModel: ObservableObject {
     /// - Parameter memos: An array of Memo objects to be deleted.
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
-        try memoRepository.renumberOrder()
     }
 
     /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI. If an error occurs during the moving, it throws an error.
