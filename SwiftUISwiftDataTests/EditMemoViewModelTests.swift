@@ -16,11 +16,11 @@ struct EditMemoViewModelTests {
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await dependency.testTarget.add(memo)
 
-        guard let newMemo = await dependency.testTarget.memoRepository.memos().first else {
+        guard let newMemo = await dependency.memoRepository.memos().first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
-        await #expect(dependency.testTarget.memoRepository.memos().count == 1)
+        await #expect(dependency.memoRepository.memos().count == 1)
         #expect(newMemo.title == "Test Title")
         #expect(newMemo.content == "Test Memo")
         #expect(newMemo.createdAt == newMemo.updatedAt)
@@ -37,7 +37,7 @@ struct EditMemoViewModelTests {
         memo.content = "Updated Content"
         try await dependency.testTarget.update(memo)
 
-        guard let newMemo = await dependency.testTarget.memoRepository.memos().first else {
+        guard let newMemo = await dependency.memoRepository.memos().first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
@@ -50,7 +50,7 @@ struct EditMemoViewModelTests {
     @Test func getContentFontSize()  {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setContentFontSize(contentFontSize)
+        dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
 
         #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
         dependency.removeUserDefaults()
@@ -59,7 +59,7 @@ struct EditMemoViewModelTests {
     @Test func getContentLineSpacing()  {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.testTarget.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
+        dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
 
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
         dependency.removeUserDefaults()
@@ -69,14 +69,18 @@ struct EditMemoViewModelTests {
 extension EditMemoViewModelTests {
     struct Dependency {
         let testTarget: EditMemoViewModel
+        let memoRepository: MemoRepository
         let userDefaults: UserDefaults
+        let userDefaultsRepository: UserDefaultsRepository
         static let suiteName: String = "Test"
 
         init() {
+            memoRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             userDefaults = UserDefaults(suiteName: EditMemoViewModelTests.Dependency.suiteName)!
+            userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
-                memoRepository: .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer),
-                userDefaultsRepository: .init(userDefaults: userDefaults)
+                memoRepository: memoRepository,
+                userDefaultsRepository: userDefaultsRepository
             )
         }
 
