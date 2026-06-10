@@ -23,11 +23,6 @@ final class BrowseMemoViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    /// The model context used for performing SwiftData operations, accessed from the memoRepository.
-    var modelContext: ModelContext {
-        memoRepository.modelContext
-    }
-
     func getHasLink() -> Bool {
         userDefaultsRepository.getHasLink()
     }

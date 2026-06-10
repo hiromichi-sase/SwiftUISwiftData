@@ -17,14 +17,10 @@ struct BrowseMemoView: View {
     )
 
     /// 表示するメモ
-    private var memo: Memo
+    @State private var memo: Memo
     /// 編集画面を開くかどうかのフラグ
     @State private var openEditMemoView = false
 
-    /// タイトルと内容の状態変数
-    @State private var title: String
-    /// 内容の状態変数
-    @State private var content: String
     /// 編集画面を表示するかどうかのフラグ
     @State private var showingEditMemo = false
     /// トーストメッセージの状態変数
@@ -39,8 +35,6 @@ struct BrowseMemoView: View {
     ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
     init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
-        self._title = State(initialValue: memo.title)
-        self._content = State(initialValue: memo.content)
         self._openEditMemoView = State(initialValue: openEditMemoView)
         self._toastMessage = State(initialValue: "")
     }
@@ -49,7 +43,7 @@ struct BrowseMemoView: View {
         NavigationStack(path: $path) {
             VStack {
                 TextView(
-                    text: $content,
+                    text: $memo.content,
                     isEditable: false,
                     defaultText: CommonString.noContent,
                     hasLink: viewModel.getHasLink(),
@@ -57,7 +51,7 @@ struct BrowseMemoView: View {
                     contentLineSpacing: viewModel.getContentLineSpacing()
                 )
                 .border(.clear)
-                .disabled(content.isEmpty)
+                .disabled(memo.content.isEmpty)
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
@@ -67,14 +61,10 @@ struct BrowseMemoView: View {
                     openEditMemoView = false
                 }
             }
-            .onReceive(willSavePublisher) { _ in
-                title = memo.title
-                content = memo.content
-            }
             .fullScreenCover(isPresented: $showingEditMemo) {
                 EditMemoView(memo: memo)
             }
-            .navigationTitle(title)
+            .navigationTitle(memo.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -85,18 +75,12 @@ struct BrowseMemoView: View {
         }
     }
 
-    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー
-    private var willSavePublisher: NotificationCenter.Publisher {
-        NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
-    }
-
     /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        if !title.isEmpty {
+        if !memo.title.isEmpty {
             Button("Copy", systemImage: "doc.on.doc") {
-                UIPasteboard.general.string = $title.wrappedValue
+                UIPasteboard.general.string = memo.title
                 toastMessage = "Successfully copied!"
             }
         }
