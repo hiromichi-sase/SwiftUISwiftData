@@ -35,8 +35,8 @@ struct EditMemoView: View {
     /// トーストメッセージの状態変数
     @State private var toastMessage = ""
 
-    /// テキストフィールドとテキストビューのフォーカス状態
-    @FocusState private var textViewFocus: Bool
+    /// テキストエディターのフォーカス状態
+    @FocusState private var textEditorFocus: Bool
     @State private var textSelection: TextSelection?
     /// テキストフィールドのフォーカス状態
     @FocusState private var textFieldFocus: Bool
@@ -65,7 +65,7 @@ struct EditMemoView: View {
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
             .onAppear {
-                textViewFocus = true
+                textEditorFocus = true
                 DispatchQueue.main.async {
                     textSelection = .init(insertionPoint: content.startIndex)
                 }
@@ -120,7 +120,7 @@ struct EditMemoView: View {
             .font(.system(size: CGFloat(viewModel.getContentFontSize())))
             .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
             .border(showTitleView ? .secondary : .primary)
-            .focused($textViewFocus)
+            .focused($textEditorFocus)
             .overlay(alignment: .topLeading) {
                 if content.isEmpty && !showTitleView {
                     Text("Input Content")
