@@ -37,6 +37,7 @@ struct EditMemoView: View {
 
     /// テキストフィールドとテキストビューのフォーカス状態
     @FocusState private var textViewFocus: Bool
+    @State private var textSelection: TextSelection?
     /// テキストフィールドのフォーカス状態
     @FocusState private var textFieldFocus: Bool
 
@@ -65,6 +66,9 @@ struct EditMemoView: View {
             .padding([.horizontal, .bottom], 16)
             .onAppear {
                 textViewFocus = true
+                DispatchQueue.main.async {
+                    textSelection = .init(insertionPoint: content.startIndex)
+                }
             }
             .alert(isPresented: $showConfirmationAlert) {
                 confirmationAlert
@@ -110,7 +114,7 @@ struct EditMemoView: View {
 
     /// 内容編集ビュー
     private var contentView: some View {
-        TextEditor(text: $content)
+        TextEditor(text: $content, selection: $textSelection)
             .disabled(showTitleView)
             .foregroundStyle(showTitleView ? .secondary : .primary)
             .font(.system(size: CGFloat(viewModel.getContentFontSize())))
