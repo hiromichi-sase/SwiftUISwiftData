@@ -26,8 +26,8 @@ struct ContentView: View {
     @State private var selection: Set<UUID> = []
     /// スクロールビューのプロキシを保持する状態変数
     @State private var scrollViewProxy: ScrollViewProxy?
-    /// 選択されたメモを削除するかどうかの確認アラートを表示するフラグ
-    @State private var showDeleteSelectionAlert = false
+    /// メモを削除するかどうかの確認アラートを表示するフラグ
+    @State private var showDeleteAlert = false
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ
     @State private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ
@@ -63,18 +63,15 @@ struct ContentView: View {
                 .onReceive(willSavePublisher) { _ in
                     viewModel.fetchMemos()
                 }
-                .alert(item: $memoToDelete) { memo in
-                    Alert(
-                        title: Text("Delete this memo?"),
-                        primaryButton: .destructive(Text("Delete")) {
-                            deleteMemos([memo])
-                        },
-                        secondaryButton: .cancel()
-                    )
-                }
-                .alert("Delete selected memos?", isPresented: $showDeleteSelectionAlert) {
+                .alert("Delete memos?", isPresented: $showDeleteAlert) {
                     Button("Delete", role: .destructive) {
-                        deleteMemos(selectedMemos)
+                        if editMode == .active {
+                            guard !selectedMemos.isEmpty else { return }
+                            deleteMemos(selectedMemos)
+                        } else {
+                            guard let memoToDelete = memoToDelete else { return }
+                            deleteMemos([memoToDelete])
+                        }
                     }
                     Button("Cancel", role: .cancel) {}
                 }
@@ -196,7 +193,7 @@ struct ContentView: View {
         } else {
             Spacer()
             Button("Delete", systemImage: "trash") {
-                showDeleteSelectionAlert = true
+                showDeleteAlert = true
             }
             .disabled(selection.isEmpty)
         }
@@ -334,6 +331,7 @@ extension ContentView {
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
+                showDeleteAlert = true
             }
         } preview: {
             PreviewMemoView(memo: memo)
