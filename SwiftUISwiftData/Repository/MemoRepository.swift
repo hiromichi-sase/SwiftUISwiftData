@@ -46,9 +46,14 @@ final class MemoRepository {
     }
 
     /// Updates an existing memo in the model context. This function updates the updatedAt timestamp of the memo and then saves the context. If an error occurs during saving, it throws an error.
-    /// - Parameter memo: The Memo object that needs to be updated in the model context.
-    func update(_ memo: Memo) throws {
+    /// - Parameters:
+    ///   - memo: The Memo object that needs to be updated in the model context.
+    ///   - title: The title that needs to be updated.
+    ///   - content: The content that needs to be updated.
+    func update(_ memo: Memo, title: String, content: String) throws {
         try modelContext.transaction {
+            memo.title = title
+            memo.content = content
             memo.updatedAt = Date()
         }
     }

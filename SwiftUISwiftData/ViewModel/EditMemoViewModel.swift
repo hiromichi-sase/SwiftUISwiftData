@@ -30,9 +30,12 @@ final class EditMemoViewModel: ObservableObject {
     }
 
     /// Updates an existing memo in the memoRepository. This function takes a Memo object as a parameter and attempts to update it in the memoRepository. If an error occurs during the update, it throws an error.
-    /// - Parameter memo: The Memo object that needs to be updated in the memoRepository.
-    func update(_ memo: Memo) throws {
-        try memoRepository.update(memo)
+    /// - Parameters:
+    ///   - memo: The Memo object that needs to be updated in the memoRepository.
+    ///   - title: The title that needs to be updated.
+    ///   - content: The content that needs to be updated.
+    func update(_ memo: Memo, title: String, content: String) throws {
+        try memoRepository.update(memo, title: title, content: content)
     }
 
     func getContentFontSize() -> Float {

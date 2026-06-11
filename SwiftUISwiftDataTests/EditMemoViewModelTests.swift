@@ -33,16 +33,16 @@ struct EditMemoViewModelTests {
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await dependency.testTarget.add(memo)
 
-        memo.title = "Updated Title"
-        memo.content = "Updated Content"
-        try await dependency.testTarget.update(memo)
+        let updatedTitle = "Updated Title"
+        let updatedContent = "Updated Content"
+        try await dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent)
 
         guard let newMemo = await dependency.memoRepository.memos().first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
-        #expect(newMemo.title == "Updated Title")
-        #expect(newMemo.content == "Updated Content")
+        #expect(newMemo.title == updatedTitle)
+        #expect(newMemo.content == updatedContent)
         #expect(newMemo.createdAt < newMemo.updatedAt)
         dependency.removeUserDefaults()
     }
