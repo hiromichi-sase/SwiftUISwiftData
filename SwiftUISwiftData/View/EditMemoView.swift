@@ -28,8 +28,8 @@ struct EditMemoView: View {
     @State private var titleToStore: String = ""
     /// 内容の状態変数
     @State private var content: String
-    /// 変更を破棄するかどうかの確認アラートを表示するフラグ
-    @State private var showConfirmationAlert = false
+    /// 変更を破棄して閉じるかどうかの確認アラートを表示するフラグ
+    @State private var showCloseAlert = false
     /// タイトル編集ビューを表示するフラグ
     @State private var showTitleView = false
     /// トーストメッセージの状態変数
@@ -74,8 +74,8 @@ struct EditMemoView: View {
                     textSelection = .init(insertionPoint: content.startIndex)
                 }
             }
-            .alert(isPresented: $showConfirmationAlert) {
-                confirmationAlert
+            .alert(isPresented: $showCloseAlert) {
+                closeAlert
             }
             .alert("The Error occured.", isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) { }
@@ -141,10 +141,10 @@ struct EditMemoView: View {
             }
     }
 
-    private var confirmationAlert: Alert {
+    private var closeAlert: Alert {
         Alert(
-            title: Text("Discard changes?"),
-            primaryButton: .destructive(Text("Discard")) {
+            title: Text("Close without saving?"),
+            primaryButton: .destructive(Text("Close")) {
                 dismiss()
             },
             secondaryButton: .cancel()
@@ -154,9 +154,9 @@ struct EditMemoView: View {
     /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
-        Button("Cancel", systemImage: "xmark") {
+        Button("Close", systemImage: "xmark") {
             if memoUpdated {
-                showConfirmationAlert = true
+                showCloseAlert = true
             } else {
                 dismiss()
             }
