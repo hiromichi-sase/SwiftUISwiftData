@@ -63,17 +63,8 @@ struct ContentView: View {
                 .onReceive(willSavePublisher) { _ in
                     viewModel.fetchMemos()
                 }
-                .alert("Delete memos?", isPresented: $showDeleteAlert) {
-                    Button("Delete", role: .destructive) {
-                        if editMode == .active {
-                            guard !selectedMemos.isEmpty else { return }
-                            deleteMemos(selectedMemos)
-                        } else {
-                            guard let memoToDelete = memoToDelete else { return }
-                            deleteMemos([memoToDelete])
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {}
+                .alert(isPresented: $showDeleteAlert) {
+                    deleteAlert
                 }
                 .alert("The Error occured.", isPresented: $showErrorAlert) {
                     Button("OK", role: .cancel) { }
@@ -107,6 +98,22 @@ struct ContentView: View {
         } detail: {
             detailView
         }
+    }
+
+    private var deleteAlert: Alert {
+        .init(
+            title: Text("Delete \(editMode == .active ? "selected memos" : "this memo")?"),
+            primaryButton: .destructive(Text("Delete")) {
+                if editMode == .active {
+                    guard !selectedMemos.isEmpty else { return }
+                    deleteMemos(selectedMemos)
+                } else {
+                    guard let memoToDelete = memoToDelete else { return }
+                    deleteMemos([memoToDelete])
+                }
+            },
+            secondaryButton: .cancel()
+        )
     }
 
     /// メモのリストを表示するビュー
