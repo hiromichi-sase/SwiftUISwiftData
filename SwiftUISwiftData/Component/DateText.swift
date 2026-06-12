@@ -20,11 +20,22 @@ struct DateText: View {
                 return "Updated at"
             }
         }
+
+        var alignment: TextAlignment {
+            switch self {
+            case .createdAt:
+                return .leading
+            case .updatedAt:
+                return .trailing
+            }
+        }
     }
 
     private let text: String
+    private let style: style
 
     init(_ date: Date?, style: style) {
+        self.style = style
         if let date {
             self.text = "\(style.text): \(date.formatted(date: .complete, time: .standard))"
         } else {
@@ -35,5 +46,6 @@ struct DateText: View {
     var body: some View {
         Text(text)
             .font(.system(size: 8.0))
+            .multilineTextAlignment(self.style.alignment)
     }
 }
