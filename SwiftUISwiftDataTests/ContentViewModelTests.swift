@@ -67,7 +67,7 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleLineLimit()  {
+    @Test func getTitleLineLimit() {
         let titleLineLimit = 3
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
@@ -76,7 +76,7 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleFontSize()  {
+    @Test func getTitleFontSize() {
         let titleFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
@@ -85,7 +85,7 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleLineSpacing()  {
+    @Test func getTitleLineSpacing() {
         let titleLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)

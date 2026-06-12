@@ -11,7 +11,7 @@ import Foundation
 
 struct PreviewMemoViewModelTests {
 
-    @Test func getContentFontSize()  {
+    @Test func getContentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
@@ -20,7 +20,7 @@ struct PreviewMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getContentLineSpacing()  {
+    @Test func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
