@@ -108,7 +108,7 @@ struct ContentView: View {
                     guard !selectedMemos.isEmpty else { return }
                     deleteMemos(selectedMemos)
                 } else {
-                    guard let memoToDelete = memoToDelete else { return }
+                    guard let memoToDelete else { return }
                     deleteMemos([memoToDelete])
                 }
             },
