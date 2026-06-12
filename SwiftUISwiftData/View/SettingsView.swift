@@ -207,7 +207,6 @@ struct SettingsView: View {
             ""
         }
     }
-
 }
 
 #Preview {
