@@ -199,10 +199,10 @@ struct SettingsView: View {
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
-        if let range = range as? ClosedRange<Int> {
-            "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
-        } else if let range = range as? ClosedRange<Float> {
-            "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
+        if let intRange = range as? ClosedRange<Int> {
+            "\(String(intRange.lowerBound)) 〜 \(String(intRange.upperBound))"
+        } else if let floatRange = range as? ClosedRange<Float> {
+            "\(String(format: "%.1f", floatRange.lowerBound)) 〜 \(String(format: "%.1f", floatRange.upperBound))"
         } else {
             ""
         }

@@ -95,40 +95,40 @@ final class UserDefaultsRepository {
         defaultValues.forEach { key, value in
             switch key {
             case .hasLink:
-                guard let value = value as? Bool else {
+                guard let boolValue = value as? Bool else {
                     fatalError("Failed to get Bool value")
                 }
-                changedCount += getHasLink() != value ? 1 : .zero
+                changedCount += getHasLink() != boolValue ? 1 : .zero
             case .contentFontSize:
-                guard let value = value as? Float else {
+                guard let floatValue = value as? Float else {
                     fatalError("Failed to get Float value")
                 }
-                changedCount += getContentFontSize() != value ? 1 : .zero
+                changedCount += getContentFontSize() != floatValue ? 1 : .zero
             case .contentLineSpacing:
-                guard let value = value as? Float else {
+                guard let floatValue = value as? Float else {
                     fatalError("Failed to get Float value")
                 }
-                changedCount += getContentLineSpacing() != value ? 1 : .zero
+                changedCount += getContentLineSpacing() != floatValue ? 1 : .zero
             case .titleLineLimit:
-                guard let value = value as? Int else {
+                guard let intValue = value as? Int else {
                     fatalError("Failed to get Int value")
                 }
-                changedCount += getTitleLineLimit() != value ? 1 : .zero
+                changedCount += getTitleLineLimit() != intValue ? 1 : .zero
             case .titleFontSize:
-                guard let value = value as? Float else {
+                guard let floatValue = value as? Float else {
                     fatalError("Failed to get Float value")
                 }
-                changedCount += getTitleFontSize() != value ? 1 : .zero
+                changedCount += getTitleFontSize() != floatValue ? 1 : .zero
             case .titleLineSpacing:
-                guard let value = value as? Float else {
+                guard let floatValue = value as? Float else {
                     fatalError("Failed to get Float value")
                 }
-                changedCount += getTitleLineSpacing() != value ? 1 : .zero
+                changedCount += getTitleLineSpacing() != floatValue ? 1 : .zero
             case .showDate:
-                guard let value = value as? Bool else {
+                guard let boolValue = value as? Bool else {
                     fatalError("Failed to get Bool value")
                 }
-                changedCount += getShowDate() != value ? 1 : .zero
+                changedCount += getShowDate() != boolValue ? 1 : .zero
             }
         }
         return changedCount > .zero

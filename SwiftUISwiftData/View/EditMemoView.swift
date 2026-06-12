@@ -195,11 +195,11 @@ struct EditMemoView: View {
                     print("Failed to update memo: \(error)")
                 }
             } else {
-                let memo = Memo(title: title, content: content)
+                let newMemo = Memo(title: title, content: content)
 
                 do {
-                    try viewModel.add(memo)
-                    self.memo = memo
+                    try viewModel.add(newMemo)
+                    self.memo = newMemo
                     toastMessage = "Successfully saved!"
                 } catch {
                     self.error = error
