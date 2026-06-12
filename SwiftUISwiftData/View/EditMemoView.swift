@@ -199,7 +199,7 @@ struct EditMemoView: View {
 
                 do {
                     try viewModel.add(newMemo)
-                    self.memo = newMemo
+                    memo = newMemo
                     toastMessage = "Successfully saved!"
                 } catch {
                     self.error = error
