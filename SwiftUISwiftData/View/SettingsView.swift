@@ -26,7 +26,8 @@ struct SettingsView: View {
     @State private var showResetAlert = false
 
     /// ビューを閉じるための環境変数
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)
+    private var dismiss
 
     init(settingsSaved: Binding<Bool>) {
         self._settingsSaved = settingsSaved
@@ -167,8 +168,7 @@ struct SettingsView: View {
     }
 
     /// ツールバーの右側のアイテムを生成するビュー
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
+    @ViewBuilder private var toolbarItemTopBarTrailing: some View {
         Button("Reset", systemImage: "xmark.circle.fill") {
             showResetAlert = true
         }

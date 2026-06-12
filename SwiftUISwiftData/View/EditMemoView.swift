@@ -17,7 +17,8 @@ struct EditMemoView: View {
     )
 
     /// ビューを閉じるための環境変数
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)
+    private var dismiss
 
     /// 編集中のメモ
     @State private var memo: Memo?
@@ -159,8 +160,7 @@ struct EditMemoView: View {
     }
 
     /// ツールバーの左側のアイテムを定義するビュー。変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
-    @ViewBuilder
-    private var toolbarItemTopBarLeading: some View {
+    @ViewBuilder private var toolbarItemTopBarLeading: some View {
         Button("Close", systemImage: "xmark") {
             if memoUpdated {
                 showCloseAlert = true
@@ -172,8 +172,7 @@ struct EditMemoView: View {
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はリネームのボタンを表示し、常に保存のボタンを表示する。保存のボタンは変更がある場合のみ有効になる。
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
+    @ViewBuilder private var toolbarItemTopBarTrailing: some View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
             showTitleView = true
             textFieldFocus = true

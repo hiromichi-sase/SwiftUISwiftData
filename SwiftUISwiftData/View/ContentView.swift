@@ -151,8 +151,7 @@ struct ContentView: View {
     }
 
     /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー
-    @ViewBuilder
-    private var toolbarItemTopBarLeading: some View {
+    @ViewBuilder private var toolbarItemTopBarLeading: some View {
         if editMode == .inactive {
             if !viewModel.memos.isEmpty {
                 Button("Edit", systemImage: "pencil") {
@@ -169,8 +168,7 @@ struct ContentView: View {
     }
 
     /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
+    @ViewBuilder private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
@@ -190,8 +188,7 @@ struct ContentView: View {
     }
 
     /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー
-    @ViewBuilder
-    private var toolbarItemBottomBar: some View {
+    @ViewBuilder private var toolbarItemBottomBar: some View {
         if editMode == .inactive {
             Spacer()
             Button("Settings", systemImage: "gearshape.fill") {
@@ -241,8 +238,7 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder
-    private var detailView: some View {
+    @ViewBuilder private var detailView: some View {
         if editMode == .inactive {
             if let id = selectedMemoId,
                let memo = viewModel.memos.first(where: { $0.id == id }) {

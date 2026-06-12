@@ -82,8 +82,7 @@ struct BrowseMemoView: View {
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
+    @ViewBuilder private var toolbarItemTopBarTrailing: some View {
         if !memo.title.isEmpty {
             Button("Copy", systemImage: "doc.on.doc") {
                 UIPasteboard.general.string = memo.title

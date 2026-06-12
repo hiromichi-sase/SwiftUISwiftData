@@ -12,7 +12,8 @@ import SwiftData
 @Model
 final class Memo: Identifiable, Hashable {
     /// UUIDを使用して一意の識別子を生成
-    @Attribute(.unique) var id: UUID = UUID()
+    @Attribute(.unique)
+    var id: UUID = UUID()
     /// タイトル
     var title: String
     /// 内容
