@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-import SwiftData
 internal import Combine
+import SwiftData
 
 /// PreviewMemoViewModel is responsible for handling the logic related to preview memos. It interacts with the UserDefaultsRepository to perform these operations.
 final class PreviewMemoViewModel: ObservableObject {

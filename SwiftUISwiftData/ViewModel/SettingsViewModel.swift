@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-import SwiftData
 internal import Combine
+import SwiftData
 
 /// SettingsViewModel is an observable object that manages the state and interactions for the SettingsView, including setting values in the UserDefaultRepository.
 final class SettingsViewModel: ObservableObject {

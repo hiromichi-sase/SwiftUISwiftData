@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/05/04.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 /// メモのリストを表示するビュー
 struct ContentView: View {
