@@ -164,7 +164,9 @@ final class UserDefaultsRepository {
     }
 
     func reset(suiteName: String? = nil) {
-        guard let name = suiteName ?? Bundle.main.bundleIdentifier else { return }
+        guard let name = suiteName ?? Bundle.main.bundleIdentifier else {
+            return
+        }
         userDefaults.removePersistentDomain(forName: name)
     }
 
@@ -173,7 +175,9 @@ final class UserDefaultsRepository {
     }
 
     func setHasLink(_ value: Bool) {
-        guard getHasLink() != value else { return }
+        guard getHasLink() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.hasLink.rawValue)
     }
 
@@ -182,7 +186,9 @@ final class UserDefaultsRepository {
     }
 
     func setContentFontSize(_ value: Float) {
-        guard getContentFontSize() != value else { return }
+        guard getContentFontSize() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.contentFontSize.rawValue)
     }
 
@@ -191,7 +197,9 @@ final class UserDefaultsRepository {
     }
 
     func setContentLineSpacing(_ value: Float) {
-        guard getContentLineSpacing() != value else { return }
+        guard getContentLineSpacing() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.contentLineSpacing.rawValue)
     }
 
@@ -200,7 +208,9 @@ final class UserDefaultsRepository {
     }
 
     func setTitleLineLimit(_ value: Int) {
-        guard getTitleLineLimit() != value else { return }
+        guard getTitleLineLimit() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.titleLineLimit.rawValue)
     }
 
@@ -209,7 +219,9 @@ final class UserDefaultsRepository {
     }
 
     func setTitleFontSize(_ value: Float) {
-        guard getTitleFontSize() != value else { return }
+        guard getTitleFontSize() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.titleFontSize.rawValue)
     }
 
@@ -218,7 +230,9 @@ final class UserDefaultsRepository {
     }
 
     func setTitleLineSpacing(_ value: Float) {
-        guard getTitleLineSpacing() != value else { return }
+        guard getTitleLineSpacing() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.titleLineSpacing.rawValue)
     }
 
@@ -227,7 +241,9 @@ final class UserDefaultsRepository {
     }
 
     func setShowDate(_ value: Bool) {
-        guard getShowDate() != value else { return }
+        guard getShowDate() != value else {
+            return
+        }
         userDefaults.set(value, forKey: Key.showDate.rawValue)
     }
 }

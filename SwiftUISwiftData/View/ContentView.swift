@@ -56,7 +56,9 @@ struct ContentView: View {
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
                 }
                 .onChange(of: settingsSaved) { _, _ in
-                    guard settingsSaved else { return }
+                    guard settingsSaved else {
+                        return
+                    }
                     viewModel.fetchMemos()
                     settingsSaved = false
                 }
@@ -105,10 +107,14 @@ struct ContentView: View {
             title: Text("Delete \(editMode == .active ? "selected memos" : "this memo")?"),
             primaryButton: .destructive(Text("Delete")) {
                 if editMode == .active {
-                    guard !selectedMemos.isEmpty else { return }
+                    guard !selectedMemos.isEmpty else {
+                        return
+                    }
                     deleteMemos(selectedMemos)
                 } else {
-                    guard let memoToDelete else { return }
+                    guard let memoToDelete else {
+                        return
+                    }
                     deleteMemos([memoToDelete])
                 }
             },
