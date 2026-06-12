@@ -98,4 +98,12 @@ final class SettingsViewModel: ObservableObject {
     func setTitleLineSpacing(_ value: Float) {
         userDefaultsRepository.setTitleLineSpacing(value)
     }
+
+    func getShowDate() -> Bool {
+        userDefaultsRepository.getShowDate()
+    }
+
+    func setShowDate(_ value: Bool) {
+        userDefaultsRepository.setShowDate(value)
+    }
 }
