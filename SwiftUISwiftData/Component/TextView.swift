@@ -61,6 +61,7 @@ struct TextView: UIViewRepresentable {
         return textView
     }
 
+    // swiftlint:disable unused_parameter
     /// Updates the UITextView instance with the latest text content and configuration whenever the SwiftUI state changes.
     /// - Parameters:
     ///   - uiView: The UITextView instance to be updated.
@@ -79,6 +80,7 @@ struct TextView: UIViewRepresentable {
         uiView.textColor = !text.isEmpty ? .label : .secondaryLabel
         uiView.dataDetectorTypes = hasLink ? .all : []
     }
+    // swiftlint:enable unused_parameter
 
     private var attributedText: NSAttributedString {
         let paragraphStyle = NSMutableParagraphStyle()
