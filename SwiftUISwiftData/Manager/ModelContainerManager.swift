@@ -18,7 +18,7 @@ final class ModelContainerManager {
     /// - Parameter isStoredInMemoryOnly: A Boolean value indicating whether the data should be stored in memory only. Default is `false`.
     init(isStoredInMemoryOnly: Bool = false) {
         let schema = Schema([
-            Memo.self,
+            Memo.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isStoredInMemoryOnly)
 
