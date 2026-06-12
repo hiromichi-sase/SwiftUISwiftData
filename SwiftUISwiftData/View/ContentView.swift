@@ -26,8 +26,8 @@ struct ContentView: View {
     @State private var selection: Set<UUID> = []
     /// スクロールビューのプロキシを保持する状態変数
     @State private var scrollViewProxy: ScrollViewProxy?
-    /// 選択されたメモを削除するかどうかの確認アラートを表示するフラグ
-    @State private var showDeleteSelectionAlert = false
+    /// メモを削除するかどうかの確認アラートを表示するフラグ
+    @State private var showDeleteAlert = false
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ
     @State private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ
@@ -39,9 +39,13 @@ struct ContentView: View {
     /// 設定画面で変更保存したかどうかのフラグ
     @State private var settingsSaved = false
 
+    @State private var error: Error?
+    @State private var showErrorAlert = false
+
     /// イニシャライザ
     init() {
         self._toastMessage = State(initialValue: "")
+        self._error = State(initialValue: nil)
     }
 
     var body: some View {
@@ -59,20 +63,13 @@ struct ContentView: View {
                 .onReceive(willSavePublisher) { _ in
                     viewModel.fetchMemos()
                 }
-                .alert(item: $memoToDelete) { memo in
-                    Alert(
-                        title: Text("Delete this memo?"),
-                        primaryButton: .destructive(Text("Delete")) {
-                            deleteMemos([memo])
-                        },
-                        secondaryButton: .cancel()
-                    )
+                .alert(isPresented: $showDeleteAlert) {
+                    deleteAlert
                 }
-                .alert("Delete selected memos?", isPresented: $showDeleteSelectionAlert) {
-                    Button("Delete", role: .destructive) {
-                        deleteMemos(selectedMemos)
-                    }
-                    Button("Cancel", role: .cancel) {}
+                .alert("The Error occured.", isPresented: $showErrorAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(error?.localizedDescription ?? "")
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
@@ -101,6 +98,22 @@ struct ContentView: View {
         } detail: {
             detailView
         }
+    }
+
+    private var deleteAlert: Alert {
+        .init(
+            title: Text("Delete \(editMode == .active ? "selected memos" : "this memo")?"),
+            primaryButton: .destructive(Text("Delete")) {
+                if editMode == .active {
+                    guard !selectedMemos.isEmpty else { return }
+                    deleteMemos(selectedMemos)
+                } else {
+                    guard let memoToDelete = memoToDelete else { return }
+                    deleteMemos([memoToDelete])
+                }
+            },
+            secondaryButton: .cancel()
+        )
     }
 
     /// メモのリストを表示するビュー
@@ -187,7 +200,7 @@ struct ContentView: View {
         } else {
             Spacer()
             Button("Delete", systemImage: "trash") {
-                showDeleteSelectionAlert = true
+                showDeleteAlert = true
             }
             .disabled(selection.isEmpty)
         }
@@ -325,6 +338,7 @@ extension ContentView {
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
+                showDeleteAlert = true
             }
         } preview: {
             PreviewMemoView(memo: memo)
@@ -350,6 +364,8 @@ extension ContentView {
             selection.removeAll()
             toastMessage = "Successfully deleted!"
         } catch {
+            self.error = error
+            showErrorAlert = true
             print("Failed to delete memos: \(error)")
         }
     }
@@ -365,6 +381,8 @@ extension ContentView {
             do {
                 try viewModel.moveMemo(from: indices, to: destination)
             } catch {
+                self.error = error
+                showErrorAlert = true
                 print("Failed to move memo: \(error)")
             }
         }

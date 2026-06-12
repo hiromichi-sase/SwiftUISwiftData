@@ -22,7 +22,7 @@ struct SettingsView: View {
     @State private var titleLineLimit: Int = .zero
     @State private var titleFontSize: Float = .zero
     @State private var titleLineSpacing: Float = .zero
-    @State private var showResetConfirmationAlert = false
+    @State private var showResetAlert = false
 
     /// ビューを閉じるための環境変数
     @Environment(\.dismiss) private var dismiss
@@ -51,8 +51,8 @@ struct SettingsView: View {
                     toolbarItemTopBarTrailing
                 }
             }
-            .alert(isPresented: $showResetConfirmationAlert) {
-                resetConfirmationAlert
+            .alert(isPresented: $showResetAlert) {
+                resetAlert
             }
         }
     }
@@ -133,7 +133,7 @@ struct SettingsView: View {
         }
     }
 
-    private var resetConfirmationAlert: Alert {
+    private var resetAlert: Alert {
         Alert(
             title: Text("Reset all settings?"),
             primaryButton: .destructive(Text("Reset")) {
@@ -154,7 +154,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Reset", systemImage: "xmark.circle.fill") {
-            showResetConfirmationAlert = true
+            showResetAlert = true
         }
         .disabled(!viewModel.settingsChanged)
         Button("Save", systemImage: "checkmark") {
