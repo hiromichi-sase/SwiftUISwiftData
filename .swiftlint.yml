@@ -1,0 +1,14 @@
+# Directory and file filters
+included:
+  - SwiftUISwiftData
+excluded:
+  - SwiftUISwiftDataTests
+  - SwiftUISwiftDataUITests
+
+# Enabled/disabled rules
+analyzer_rules:
+  - unused_declaration
+  - unused_import
+opt_in_rules:
+  - all
+disabled_rules:
