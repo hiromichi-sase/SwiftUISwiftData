@@ -397,7 +397,7 @@ extension ContentView {
     ///   - source: 移動するメモのインデックス
     ///   - destination: 移動先のインデックス
     private func moveMemo(from source: IndexSet, to destination: Int) {
-        let indices = source.map { $0 }
+        let indices = Array(source)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             do {
