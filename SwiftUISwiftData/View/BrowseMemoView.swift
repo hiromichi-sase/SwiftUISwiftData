@@ -26,7 +26,7 @@ struct BrowseMemoView: View {
     @State private var toastMessage = ""
 
     /// ナビゲーションパスの状態変数
-    @State var path = NavigationPath()
+    @State private var path = NavigationPath()
 
     /// イニシャライザ
     /// - Parameters:

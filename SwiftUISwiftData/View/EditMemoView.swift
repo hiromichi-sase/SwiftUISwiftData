@@ -46,7 +46,7 @@ struct EditMemoView: View {
     @State private var showErrorAlert = false
 
     /// ナビゲーションパスの状態変数
-    @State var path = NavigationPath()
+    @State private var path = NavigationPath()
 
     /// イニシャライザ
     /// - Parameter memo: 編集するメモ（デフォルトはnilで新規作成）
