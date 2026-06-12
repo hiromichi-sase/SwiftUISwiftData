@@ -37,13 +37,15 @@ final class ContentViewModel: ObservableObject {
         self.memos = memoRepository.memos()
     }
 
-    /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list. If an error occurs during the deletion, it throws an error.
+    /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list.
+    /// If an error occurs during the deletion, it throws an error.
     /// - Parameter memos: An array of Memo objects to be deleted.
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
     }
 
-    /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI. If an error occurs during the moving, it throws an error.
+    /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI.
+    /// If an error occurs during the moving, it throws an error.
     /// - Parameters:
     ///   - source: An integer array representing the indices of the memo to be moved.
     ///   - destination: An integer representing the index to which the memos should be moved.

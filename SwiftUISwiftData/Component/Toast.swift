@@ -23,7 +23,8 @@ struct Toast: ViewModifier {
             }
     }
 
-    /// A private computed property that defines the view for the toast message. It displays the message in a styled text view with a background and border. The toast disappears after 2 seconds or when tapped.
+    /// A private computed property that defines the view for the toast message. It displays the message in a styled text view with a background and border.
+    /// The toast disappears after 2 seconds or when tapped.
     private var toastView: some View {
         VStack {
             if !message.isEmpty {

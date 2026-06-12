@@ -23,13 +23,15 @@ final class EditMemoViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    /// Adds a new memo to the memoRepository. This function takes a Memo object as a parameter and attempts to add it to the memoRepository. If an error occurs during the addition, it throws an error.
+    /// Adds a new memo to the memoRepository. This function takes a Memo object as a parameter and attempts to add it to the memoRepository.
+    /// If an error occurs during the addition, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the memoRepository.
     func add(_ memo: Memo) throws {
         try memoRepository.add(memo)
     }
 
-    /// Updates an existing memo in the memoRepository. This function takes a Memo object as a parameter and attempts to update it in the memoRepository. If an error occurs during the update, it throws an error.
+    /// Updates an existing memo in the memoRepository. This function takes a Memo object as a parameter and attempts to update it in the memoRepository.
+    /// If an error occurs during the update, it throws an error.
     /// - Parameters:
     ///   - memo: The Memo object that needs to be updated in the memoRepository.
     ///   - title: The title that needs to be updated.
