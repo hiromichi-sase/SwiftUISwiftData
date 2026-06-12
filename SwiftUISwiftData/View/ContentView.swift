@@ -225,9 +225,9 @@ struct ContentView: View {
                     var transaction = Transaction()
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
-                        self.selection.removeAll()
-                        self.selectedMemoId = newMemo.id
-                        if let proxy = self.scrollViewProxy {
+                        selection.removeAll()
+                        selectedMemoId = newMemo.id
+                        if let proxy = scrollViewProxy {
                             proxy.scrollTo(newMemo.id, anchor: .center)
                         }
                     }
