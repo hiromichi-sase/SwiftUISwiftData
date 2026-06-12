@@ -274,6 +274,7 @@ extension ContentView {
             lineLimit: viewModel.getTitleLineLimit(),
             fontSize: viewModel.getTitleFontSize(),
             lineSpacing: viewModel.getTitleLineSpacing(),
+            showDate: viewModel.getShowDate(),
         ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
@@ -292,6 +293,7 @@ extension ContentView {
         let lineLimit: Int
         let fontSize: Float
         let lineSpacing: Float
+        let showDate: Bool
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -307,13 +309,15 @@ extension ContentView {
                             .lineSpacing(CGFloat(lineSpacing))
                         Spacer()
                     }
-                    HStack(spacing: 0) {
-                        DateText(memo.createdAt, style: .createdAt)
-                        Spacer()
-                        DateText(memo.updatedAt, style: .updatedAt)
+                    if showDate {
+                        HStack(spacing: 0) {
+                            DateText(memo.createdAt, style: .createdAt)
+                            Spacer()
+                            DateText(memo.updatedAt, style: .updatedAt)
+                        }
+                        .padding(.horizontal, 0.0)
+                        .padding(.top, 8.0)
                     }
-                    .padding(.horizontal, 0.0)
-                    .padding(.top, 8.0)
                 }
             }
             .foregroundStyle(.primary)
@@ -338,13 +342,15 @@ extension ContentView {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer()
                 }
-                HStack(spacing: 0) {
-                    DateText(memo.createdAt, style: .createdAt)
-                    Spacer()
-                    DateText(memo.updatedAt, style: .updatedAt)
+                if viewModel.getShowDate() {
+                    HStack(spacing: 0) {
+                        DateText(memo.createdAt, style: .createdAt)
+                        Spacer()
+                        DateText(memo.updatedAt, style: .updatedAt)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8.0)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 8.0)
             }
         }
         .contentShape(Rectangle())
