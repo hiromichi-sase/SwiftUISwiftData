@@ -139,7 +139,7 @@ struct SettingsView: View {
     private var dateSection: some View {
         Section("Date") {
             VStack(alignment: .leading) {
-                Text("Show Date(CreatedAt, UpdatedAt")
+                Text("Show Date(CreatedAt, UpdatedAt)")
                     .font(.system(size: 12.0))
                 Toggle(isOn: $showDate) {
                     Text(showDate ? "ON" : "OFF")
