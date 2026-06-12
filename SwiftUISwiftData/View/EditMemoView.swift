@@ -139,7 +139,7 @@ struct EditMemoView: View {
             .border(showTitleView ? .secondary : .primary)
             .focused($textEditorFocus)
             .overlay(alignment: .topLeading) {
-                if content.isEmpty && !showTitleView {
+                if content.isEmpty, !showTitleView {
                     Text("Input Content")
                         .font(.system(size: CGFloat(viewModel.getContentFontSize())))
                         .allowsHitTesting(false)
