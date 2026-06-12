@@ -20,37 +20,58 @@ final class UserDefaultsRepository {
 
         var defaultValue: Any? {
             switch self {
-            case .hasLink: true
-            case .contentFontSize: Float(16.0)
-            case .contentLineSpacing: Float.zero
-            case .titleLineLimit: 3
-            case .titleFontSize: Float(16.0)
-            case .titleLineSpacing: Float.zero
-            case .showDate: false
+            case .hasLink:
+                true
+            case .contentFontSize:
+                Float(16.0)
+            case .contentLineSpacing:
+                Float.zero
+            case .titleLineLimit:
+                3
+            case .titleFontSize:
+                Float(16.0)
+            case .titleLineSpacing:
+                Float.zero
+            case .showDate:
+                false
             }
         }
 
         var maxValue: Any? {
             switch self {
-            case .hasLink: nil
-            case .contentFontSize: Float(100.0)
-            case .contentLineSpacing: Float(10.0)
-            case .titleLineLimit: 5
-            case .titleFontSize: Float(100.0)
-            case .titleLineSpacing: Float(10.0)
-            case .showDate: nil
+            case .hasLink:
+                nil
+            case .contentFontSize:
+                Float(100.0)
+            case .contentLineSpacing:
+                Float(10.0)
+            case .titleLineLimit:
+                5
+            case .titleFontSize:
+                Float(100.0)
+            case .titleLineSpacing:
+                Float(10.0)
+            case .showDate:
+                nil
             }
         }
 
         var minValue: Any? {
             switch self {
-            case .hasLink: nil
-            case .contentFontSize: Float(5.0)
-            case .contentLineSpacing: Float.zero
-            case .titleLineLimit: 1
-            case .titleFontSize: Float(5.0)
-            case .titleLineSpacing: Float.zero
-            case .showDate: nil
+            case .hasLink:
+                nil
+            case .contentFontSize:
+                Float(5.0)
+            case .contentLineSpacing:
+                Float.zero
+            case .titleLineLimit:
+                1
+            case .titleFontSize:
+                Float(5.0)
+            case .titleLineSpacing:
+                Float.zero
+            case .showDate:
+                nil
             }
         }
     }
