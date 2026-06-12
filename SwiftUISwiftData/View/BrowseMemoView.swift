@@ -40,7 +40,7 @@ struct BrowseMemoView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack {
+            VStack(spacing: 4) {
                 TextView(
                     text: $memo.content,
                     isEditable: false,
@@ -51,6 +51,11 @@ struct BrowseMemoView: View {
                 )
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
+                HStack(spacing: 0) {
+                    DateText(memo.createdAt, style: .createdAt)
+                    Spacer()
+                    DateText(memo.updatedAt, style: .updatedAt)
+                }
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)

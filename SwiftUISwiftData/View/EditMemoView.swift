@@ -60,11 +60,16 @@ struct EditMemoView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 if showTitleView {
                     titleView
                 }
                 contentView
+                HStack(spacing: 0) {
+                    DateText(memo?.createdAt, style: .createdAt)
+                    Spacer()
+                    DateText(memo?.updatedAt, style: .updatedAt)
+                }
             }
             .padding(.top, 0)
             .padding([.horizontal, .bottom], 16)
