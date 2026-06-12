@@ -299,9 +299,9 @@ extension ContentView {
         let onTap: (Memo) -> Void
 
         var body: some View {
-            Button(action: {
+            Button {
                 onTap(memo)
-            }) {
+            } label: {
                 VStack(spacing: 0) {
                     HStack {
                         Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
