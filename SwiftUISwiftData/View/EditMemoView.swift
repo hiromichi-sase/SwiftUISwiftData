@@ -65,10 +65,12 @@ struct EditMemoView: View {
                     titleView
                 }
                 contentView
-                HStack(spacing: 0) {
-                    DateText(memo?.createdAt, style: .createdAt)
-                    Spacer()
-                    DateText(memo?.updatedAt, style: .updatedAt)
+                if viewModel.getShowDate() {
+                    HStack(spacing: 0) {
+                        DateText(memo?.createdAt, style: .createdAt)
+                        Spacer()
+                        DateText(memo?.updatedAt, style: .updatedAt)
+                    }
                 }
             }
             .padding(.top, 0)
