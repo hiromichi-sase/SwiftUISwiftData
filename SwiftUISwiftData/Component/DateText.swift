@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DateText: View {
-    enum style {
+    enum Style {
         case createdAt
         case updatedAt
 
@@ -32,9 +32,9 @@ struct DateText: View {
     }
 
     private let text: String
-    private let style: style
+    private let style: Style
 
-    init(_ date: Date?, style: style) {
+    init(_ date: Date?, style: Style) {
         self.style = style
         if let date {
             self.text = "\(style.text): \(date.formatted(date: .complete, time: .standard))"
