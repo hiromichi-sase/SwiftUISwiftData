@@ -274,6 +274,7 @@ extension ContentView {
             lineLimit: viewModel.getTitleLineLimit(),
             fontSize: viewModel.getTitleFontSize(),
             lineSpacing: viewModel.getTitleLineSpacing(),
+            showDate: viewModel.getShowDate(),
         ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
@@ -292,19 +293,31 @@ extension ContentView {
         let lineLimit: Int
         let fontSize: Float
         let lineSpacing: Float
+        let showDate: Bool
         let onTap: (Memo) -> Void
 
         var body: some View {
             Button(action: {
                 onTap(memo)
             }) {
-                HStack {
-                    Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-                        .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
-                        .lineLimit(lineLimit)
-                        .font(.system(size: CGFloat(fontSize)))
-                        .lineSpacing(CGFloat(lineSpacing))
-                    Spacer()
+                VStack(spacing: 0) {
+                    HStack {
+                        Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
+                            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
+                            .lineLimit(lineLimit)
+                            .font(.system(size: CGFloat(fontSize)))
+                            .lineSpacing(CGFloat(lineSpacing))
+                        Spacer()
+                    }
+                    if showDate {
+                        HStack(spacing: 0) {
+                            DateText(memo.createdAt, style: .createdAt)
+                            Spacer()
+                            DateText(memo.updatedAt, style: .updatedAt)
+                        }
+                        .padding(.horizontal, 0.0)
+                        .padding(.top, 8.0)
+                    }
                 }
             }
             .foregroundStyle(.primary)
@@ -318,14 +331,27 @@ extension ContentView {
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
-            Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-                .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
-                .padding()
-                .lineLimit(viewModel.getTitleLineLimit())
-                .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
-                .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Spacer()
+            VStack(spacing: 0) {
+                HStack {
+                    Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
+                        .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
+                        .padding()
+                        .lineLimit(viewModel.getTitleLineLimit())
+                        .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
+                        .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer()
+                }
+                if viewModel.getShowDate() {
+                    HStack(spacing: 0) {
+                        DateText(memo.createdAt, style: .createdAt)
+                        Spacer()
+                        DateText(memo.updatedAt, style: .updatedAt)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8.0)
+                }
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {

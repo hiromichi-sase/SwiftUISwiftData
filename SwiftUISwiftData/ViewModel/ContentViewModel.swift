@@ -62,4 +62,8 @@ final class ContentViewModel: ObservableObject {
     func getTitleLineSpacing() -> Float {
         userDefaultsRepository.getTitleLineSpacing()
     }
+
+    func getShowDate() -> Bool {
+        userDefaultsRepository.getShowDate()
+    }
 }

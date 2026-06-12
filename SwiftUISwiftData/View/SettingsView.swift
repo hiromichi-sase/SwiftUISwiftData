@@ -22,6 +22,7 @@ struct SettingsView: View {
     @State private var titleLineLimit: Int = .zero
     @State private var titleFontSize: Float = .zero
     @State private var titleLineSpacing: Float = .zero
+    @State private var showDate: Bool = false
     @State private var showResetAlert = false
 
     /// ビューを閉じるための環境変数
@@ -35,6 +36,7 @@ struct SettingsView: View {
         self._titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
         self._titleFontSize = State(initialValue: viewModel.getTitleFontSize())
         self._titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
+        self._showDate = State(initialValue: viewModel.getShowDate())
     }
 
     var body: some View {
@@ -43,6 +45,7 @@ struct SettingsView: View {
                 browseSection
                 contentSection
                 titleSection
+                dateSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -133,6 +136,18 @@ struct SettingsView: View {
         }
     }
 
+    private var dateSection: some View {
+        Section("Date") {
+            VStack(alignment: .leading) {
+                Text("Show Date(CreatedAt, UpdatedAt")
+                    .font(.system(size: 12.0))
+                Toggle(isOn: $showDate) {
+                    Text(showDate ? "ON" : "OFF")
+                }
+            }
+        }
+    }
+
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset all settings?"),
@@ -144,6 +159,7 @@ struct SettingsView: View {
                 titleLineLimit = viewModel.getTitleLineLimit()
                 titleFontSize = viewModel.getTitleFontSize()
                 titleLineSpacing = viewModel.getTitleLineSpacing()
+                showDate = viewModel.getShowDate()
                 settingsSaved = true
             },
             secondaryButton: .cancel()
@@ -164,6 +180,7 @@ struct SettingsView: View {
             viewModel.setTitleLineLimit(titleLineLimit)
             viewModel.setTitleFontSize(titleFontSize)
             viewModel.setTitleLineSpacing(titleLineSpacing)
+            viewModel.setShowDate(showDate)
             settingsSaved = true
             dismiss()
         }
@@ -177,7 +194,8 @@ struct SettingsView: View {
         viewModel.getContentLineSpacing() != contentLineSpacing ||
         viewModel.getTitleLineLimit() != titleLineLimit ||
         viewModel.getTitleFontSize() != titleFontSize ||
-        viewModel.getTitleLineSpacing() != titleLineSpacing
+        viewModel.getTitleLineSpacing() != titleLineSpacing ||
+        viewModel.getShowDate() != showDate
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {

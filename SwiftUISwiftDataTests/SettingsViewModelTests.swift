@@ -65,6 +65,15 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @Test func showDate()  {
+        let showDate = true
+        let dependency = Dependency()
+        dependency.testTarget.setShowDate(showDate)
+
+        #expect(dependency.testTarget.getShowDate() == showDate)
+        dependency.removeUserDefaults()
+    }
+
     @Test func reset() {
         let dependency = Dependency()
         dependency.testTarget.setHasLink(false)
@@ -73,6 +82,7 @@ struct SettingsViewModelTests {
         dependency.testTarget.setTitleLineLimit(5)
         dependency.testTarget.setTitleFontSize(30.0)
         dependency.testTarget.setTitleLineSpacing(5.0)
+        dependency.testTarget.setShowDate(true)
         #expect(dependency.testTarget.settingsChanged)
         dependency.testTarget.reset()
 

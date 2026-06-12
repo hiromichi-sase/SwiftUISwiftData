@@ -66,6 +66,15 @@ struct EditMemoViewModelTests {
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
         dependency.removeUserDefaults()
     }
+
+    @Test func getShowDate() {
+        let hasLink = false
+        let dependency = Dependency()
+        dependency.userDefaultsRepository.setShowDate(hasLink)
+
+        #expect(dependency.testTarget.getShowDate() == hasLink)
+        dependency.removeUserDefaults()
+    }
 }
 
 extension EditMemoViewModelTests {

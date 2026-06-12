@@ -16,6 +16,7 @@ final class UserDefaultsRepository {
         case titleLineLimit
         case titleFontSize
         case titleLineSpacing
+        case showDate
 
         var defaultValue: Any? {
             switch self {
@@ -25,6 +26,7 @@ final class UserDefaultsRepository {
             case .titleLineLimit: 3
             case .titleFontSize: Float(16.0)
             case .titleLineSpacing: Float.zero
+            case .showDate: false
             }
         }
 
@@ -36,6 +38,7 @@ final class UserDefaultsRepository {
             case .titleLineLimit: 5
             case .titleFontSize: Float(100.0)
             case .titleLineSpacing: Float(10.0)
+            case .showDate: nil
             }
         }
 
@@ -47,6 +50,7 @@ final class UserDefaultsRepository {
             case .titleLineLimit: 1
             case .titleFontSize: Float(5.0)
             case .titleLineSpacing: Float.zero
+            case .showDate: nil
             }
         }
     }
@@ -82,6 +86,8 @@ final class UserDefaultsRepository {
                 changedCount += getTitleFontSize() != (value as! Float) ? 1 : .zero
             case .titleLineSpacing:
                 changedCount += getTitleLineSpacing() != (value as! Float) ? 1 : .zero
+            case .showDate:
+                changedCount += getShowDate() != (value as! Bool) ? 1 : .zero
             }
         }
         return changedCount > .zero
@@ -172,5 +178,14 @@ final class UserDefaultsRepository {
     func setTitleLineSpacing(_ value: Float) {
         guard getTitleLineSpacing() != value else { return }
         userDefaults.set(value, forKey: Key.titleLineSpacing.rawValue)
+    }
+
+    func getShowDate() -> Bool {
+        userDefaults.bool(forKey: Key.showDate.rawValue)
+    }
+
+    func setShowDate(_ value: Bool) {
+        guard getShowDate() != value else { return }
+        userDefaults.set(value, forKey: Key.showDate.rawValue)
     }
 }
