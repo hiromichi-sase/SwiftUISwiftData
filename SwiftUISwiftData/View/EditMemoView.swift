@@ -85,7 +85,7 @@ struct EditMemoView: View {
                 closeAlert
             }
             .alert("The Error occured.", isPresented: $showErrorAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(error?.localizedDescription ?? "")
             }
