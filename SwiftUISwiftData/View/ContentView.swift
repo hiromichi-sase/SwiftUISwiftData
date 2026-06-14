@@ -381,10 +381,8 @@ extension ContentView {
         do {
             try viewModel.delete(memos)
 
-            for memo in memos {
-                if selectedMemoId == memo.id {
-                    selectedMemoId = nil
-                }
+            for memo in memos where selectedMemoId == memo.id {
+                selectedMemoId = nil
             }
 
             selection.removeAll()
