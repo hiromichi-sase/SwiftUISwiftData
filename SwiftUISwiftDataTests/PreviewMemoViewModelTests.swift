@@ -5,9 +5,9 @@
 //  Created by Hiromichi Sase on 2026/06/08.
 //
 
+import Foundation
 import Testing
 @testable import SwiftUISwiftData
-import Foundation
 
 struct PreviewMemoViewModelTests {
 

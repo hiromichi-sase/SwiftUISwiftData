@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import SwiftData
 internal import Combine
+import SwiftData
 
 /// EditMemoViewModel is responsible for handling the logic related to adding and updating memos. It interacts with the MemoRepository to perform these operations.
 final class EditMemoViewModel: ObservableObject {

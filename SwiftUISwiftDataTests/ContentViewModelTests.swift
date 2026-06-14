@@ -5,9 +5,9 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
+import Foundation
 import Testing
 @testable import SwiftUISwiftData
-import Foundation
 
 struct ContentViewModelTests {
 

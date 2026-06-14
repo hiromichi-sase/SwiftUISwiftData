@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 /// 設定画面を表示するビュー
 struct SettingsView: View {

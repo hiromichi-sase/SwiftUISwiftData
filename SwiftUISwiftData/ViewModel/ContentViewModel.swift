@@ -5,8 +5,8 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import SwiftData
 internal import Combine
+import SwiftData
 
 /// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
 final class ContentViewModel: ObservableObject {
