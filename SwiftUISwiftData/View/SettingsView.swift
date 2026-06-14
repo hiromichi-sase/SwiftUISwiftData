@@ -8,9 +8,9 @@
 import SwiftData
 import SwiftUI
 
-/// 設定画面を表示するビュー
+/// 設定画面を表示するビュー。
 struct SettingsView: View {
-    /// ビューの状態を管理するViewModel
+    /// ビューの状態を管理するViewModel。
     @ObservedObject var viewModel = SettingsViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
@@ -25,7 +25,7 @@ struct SettingsView: View {
     @State private var showDate: Bool = false
     @State private var showResetAlert = false
 
-    /// ビューを閉じるための環境変数
+    /// ビューを閉じるための環境変数。
     @Environment(\.dismiss) private var dismiss
 
     init(settingsSaved: Binding<Bool>) {
@@ -166,7 +166,7 @@ struct SettingsView: View {
         )
     }
 
-    /// ツールバーの右側のアイテムを生成するビュー
+    /// ツールバーの右側のアイテムを生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Reset", systemImage: "xmark.circle.fill") {
@@ -187,7 +187,7 @@ struct SettingsView: View {
         .disabled(!settingsUpdated)
     }
 
-    /// 設定が更新されたかどうかを判定するプロパティ
+    /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
         viewModel.getHasLink() != hasLink ||
         viewModel.getContentFontSize() != contentFontSize ||

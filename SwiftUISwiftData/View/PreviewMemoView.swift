@@ -8,14 +8,14 @@
 import SwiftData
 import SwiftUI
 
-/// メモの内容をプレビュー表示するビュー
+/// メモの内容をプレビュー表示するビュー。
 struct PreviewMemoView: View {
-    /// ビューモデルの状態変数
+    /// ビューモデルの状態変数。
     @ObservedObject var viewModel = PreviewMemoViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
 
-    /// 表示するメモのデータ
+    /// 表示するメモのデータ。
     var memo: Memo
 
     var body: some View {

@@ -23,7 +23,9 @@ final class MemoRepository {
         modelContext = modelContainer.mainContext
     }
 
-    /// Fetches the list of memos from the model context using the defined fetch descriptor. If an error occurs during fetching, it returns an empty array.
+    /// Fetches the list of memos from the model context using the defined fetch descriptor.
+    ///
+    /// If an error occurs during fetching, it returns an empty array.
     /// - Returns: An array of Memo objects fetched from the model context, sorted by their order.
     func memos() -> [Memo] {
         do {
@@ -33,7 +35,9 @@ final class MemoRepository {
         }
     }
 
-    /// Adds a new memo to the model context. This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
+    /// Adds a new memo to the model context.
+    ///
+    /// This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the model context.
     func add(_ memo: Memo) throws {
         try modelContext.transaction {
@@ -45,7 +49,9 @@ final class MemoRepository {
         }
     }
 
-    /// Updates an existing memo in the model context. This function updates the updatedAt timestamp of the memo and then saves the context. If an error occurs during saving, it throws an error.
+    /// Updates an existing memo in the model context.
+    ///
+    /// This function updates the updatedAt timestamp of the memo and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameters:
     ///   - memo: The Memo object that needs to be updated in the model context.
     ///   - title: The title that needs to be updated.
@@ -58,7 +64,9 @@ final class MemoRepository {
         }
     }
 
-    /// Deletes the specified memos from the model context. This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
+    /// Deletes the specified memos from the model context.
+    ///
+    /// This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memos: An array of Memo objects that need to be deleted from the model context.
     func delete(_ memos: [Memo]) throws {
         try modelContext.transaction {
@@ -72,7 +80,9 @@ final class MemoRepository {
         }
     }
 
-    /// Moves memos from the specified source indices to the destination index in the model context. This function first fetches the current list of memos, sorts them by their order, and then moves the memos based on the provided source and destination indices. After reordering, it updates the order property of each memo to reflect their new positions and saves the context.  If an error occurs during saving, it throws an error.
+    /// Moves memos from the specified source indices to the destination index in the model context.
+    ///
+    /// This function first fetches the current list of memos, sorts them by their order, and then moves the memos based on the provided source and destination indices. After reordering, it updates the order property of each memo to reflect their new positions and saves the context.  If an error occurs during saving, it throws an error.
     /// - Parameters:
     ///   - source: An integer array representing the indices of the memos to be moved from their current positions.
     ///   - destination: An integer representing the index to which the memos should be moved in the list.

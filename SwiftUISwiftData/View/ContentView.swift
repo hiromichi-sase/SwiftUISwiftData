@@ -8,41 +8,41 @@
 import SwiftData
 import SwiftUI
 
-/// メモのリストを表示するビュー
+/// メモのリストを表示するビュー。
 struct ContentView: View {
-    /// ビューの状態を管理するViewModel
+    /// ビューの状態を管理するViewModel。
     @ObservedObject var viewModel = ContentViewModel(
         memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
 
-    /// 編集モードの状態を管理する状態変数
+    /// 編集モードの状態を管理する状態変数。
     @State private var editMode: EditMode = .inactive
-    /// 削除するメモを保持する状態変数
+    /// 削除するメモを保持する状態変数。
     @State private var memoToDelete: Memo?
-    /// 選択されたメモのIDを保持する状態変数
+    /// 選択されたメモのIDを保持する状態変数。
     @State private var selectedMemoId: UUID?
-    /// 複数選択されたメモのIDを保持する状態変数
+    /// 複数選択されたメモのIDを保持する状態変数。
     @State private var selection: Set<UUID> = []
-    /// スクロールビューのプロキシを保持する状態変数
+    /// スクロールビューのプロキシを保持する状態変数。
     @State private var scrollViewProxy: ScrollViewProxy?
-    /// メモを削除するかどうかの確認アラートを表示するフラグ
+    /// メモを削除するかどうかの確認アラートを表示するフラグ。
     @State private var showDeleteAlert = false
-    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ
+    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @State private var showingAddMemo = false
-    /// メモの内容を編集するビューを開くかどうかのフラグ
+    /// メモの内容を編集するビューを開くかどうかのフラグ。
     @State private var openEditMemoView = false
-    /// 設定画面をフルスクリーンカバーで表示するフラグ
+    /// 設定画面をフルスクリーンカバーで表示するフラグ。
     @State private var showSettingsView = false
-    /// トーストメッセージの状態変数
+    /// トーストメッセージの状態変数。
     @State private var toastMessage = ""
-    /// 設定画面で変更保存したかどうかのフラグ
+    /// 設定画面で変更保存したかどうかのフラグ。
     @State private var settingsSaved = false
 
     @State private var error: Error?
     @State private var showErrorAlert = false
 
-    /// イニシャライザ
+    /// イニシャライザ。
     init() {
         self._toastMessage = State(initialValue: "")
         self._error = State(initialValue: nil)
@@ -116,7 +116,7 @@ struct ContentView: View {
         )
     }
 
-    /// メモのリストを表示するビュー
+    /// メモのリストを表示するビュー。
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
@@ -145,12 +145,12 @@ struct ContentView: View {
         }
     }
 
-    /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ
+    /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
         "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(viewModel.memos.count))"
     }
 
-    /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー
+    /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
         if editMode == .inactive {
@@ -168,7 +168,7 @@ struct ContentView: View {
         }
     }
 
-    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー
+    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
@@ -189,7 +189,7 @@ struct ContentView: View {
         }
     }
 
-    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー
+    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
     private var toolbarItemBottomBar: some View {
         if editMode == .inactive {
@@ -206,12 +206,14 @@ struct ContentView: View {
         }
     }
 
-    /// 選択されたメモの配列を返す計算プロパティ
+    /// 選択されたメモの配列を返す計算プロパティ。
     private var selectedMemos: [Memo] {
         viewModel.memos.filter { selection.contains($0.id) }
     }
 
-    /// メモの配列が変更されたときに呼び出される関数。編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
+    /// メモの配列が変更されたときに呼び出される関数。
+    ///
+    /// 編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
     /// - Parameters:
     ///   - oldMemos: 以前のメモの配列
     ///   - newMemos: 新しいメモの配列
@@ -257,7 +259,9 @@ struct ContentView: View {
         }
     }
 
-    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー。これを使用して、メモが更新されたときにビューを更新することができる。
+    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー。
+    ///
+    /// これを使用して、メモが更新されたときにビューを更新することができる。
     private var willSavePublisher: NotificationCenter.Publisher {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
@@ -265,7 +269,9 @@ struct ContentView: View {
 }
 
 extension ContentView {
-    /// 編集モードで表示する行のビューを生成する関数。メモをタップすると選択状態が切り替わるようになっている。
+    /// 編集モードで表示する行のビューを生成する関数。
+    ///
+    /// メモをタップすると選択状態が切り替わるようになっている。
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
@@ -287,7 +293,9 @@ extension ContentView {
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
-    /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
+    /// 非編集モードで表示する行のビューを生成する関数。
+    ///
+    /// メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
     private struct activeMemoRow: View {
         let memo: Memo
         let lineLimit: Int
@@ -326,7 +334,9 @@ extension ContentView {
         }
     }
 
-    /// 非編集モードで表示する行のビューを生成する関数。メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
+    /// 非編集モードで表示する行のビューを生成する関数。
+    ///
+    /// メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
@@ -375,7 +385,9 @@ extension ContentView {
 }
 
 extension ContentView {
-    /// 指定されたメモを削除する関数。削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
+    /// 指定されたメモを削除する関数。
+    ///
+    /// 削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
     /// - Parameter memos: 削除するメモの配列
     private func deleteMemos(_ memos: [Memo]) {
         do {
@@ -394,7 +406,9 @@ extension ContentView {
         }
     }
 
-    /// 指定されたメモを新しい位置に移動する関数。移動後にすべてのメモの順序を再計算して保存する。
+    /// 指定されたメモを新しい位置に移動する関数。
+    ///
+    /// 移動後にすべてのメモの順序を再計算して保存する。
     /// - Parameters:
     ///   - source: 移動するメモのインデックス
     ///   - destination: 移動先のインデックス
