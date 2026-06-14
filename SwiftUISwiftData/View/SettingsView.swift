@@ -40,7 +40,7 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationStack() {
+        NavigationStack {
             Form {
                 browseSection
                 contentSection

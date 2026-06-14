@@ -19,7 +19,7 @@ struct PreviewMemoView: View {
     var memo: Memo
 
     var body: some View {
-        NavigationStack() {
+        NavigationStack {
             VStack(alignment: .leading) {
                 Text(memo.content.isEmpty ? CommonString.noContent : memo.content)
                     .font(.system(size: CGFloat(viewModel.getContentFontSize())))
