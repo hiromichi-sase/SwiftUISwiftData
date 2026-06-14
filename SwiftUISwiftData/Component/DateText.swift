@@ -14,19 +14,19 @@ struct DateText: View {
 
         var text: String {
             switch self {
-            case .createdAt:
-                return "Created at"
-            case .updatedAt:
-                return "Updated at"
+                case .createdAt:
+                    return "Created at"
+                case .updatedAt:
+                    return "Updated at"
             }
         }
 
         var alignment: TextAlignment {
             switch self {
-            case .createdAt:
-                return .leading
-            case .updatedAt:
-                return .trailing
+                case .createdAt:
+                    return .leading
+                case .updatedAt:
+                    return .trailing
             }
         }
     }

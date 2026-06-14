@@ -217,27 +217,27 @@ struct ContentView: View {
     ///   - newMemos: 新しいメモの配列
     private func onChange(oldMemos: [Memo], newMemos: [Memo]) {
         switch editMode {
-        case .active:
-            if newMemos.isEmpty {
-                selection.removeAll()
-                editMode = .inactive
-            }
-        case .inactive:
-            if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
-                DispatchQueue.main.async {
-                    var transaction = Transaction()
-                    transaction.disablesAnimations = true
-                    withTransaction(transaction) {
-                        self.selection.removeAll()
-                        self.selectedMemoId = newMemo.id
-                        if let proxy = self.scrollViewProxy {
-                            proxy.scrollTo(newMemo.id, anchor: .center)
+            case .active:
+                if newMemos.isEmpty {
+                    selection.removeAll()
+                    editMode = .inactive
+                }
+            case .inactive:
+                if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
+                    DispatchQueue.main.async {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            self.selection.removeAll()
+                            self.selectedMemoId = newMemo.id
+                            if let proxy = self.scrollViewProxy {
+                                proxy.scrollTo(newMemo.id, anchor: .center)
+                            }
                         }
                     }
                 }
-            }
-        default:
-            break
+            default:
+                break
         }
     }
 
@@ -245,7 +245,7 @@ struct ContentView: View {
     private var detailView: some View {
         if editMode == .inactive {
             if let id = selectedMemoId,
-               let memo = viewModel.memos.first(where: { $0.id == id }) {
+                let memo = viewModel.memos.first(where: { $0.id == id }) {
                 BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
                     .modelContext(viewModel.modelContext)
                     .id(memo.id)
