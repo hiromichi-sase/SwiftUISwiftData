@@ -58,7 +58,7 @@ final class UserDefaultsRepository {
 
     init(userDefaults: UserDefaults = UserDefaults.standard) {
         self.userDefaults = userDefaults
-        defaultValues.forEach { key, value in
+        for (key, value) in defaultValues {
             userDefaults.register(defaults: [key.rawValue: value])
         }
     }
@@ -71,7 +71,7 @@ final class UserDefaultsRepository {
 
     var settingsChanged: Bool {
         var changedCount = Int.zero
-        defaultValues.forEach { key, value in
+        for (key, value) in defaultValues {
             switch key {
                 case .hasLink:
                     changedCount += getHasLink() != (value as! Bool) ? 1 : .zero
