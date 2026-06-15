@@ -85,7 +85,7 @@ struct TextView: UIViewRepresentable {
         paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
-            .paragraphStyle: paragraphStyle
+            .paragraphStyle: paragraphStyle,
         ]
         return NSAttributedString(
             string: text,
