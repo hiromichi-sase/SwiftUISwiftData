@@ -45,6 +45,7 @@ final class ContentViewModel: ObservableObject {
     ///
     /// If an error occurs during the deletion, it throws an error.
     /// - Parameter memos: An array of Memo objects to be deleted.
+    /// - throws: An error.
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
     }
@@ -55,6 +56,7 @@ final class ContentViewModel: ObservableObject {
     /// - Parameters:
     ///   - source: An integer array representing the indices of the memo to be moved.
     ///   - destination: An integer representing the index to which the memos should be moved.
+    /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try memoRepository.moveMemo(from: source, to: destination)
     }

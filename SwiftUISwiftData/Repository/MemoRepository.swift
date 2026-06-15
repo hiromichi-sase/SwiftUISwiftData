@@ -38,6 +38,7 @@ final class MemoRepository {
     ///
     /// This function sets the createdAt and updatedAt timestamps, assigns an order based on the current count of memos, and then saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memo: The Memo object that needs to be added to the model context.
+    /// - throws: An error.
     func add(_ memo: Memo) throws {
         try modelContext.transaction {
             let now = Date()
@@ -55,6 +56,7 @@ final class MemoRepository {
     ///   - memo: The Memo object that needs to be updated in the model context.
     ///   - title: The title that needs to be updated.
     ///   - content: The content that needs to be updated.
+    /// - throws: An error.
     func update(_ memo: Memo, title: String, content: String) throws {
         try modelContext.transaction {
             memo.title = title
@@ -67,6 +69,7 @@ final class MemoRepository {
     ///
     /// This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
     /// - Parameter memos: An array of Memo objects that need to be deleted from the model context.
+    /// - throws: An error.
     func delete(_ memos: [Memo]) throws {
         try modelContext.transaction {
             for memo in memos {
@@ -85,6 +88,7 @@ final class MemoRepository {
     /// - Parameters:
     ///   - source: An integer array representing the indices of the memos to be moved from their current positions.
     ///   - destination: An integer representing the index to which the memos should be moved in the list.
+    /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try modelContext.transaction {
             let memos = self.memos()

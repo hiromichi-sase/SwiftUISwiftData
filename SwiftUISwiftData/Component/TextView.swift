@@ -25,6 +25,8 @@ struct TextView: UIViewRepresentable {
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
     ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
     ///   - hasLink: An optional default flag indicating where the TextView has links.
+    ///   - contentFontSize: A value to indicate the font size of the content.
+    ///   - contentLineSpacing: A value to indicate the line spacing of the content.
     init(
         text: Binding<String>,
         isEditable: Bool,
