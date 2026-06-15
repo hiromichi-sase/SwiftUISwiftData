@@ -11,41 +11,50 @@ import SwiftUI
 /// メモの内容を編集するビュー。
 struct EditMemoView: View {
     /// ビューモデルの状態変数。
-    @ObservedObject var viewModel = EditMemoViewModel(
+    @ObservedObject
+    var viewModel = EditMemoViewModel(
         memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
-
     /// ビューを閉じるための環境変数。
-    @Environment(\.dismiss) private var dismiss
-
+    @Environment(\.dismiss)
+    private var dismiss
     /// 編集中のメモ。
-    @State private var memo: Memo?
-
+    @State
+    private var memo: Memo?
     /// タイトルと内容の状態変数。
-    @State private var title: String
+    @State
+    private var title: String
     /// 保存前のタイトルを保持する状態変数。
-    @State private var titleToStore: String = ""
+    @State
+    private var titleToStore: String = ""
     /// 内容の状態変数。
-    @State private var content: String
+    @State
+    private var content: String
     /// 変更を破棄して閉じるかどうかの確認アラートを表示するフラグ。
-    @State private var showCloseAlert = false
+    @State
+    private var showCloseAlert = false
     /// タイトル編集ビューを表示するフラグ。
-    @State private var showTitleView = false
+    @State
+    private var showTitleView = false
     /// トーストメッセージの状態変数。
-    @State private var toastMessage = ""
-
+    @State
+    private var toastMessage = ""
     /// テキストエディターのフォーカス状態。
-    @FocusState private var textEditorFocus: Bool
-    @State private var textSelection: TextSelection?
+    @FocusState
+    private var textEditorFocus: Bool
+    @State
+    private var textSelection: TextSelection?
     /// テキストフィールドのフォーカス状態。
-    @FocusState private var textFieldFocus: Bool
-
-    @State private var error: Error?
-    @State private var showErrorAlert = false
-
+    @FocusState
+    private var textFieldFocus: Bool
+    @State
+    private var error: Error?
+    @State
+    private var showErrorAlert = false
     /// ナビゲーションパスの状態変数。
-    @State var path = NavigationPath()
+    @State
+    var path = NavigationPath()
 
     /// イニシャライザ。
     /// - Parameter memo: 編集するメモ（デフォルトはnilで新規作成）
@@ -166,7 +175,8 @@ struct EditMemoView: View {
         Button("Close", systemImage: "xmark") {
             if memoUpdated {
                 showCloseAlert = true
-            } else {
+            }
+            else {
                 dismiss()
             }
         }
@@ -191,7 +201,8 @@ struct EditMemoView: View {
                 do {
                     try viewModel.update(memo, title: title, content: content)
                     toastMessage = "Successfully saved!"
-                } catch {
+                }
+                catch {
                     self.error = error
                     showErrorAlert = true
 
@@ -199,14 +210,16 @@ struct EditMemoView: View {
                     memo.content = oldContent
                     print("Failed to update memo: \(error)")
                 }
-            } else {
+            }
+            else {
                 let memo = Memo(title: title, content: content)
 
                 do {
                     try viewModel.add(memo)
                     self.memo = memo
                     toastMessage = "Successfully saved!"
-                } catch {
+                }
+                catch {
                     self.error = error
                     showErrorAlert = true
                     print("Failed to add memo: \(error)")
@@ -222,7 +235,8 @@ struct EditMemoView: View {
     private var memoUpdated: Bool {
         if let memo {
             memo.title != titleToStore || memo.content != content
-        } else {
+        }
+        else {
             !titleToStore.isEmpty || !content.isEmpty
         }
     }

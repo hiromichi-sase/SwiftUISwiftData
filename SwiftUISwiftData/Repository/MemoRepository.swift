@@ -29,7 +29,8 @@ final class MemoRepository {
     func memos() -> [Memo] {
         do {
             return try modelContext.fetch(descriptor)
-        } catch {
+        }
+        catch {
             return []
         }
     }

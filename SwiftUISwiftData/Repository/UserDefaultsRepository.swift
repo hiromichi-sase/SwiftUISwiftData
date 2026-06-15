@@ -115,7 +115,8 @@ final class UserDefaultsRepository {
 
     private func range<T: Equatable>(for key: UserDefaultsRepository.Key) -> ClosedRange<T> {
         guard let minValue = key.minValue as? T,
-            let maxValue = key.maxValue as? T else {
+            let maxValue = key.maxValue as? T
+        else {
             fatalError("\(key) has no minValue or maxValue")
         }
         return minValue ... maxValue

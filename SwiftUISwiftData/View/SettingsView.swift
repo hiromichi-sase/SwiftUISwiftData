@@ -11,22 +11,31 @@ import SwiftUI
 /// 設定画面を表示するビュー。
 struct SettingsView: View {
     /// ビューの状態を管理するViewModel。
-    @ObservedObject var viewModel = SettingsViewModel(
+    @ObservedObject
+    var viewModel = SettingsViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-
-    @Binding private var settingsSaved: Bool
-    @State private var hasLink: Bool = false
-    @State private var contentFontSize: Float = .zero
-    @State private var contentLineSpacing: Float = .zero
-    @State private var titleLineLimit: Int = .zero
-    @State private var titleFontSize: Float = .zero
-    @State private var titleLineSpacing: Float = .zero
-    @State private var showDate: Bool = false
-    @State private var showResetAlert = false
-
+    @Binding
+    private var settingsSaved: Bool
+    @State
+    private var hasLink: Bool = false
+    @State
+    private var contentFontSize: Float = .zero
+    @State
+    private var contentLineSpacing: Float = .zero
+    @State
+    private var titleLineLimit: Int = .zero
+    @State
+    private var titleFontSize: Float = .zero
+    @State
+    private var titleLineSpacing: Float = .zero
+    @State
+    private var showDate: Bool = false
+    @State
+    private var showResetAlert = false
     /// ビューを閉じるための環境変数。
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)
+    private var dismiss
 
     init(settingsSaved: Binding<Bool>) {
         self._settingsSaved = settingsSaved
@@ -202,9 +211,11 @@ struct SettingsView: View {
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
         if let range = range as? ClosedRange<Int> {
             "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
-        } else if let range = range as? ClosedRange<Float> {
+        }
+        else if let range = range as? ClosedRange<Float> {
             "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
-        } else {
+        }
+        else {
             ""
         }
     }

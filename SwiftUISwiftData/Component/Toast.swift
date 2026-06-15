@@ -14,7 +14,8 @@ struct Toast: ViewModifier {
     /// The message to be displayed in the toast.
     ///
     /// When this string is empty, the toast will not be shown.
-    @Binding var message: String
+    @Binding
+    var message: String
 
     /// Defines the content and behavior of the view modifier.
     ///

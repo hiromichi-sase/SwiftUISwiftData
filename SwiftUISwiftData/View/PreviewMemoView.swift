@@ -11,10 +11,10 @@ import SwiftUI
 /// メモの内容をプレビュー表示するビュー。
 struct PreviewMemoView: View {
     /// ビューモデルの状態変数。
-    @ObservedObject var viewModel = PreviewMemoViewModel(
+    @ObservedObject
+    var viewModel = PreviewMemoViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-
     /// 表示するメモのデータ。
     var memo: Memo
 

@@ -11,22 +11,25 @@ import SwiftUI
 /// メモの内容を表示するビュー。
 struct BrowseMemoView: View {
     /// ビューの状態を管理するViewModel。
-    @ObservedObject var viewModel = BrowseMemoViewModel(
+    @ObservedObject
+    var viewModel = BrowseMemoViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-
     /// 表示するメモ。
-    @State private var memo: Memo
+    @State
+    private var memo: Memo
     /// 編集画面を開くかどうかのフラグ。
-    @State private var openEditMemoView = false
-
+    @State
+    private var openEditMemoView = false
     /// 編集画面を表示するかどうかのフラグ。
-    @State private var showingEditMemo = false
+    @State
+    private var showingEditMemo = false
     /// トーストメッセージの状態変数。
-    @State private var toastMessage = ""
-
+    @State
+    private var toastMessage = ""
     /// ナビゲーションパスの状態変数。
-    @State var path = NavigationPath()
+    @State
+    var path = NavigationPath()
 
     /// イニシャライザ。
     /// - Parameters:

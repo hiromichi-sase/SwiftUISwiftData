@@ -11,36 +11,48 @@ import SwiftUI
 /// メモのリストを表示するビュー。
 struct ContentView: View {
     /// ビューの状態を管理するViewModel。
-    @ObservedObject var viewModel = ContentViewModel(
+    @ObservedObject
+    var viewModel = ContentViewModel(
         memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
-
     /// 編集モードの状態を管理する状態変数。
-    @State private var editMode: EditMode = .inactive
+    @State
+    private var editMode: EditMode = .inactive
     /// 削除するメモを保持する状態変数。
-    @State private var memoToDelete: Memo?
+    @State
+    private var memoToDelete: Memo?
     /// 選択されたメモのIDを保持する状態変数。
-    @State private var selectedMemoId: UUID?
+    @State
+    private var selectedMemoId: UUID?
     /// 複数選択されたメモのIDを保持する状態変数。
-    @State private var selection: Set<UUID> = []
+    @State
+    private var selection: Set<UUID> = []
     /// スクロールビューのプロキシを保持する状態変数。
-    @State private var scrollViewProxy: ScrollViewProxy?
+    @State
+    private var scrollViewProxy: ScrollViewProxy?
     /// メモを削除するかどうかの確認アラートを表示するフラグ。
-    @State private var showDeleteAlert = false
+    @State
+    private var showDeleteAlert = false
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
-    @State private var showingAddMemo = false
+    @State
+    private var showingAddMemo = false
     /// メモの内容を編集するビューを開くかどうかのフラグ。
-    @State private var openEditMemoView = false
+    @State
+    private var openEditMemoView = false
     /// 設定画面をフルスクリーンカバーで表示するフラグ。
-    @State private var showSettingsView = false
+    @State
+    private var showSettingsView = false
     /// トーストメッセージの状態変数。
-    @State private var toastMessage = ""
+    @State
+    private var toastMessage = ""
     /// 設定画面で変更保存したかどうかのフラグ。
-    @State private var settingsSaved = false
-
-    @State private var error: Error?
-    @State private var showErrorAlert = false
+    @State
+    private var settingsSaved = false
+    @State
+    private var error: Error?
+    @State
+    private var showErrorAlert = false
 
     /// イニシャライザ。
     init() {
@@ -107,7 +119,8 @@ struct ContentView: View {
                 if editMode == .active {
                     guard !selectedMemos.isEmpty else { return }
                     deleteMemos(selectedMemos)
-                } else {
+                }
+                else {
                     guard let memoToDelete = memoToDelete else { return }
                     deleteMemos([memoToDelete])
                 }
@@ -129,7 +142,8 @@ struct ContentView: View {
                         }
                         .onMove(perform: moveMemo)
                     }
-                } else {
+                }
+                else {
                     List(selection: $selectedMemoId) {
                         ForEach(viewModel.memos) { memo in
                             inactiveRow(for: memo)
@@ -160,7 +174,8 @@ struct ContentView: View {
                     editMode = .active
                 }
             }
-        } else {
+        }
+        else {
             Button("Done", systemImage: "checkmark") {
                 selection.removeAll()
                 editMode = .inactive
@@ -175,7 +190,8 @@ struct ContentView: View {
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
-        } else {
+        }
+        else {
             Menu("Menu", systemImage: "ellipsis.circle") {
                 Button("Select All", systemImage: "checkmark.circle") {
                     selection = Set(viewModel.memos.map { $0.id })
@@ -197,7 +213,8 @@ struct ContentView: View {
             Button("Settings", systemImage: "gearshape.fill") {
                 showSettingsView = true
             }
-        } else {
+        }
+        else {
             Spacer()
             Button("Delete", systemImage: "trash") {
                 showDeleteAlert = true
@@ -247,14 +264,17 @@ struct ContentView: View {
     private var detailView: some View {
         if editMode == .inactive {
             if let id = selectedMemoId,
-                let memo = viewModel.memos.first(where: { $0.id == id }) {
+                let memo = viewModel.memos.first(where: { $0.id == id })
+            {
                 BrowseMemoView(memo: memo, openEditMemoView: openEditMemoView)
                     .modelContext(viewModel.modelContext)
                     .id(memo.id)
-            } else {
+            }
+            else {
                 Text("Select a memo")
             }
-        } else {
+        }
+        else {
             Text("Select memos to edit or delete")
         }
     }
@@ -284,7 +304,8 @@ extension ContentView {
         ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
-            } else {
+            }
+            else {
                 selection.insert(memo.id)
             }
         }
@@ -399,7 +420,8 @@ extension ContentView {
 
             selection.removeAll()
             toastMessage = "Successfully deleted!"
-        } catch {
+        }
+        catch {
             self.error = error
             showErrorAlert = true
             print("Failed to delete memos: \(error)")
@@ -418,7 +440,8 @@ extension ContentView {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             do {
                 try viewModel.moveMemo(from: indices, to: destination)
-            } catch {
+            }
+            catch {
                 self.error = error
                 showErrorAlert = true
                 print("Failed to move memo: \(error)")

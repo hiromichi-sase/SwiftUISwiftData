@@ -10,7 +10,8 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct EditMemoViewModelTests {
-    @Test func addMemo() async throws {
+    @Test
+    func addMemo() async throws {
         let dependency = Dependency()
         let addedTitle = "Added Title"
         let addedContent = "Added Content"
@@ -29,7 +30,8 @@ struct EditMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func updateMemo() async throws {
+    @Test
+    func updateMemo() async throws {
         let dependency = Dependency()
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try await dependency.testTarget.add(memo)
@@ -48,7 +50,8 @@ struct EditMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getContentFontSize() {
+    @Test
+    func getContentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
@@ -57,7 +60,8 @@ struct EditMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getContentLineSpacing() {
+    @Test
+    func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
@@ -66,7 +70,8 @@ struct EditMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getShowDate() {
+    @Test
+    func getShowDate() {
         let hasLink = false
         let dependency = Dependency()
         dependency.userDefaultsRepository.setShowDate(hasLink)

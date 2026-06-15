@@ -11,8 +11,8 @@ import SwiftData
 /// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
 final class ContentViewModel: ObservableObject {
     /// An array of Memo objects that are published to update the UI when changes occur.
-    @Published var memos: [Memo] = []
-
+    @Published
+    var memos: [Memo] = []
     /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
     ///
     /// It provides functions to add and update memos in the memoRepository.

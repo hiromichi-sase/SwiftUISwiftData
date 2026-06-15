@@ -38,7 +38,8 @@ struct DateText: View {
         self.style = style
         if let date {
             self.text = "\(style.text): \(date.formatted(date: .complete, time: .standard))"
-        } else {
+        }
+        else {
             self.text = ""
         }
     }

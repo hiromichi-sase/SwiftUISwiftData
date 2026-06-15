@@ -10,7 +10,8 @@ import SwiftUI
 /// A SwiftUI wrapper for UITextView that supports multi-line text input and editing.
 struct TextView: UIViewRepresentable {
     /// The text content of the TextView, bound to a SwiftUI state variable.
-    @Binding var text: String
+    @Binding
+    var text: String
     /// A flag indicating whether the TextView is editable or read-only.
     var isEditable: Bool
     /// An optional default text to display when the TextView is empty and not editable.

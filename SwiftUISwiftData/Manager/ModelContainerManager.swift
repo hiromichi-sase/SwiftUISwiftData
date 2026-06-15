@@ -25,7 +25,8 @@ final class ModelContainerManager {
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
             modelContainer.mainContext.autosaveEnabled = false
-        } catch {
+        }
+        catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }
