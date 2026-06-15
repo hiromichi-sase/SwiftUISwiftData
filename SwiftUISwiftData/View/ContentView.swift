@@ -275,7 +275,7 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        activeMemoRow(
+        ActiveMemoRow(
             memo: memo,
             lineLimit: viewModel.getTitleLineLimit(),
             fontSize: viewModel.getTitleFontSize(),
@@ -296,7 +296,7 @@ extension ContentView {
     /// 非編集モードで表示する行のビューを生成する関数。
     ///
     /// メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
-    private struct activeMemoRow: View {
+    private struct ActiveMemoRow: View {
         let memo: Memo
         let lineLimit: Int
         let fontSize: Float
