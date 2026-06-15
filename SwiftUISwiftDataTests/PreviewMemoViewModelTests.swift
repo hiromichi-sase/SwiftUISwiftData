@@ -10,7 +10,6 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct PreviewMemoViewModelTests {
-
     @Test func getContentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
@@ -28,7 +27,6 @@ struct PreviewMemoViewModelTests {
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
         dependency.removeUserDefaults()
     }
-
 }
 
 extension PreviewMemoViewModelTests {

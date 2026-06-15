@@ -10,7 +10,6 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct SettingsViewModelTests {
-
     @Test func hasLink() {
         let hasLink = true
         let dependency = Dependency()

@@ -10,7 +10,6 @@ import SwiftData
 
 /// MemoRepository is responsible for managing the CRUD operations for Memo entities, including fetching, adding, updating, deleting, and reordering memos in the SwiftData model context.
 final class MemoRepository {
-
     /// The model context used for performing SwiftData operations, accessed from the model container.
     var modelContext: ModelContext
     /// The model container that holds the data model for the application, allowing access to the main context for performing data operations.
@@ -99,5 +98,4 @@ final class MemoRepository {
             }
         }
     }
-
 }

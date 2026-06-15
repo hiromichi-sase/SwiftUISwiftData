@@ -10,7 +10,6 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct BrowseMemoViewModelTests {
-
     @Test func getHasLink() {
         let hasLink = true
         let dependency = Dependency()

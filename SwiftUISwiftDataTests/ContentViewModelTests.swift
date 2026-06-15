@@ -10,7 +10,6 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct ContentViewModelTests {
-
     @Test func deleteMemos() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
@@ -102,7 +101,6 @@ struct ContentViewModelTests {
         #expect(dependency.testTarget.getShowDate() == hasLink)
         dependency.removeUserDefaults()
     }
-
 }
 
 extension ContentViewModelTests {

@@ -10,7 +10,6 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct EditMemoViewModelTests {
-
     @Test func addMemo() async throws {
         let dependency = Dependency()
         let addedTitle = "Added Title"
