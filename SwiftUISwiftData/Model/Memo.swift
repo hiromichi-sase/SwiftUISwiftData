@@ -45,7 +45,7 @@ final class Memo: Identifiable, Hashable {
     ///   - rhs: Memo(右側)
     /// - Returns: 両方のMemoのidが等しい場合にtrueを返す。
     static func == (lhs: Memo, rhs: Memo) -> Bool {
-        return lhs.id == rhs.id
+        lhs.id == rhs.id
     }
 
     /// Hashableプロトコルの実装。
