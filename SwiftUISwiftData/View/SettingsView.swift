@@ -189,13 +189,14 @@ struct SettingsView: View {
 
     /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
-        viewModel.getHasLink() != hasLink ||
-        viewModel.getContentFontSize() != contentFontSize ||
-        viewModel.getContentLineSpacing() != contentLineSpacing ||
-        viewModel.getTitleLineLimit() != titleLineLimit ||
-        viewModel.getTitleFontSize() != titleFontSize ||
-        viewModel.getTitleLineSpacing() != titleLineSpacing ||
-        viewModel.getShowDate() != showDate
+        guard viewModel.getHasLink() == hasLink else { return true }
+        guard viewModel.getContentFontSize() == contentFontSize else { return true }
+        guard viewModel.getContentLineSpacing() == contentLineSpacing else { return true }
+        guard viewModel.getTitleLineLimit() == titleLineLimit else { return true }
+        guard viewModel.getTitleFontSize() == titleFontSize else { return true }
+        guard viewModel.getTitleLineSpacing() == titleLineSpacing else { return true }
+        guard viewModel.getShowDate() == showDate else { return true }
+        return false
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
