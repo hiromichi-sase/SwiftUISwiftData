@@ -74,27 +74,48 @@ final class UserDefaultsRepository {
         for (key, value) in defaultValues {
             switch key {
                 case .hasLink:
-                    changedCount += getHasLink() != (value as! Bool) ? 1 : .zero
+                    guard let value = value as? Bool else {
+                        fatalError("Failed to get Bool value")
+                    }
+                    changedCount += getHasLink() != value ? 1 : .zero
                 case .contentFontSize:
-                    changedCount += getContentFontSize() != (value as! Float) ? 1 : .zero
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getContentFontSize() != value ? 1 : .zero
                 case .contentLineSpacing:
-                    changedCount += getContentLineSpacing() != (value as! Float) ? 1 : .zero
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getContentLineSpacing() != value ? 1 : .zero
                 case .titleLineLimit:
-                    changedCount += getTitleLineLimit() != (value as! Int) ? 1 : .zero
+                    guard let value = value as? Int else {
+                        fatalError("Failed to get Int value")
+                    }
+                    changedCount += getTitleLineLimit() != value ? 1 : .zero
                 case .titleFontSize:
-                    changedCount += getTitleFontSize() != (value as! Float) ? 1 : .zero
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getTitleFontSize() != value ? 1 : .zero
                 case .titleLineSpacing:
-                    changedCount += getTitleLineSpacing() != (value as! Float) ? 1 : .zero
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getTitleLineSpacing() != value ? 1 : .zero
                 case .showDate:
-                    changedCount += getShowDate() != (value as! Bool) ? 1 : .zero
+                    guard let value = value as? Bool else {
+                        fatalError("Failed to get Bool value")
+                    }
+                    changedCount += getShowDate() != value ? 1 : .zero
             }
         }
         return changedCount > .zero
     }
 
     private func range<T: Equatable>(for key: UserDefaultsRepository.Key) -> ClosedRange<T> {
-        guard let minValue = key.minValue as! T?,
-            let maxValue = key.maxValue as! T? else {
+        guard let minValue = key.minValue as? T,
+            let maxValue = key.maxValue as? T else {
             fatalError("\(key) has no minValue or maxValue")
         }
         return minValue ... maxValue

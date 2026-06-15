@@ -86,7 +86,10 @@ extension EditMemoViewModelTests {
 
         init() {
             memoRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            userDefaults = UserDefaults(suiteName: EditMemoViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: EditMemoViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 memoRepository: memoRepository,

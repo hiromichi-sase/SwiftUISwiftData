@@ -37,7 +37,10 @@ extension PreviewMemoViewModelTests {
         private static let suiteName: String = "Test"
 
         init() {
-            userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 userDefaultsRepository: userDefaultsRepository

@@ -97,7 +97,10 @@ extension SettingsViewModelTests {
         private static let suiteName: String = "Test"
 
         init() {
-            userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             testTarget = .init(
                 userDefaultsRepository: .init(userDefaults: userDefaults),
                 suiteName: SettingsViewModelTests.Dependency.suiteName

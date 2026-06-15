@@ -55,7 +55,10 @@ extension BrowseMemoViewModelTests {
         private static let suiteName: String = "Test"
 
         init() {
-            userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 userDefaultsRepository: userDefaultsRepository
