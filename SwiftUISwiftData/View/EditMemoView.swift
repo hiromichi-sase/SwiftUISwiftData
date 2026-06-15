@@ -185,8 +185,8 @@ struct EditMemoView: View {
         .disabled(showTitleView)
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {
-                let _title = memo.title
-                let _content = memo.content
+                let oldTitle = memo.title
+                let oldContent = memo.content
 
                 do {
                     try viewModel.update(memo, title: title, content: content)
@@ -195,8 +195,8 @@ struct EditMemoView: View {
                     self.error = error
                     showErrorAlert = true
 
-                    memo.title = _title
-                    memo.content = _content
+                    memo.title = oldTitle
+                    memo.content = oldContent
                     print("Failed to update memo: \(error)")
                 }
             } else {
