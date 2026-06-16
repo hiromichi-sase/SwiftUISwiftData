@@ -135,6 +135,7 @@ struct EditMemoView: View {
             }
             .imageScale(.large)
         }
+        .padding(.bottom, 4)
     }
 
     /// 内容編集ビュー。
