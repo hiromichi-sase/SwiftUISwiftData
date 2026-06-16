@@ -5,13 +5,14 @@
 //  Created by Hiromichi Sase on 2026/06/08.
 //
 
-import Testing
-@testable import SwiftUISwiftData
 import Foundation
+import Testing
+
+@testable import SwiftUISwiftData
 
 struct SettingsViewModelTests {
-
-    @Test func hasLink() {
+    @Test
+    func hasLink() {
         let hasLink = true
         let dependency = Dependency()
         dependency.testTarget.setHasLink(hasLink)
@@ -20,7 +21,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func contentFontSize() {
+    @Test
+    func contentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.testTarget.setContentFontSize(contentFontSize)
@@ -29,7 +31,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func contentLineSpacing() {
+    @Test
+    func contentLineSpacing() {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.testTarget.setContentLineSpacing(contentLineSpacing)
@@ -38,7 +41,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func titleLineLimit() {
+    @Test
+    func titleLineLimit() {
         let titleLineLimit = 3
         let dependency = Dependency()
         dependency.testTarget.setTitleLineLimit(titleLineLimit)
@@ -47,7 +51,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func titleFontSize() {
+    @Test
+    func titleFontSize() {
         let titleFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.testTarget.setTitleFontSize(titleFontSize)
@@ -56,7 +61,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func titleLineSpacing() {
+    @Test
+    func titleLineSpacing() {
         let titleLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.testTarget.setTitleLineSpacing(titleLineSpacing)
@@ -65,7 +71,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func showDate() {
+    @Test
+    func showDate() {
         let showDate = true
         let dependency = Dependency()
         dependency.testTarget.setShowDate(showDate)
@@ -74,7 +81,8 @@ struct SettingsViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func reset() {
+    @Test
+    func reset() {
         let dependency = Dependency()
         dependency.testTarget.setHasLink(false)
         dependency.testTarget.setContentFontSize(30.0)
@@ -98,7 +106,10 @@ extension SettingsViewModelTests {
         private static let suiteName: String = "Test"
 
         init() {
-            userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             testTarget = .init(
                 userDefaultsRepository: .init(userDefaults: userDefaults),
                 suiteName: SettingsViewModelTests.Dependency.suiteName

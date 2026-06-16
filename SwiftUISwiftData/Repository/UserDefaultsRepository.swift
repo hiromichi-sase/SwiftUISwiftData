@@ -8,7 +8,6 @@
 import Foundation
 
 final class UserDefaultsRepository {
-
     enum Key: String, CaseIterable {
         case hasLink
         case contentFontSize
@@ -20,37 +19,37 @@ final class UserDefaultsRepository {
 
         var defaultValue: Any? {
             switch self {
-            case .hasLink: true
-            case .contentFontSize: Float(16.0)
-            case .contentLineSpacing: Float.zero
-            case .titleLineLimit: 3
-            case .titleFontSize: Float(16.0)
-            case .titleLineSpacing: Float.zero
-            case .showDate: false
+                case .hasLink: true
+                case .contentFontSize: Float(16.0)
+                case .contentLineSpacing: Float.zero
+                case .titleLineLimit: 3
+                case .titleFontSize: Float(16.0)
+                case .titleLineSpacing: Float.zero
+                case .showDate: false
             }
         }
 
         var maxValue: Any? {
             switch self {
-            case .hasLink: nil
-            case .contentFontSize: Float(100.0)
-            case .contentLineSpacing: Float(10.0)
-            case .titleLineLimit: 5
-            case .titleFontSize: Float(100.0)
-            case .titleLineSpacing: Float(10.0)
-            case .showDate: nil
+                case .hasLink: nil
+                case .contentFontSize: Float(100.0)
+                case .contentLineSpacing: Float(10.0)
+                case .titleLineLimit: 5
+                case .titleFontSize: Float(100.0)
+                case .titleLineSpacing: Float(10.0)
+                case .showDate: nil
             }
         }
 
         var minValue: Any? {
             switch self {
-            case .hasLink: nil
-            case .contentFontSize: Float(5.0)
-            case .contentLineSpacing: Float.zero
-            case .titleLineLimit: 1
-            case .titleFontSize: Float(5.0)
-            case .titleLineSpacing: Float.zero
-            case .showDate: nil
+                case .hasLink: nil
+                case .contentFontSize: Float(5.0)
+                case .contentLineSpacing: Float.zero
+                case .titleLineLimit: 1
+                case .titleFontSize: Float(5.0)
+                case .titleLineSpacing: Float.zero
+                case .showDate: nil
             }
         }
     }
@@ -59,7 +58,7 @@ final class UserDefaultsRepository {
 
     init(userDefaults: UserDefaults = UserDefaults.standard) {
         self.userDefaults = userDefaults
-        defaultValues.forEach { key, value in
+        for (key, value) in defaultValues {
             userDefaults.register(defaults: [key.rawValue: value])
         }
     }
@@ -72,30 +71,52 @@ final class UserDefaultsRepository {
 
     var settingsChanged: Bool {
         var changedCount = Int.zero
-        defaultValues.forEach { key, value in
+        for (key, value) in defaultValues {
             switch key {
-            case .hasLink:
-                changedCount += getHasLink() != (value as! Bool) ? 1 : .zero
-            case .contentFontSize:
-                changedCount += getContentFontSize() != (value as! Float) ? 1 : .zero
-            case .contentLineSpacing:
-                changedCount += getContentLineSpacing() != (value as! Float) ? 1 : .zero
-            case .titleLineLimit:
-                changedCount += getTitleLineLimit() != (value as! Int) ? 1 : .zero
-            case .titleFontSize:
-                changedCount += getTitleFontSize() != (value as! Float) ? 1 : .zero
-            case .titleLineSpacing:
-                changedCount += getTitleLineSpacing() != (value as! Float) ? 1 : .zero
-            case .showDate:
-                changedCount += getShowDate() != (value as! Bool) ? 1 : .zero
+                case .hasLink:
+                    guard let value = value as? Bool else {
+                        fatalError("Failed to get Bool value")
+                    }
+                    changedCount += getHasLink() != value ? 1 : .zero
+                case .contentFontSize:
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getContentFontSize() != value ? 1 : .zero
+                case .contentLineSpacing:
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getContentLineSpacing() != value ? 1 : .zero
+                case .titleLineLimit:
+                    guard let value = value as? Int else {
+                        fatalError("Failed to get Int value")
+                    }
+                    changedCount += getTitleLineLimit() != value ? 1 : .zero
+                case .titleFontSize:
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getTitleFontSize() != value ? 1 : .zero
+                case .titleLineSpacing:
+                    guard let value = value as? Float else {
+                        fatalError("Failed to get Float value")
+                    }
+                    changedCount += getTitleLineSpacing() != value ? 1 : .zero
+                case .showDate:
+                    guard let value = value as? Bool else {
+                        fatalError("Failed to get Bool value")
+                    }
+                    changedCount += getShowDate() != value ? 1 : .zero
             }
         }
         return changedCount > .zero
     }
 
     private func range<T: Equatable>(for key: UserDefaultsRepository.Key) -> ClosedRange<T> {
-        guard let minValue = key.minValue as! T?,
-              let maxValue = key.maxValue as! T? else {
+        guard let minValue = key.minValue as? T,
+            let maxValue = key.maxValue as? T
+        else {
             fatalError("\(key) has no minValue or maxValue")
         }
         return minValue ... maxValue

@@ -5,17 +5,21 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import SwiftData
 internal import Combine
+import SwiftData
 
 /// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
 final class ContentViewModel: ObservableObject {
     /// An array of Memo objects that are published to update the UI when changes occur.
-    @Published var memos: [Memo] = []
-
-    /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application. It provides functions to add and update memos in the memoRepository.
+    @Published
+    var memos: [Memo] = []
+    /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
+    ///
+    /// It provides functions to add and update memos in the memoRepository.
     private let memoRepository: MemoRepository
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application. It provides functions in the userDefaultsRepository.
+    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
+    ///
+    /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
 
     init(
@@ -37,16 +41,22 @@ final class ContentViewModel: ObservableObject {
         self.memos = memoRepository.memos()
     }
 
-    /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list. If an error occurs during the deletion, it throws an error.
+    /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list.
+    ///
+    /// If an error occurs during the deletion, it throws an error.
     /// - Parameter memos: An array of Memo objects to be deleted.
+    /// - throws: An error.
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
     }
 
-    /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI. If an error occurs during the moving, it throws an error.
+    /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI.
+    ///
+    /// If an error occurs during the moving, it throws an error.
     /// - Parameters:
     ///   - source: An integer array representing the indices of the memo to be moved.
     ///   - destination: An integer representing the index to which the memos should be moved.
+    /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try memoRepository.moveMemo(from: source, to: destination)
     }

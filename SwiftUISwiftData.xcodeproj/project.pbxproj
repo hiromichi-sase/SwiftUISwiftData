@@ -208,6 +208,9 @@
 			);
 			mainGroup = 45D8A3D72FA8836A003C123D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4569ECFF2FDE500300CCFCAC /* XCRemoteSwiftPackageReference "swift-format" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45D8A3E12FA8836A003C123D /* Products */;
 			projectDirPath = "";
@@ -597,6 +600,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4569ECFF2FDE500300CCFCAC /* XCRemoteSwiftPackageReference "swift-format" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftlang/swift-format";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 602.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 45D8A3D82FA8836A003C123D /* Project object */;
 }

@@ -5,13 +5,14 @@
 //  Created by Hiromichi Sase on 2026/06/08.
 //
 
-import Testing
-@testable import SwiftUISwiftData
 import Foundation
+import Testing
+
+@testable import SwiftUISwiftData
 
 struct PreviewMemoViewModelTests {
-
-    @Test func getContentFontSize() {
+    @Test
+    func getContentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
@@ -20,7 +21,8 @@ struct PreviewMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getContentLineSpacing() {
+    @Test
+    func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
@@ -28,7 +30,6 @@ struct PreviewMemoViewModelTests {
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
         dependency.removeUserDefaults()
     }
-
 }
 
 extension PreviewMemoViewModelTests {
@@ -39,7 +40,10 @@ extension PreviewMemoViewModelTests {
         private static let suiteName: String = "Test"
 
         init() {
-            userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 userDefaultsRepository: userDefaultsRepository

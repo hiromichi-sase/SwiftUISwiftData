@@ -8,37 +8,38 @@
 import SwiftUI
 
 struct DateText: View {
-    enum style {
+    enum Style {
         case createdAt
         case updatedAt
 
         var text: String {
             switch self {
-            case .createdAt:
-                return "Created at"
-            case .updatedAt:
-                return "Updated at"
+                case .createdAt:
+                    return "Created at"
+                case .updatedAt:
+                    return "Updated at"
             }
         }
 
         var alignment: TextAlignment {
             switch self {
-            case .createdAt:
-                return .leading
-            case .updatedAt:
-                return .trailing
+                case .createdAt:
+                    return .leading
+                case .updatedAt:
+                    return .trailing
             }
         }
     }
 
     private let text: String
-    private let style: style
+    private let style: Style
 
-    init(_ date: Date?, style: style) {
+    init(_ date: Date?, style: Style) {
         self.style = style
         if let date {
             self.text = "\(style.text): \(date.formatted(date: .complete, time: .standard))"
-        } else {
+        }
+        else {
             self.text = ""
         }
     }

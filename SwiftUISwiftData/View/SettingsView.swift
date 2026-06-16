@@ -5,28 +5,37 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
-/// 設定画面を表示するビュー
+/// 設定画面を表示するビュー。
 struct SettingsView: View {
-    /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = SettingsViewModel(
+    /// ビューの状態を管理するViewModel。
+    @ObservedObject
+    var viewModel = SettingsViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-
-    @Binding private var settingsSaved: Bool
-    @State private var hasLink: Bool = false
-    @State private var contentFontSize: Float = .zero
-    @State private var contentLineSpacing: Float = .zero
-    @State private var titleLineLimit: Int = .zero
-    @State private var titleFontSize: Float = .zero
-    @State private var titleLineSpacing: Float = .zero
-    @State private var showDate: Bool = false
-    @State private var showResetAlert = false
-
-    /// ビューを閉じるための環境変数
-    @Environment(\.dismiss) private var dismiss
+    @Binding
+    private var settingsSaved: Bool
+    @State
+    private var hasLink: Bool = false
+    @State
+    private var contentFontSize: Float = .zero
+    @State
+    private var contentLineSpacing: Float = .zero
+    @State
+    private var titleLineLimit: Int = .zero
+    @State
+    private var titleFontSize: Float = .zero
+    @State
+    private var titleLineSpacing: Float = .zero
+    @State
+    private var showDate: Bool = false
+    @State
+    private var showResetAlert = false
+    /// ビューを閉じるための環境変数。
+    @Environment(\.dismiss)
+    private var dismiss
 
     init(settingsSaved: Binding<Bool>) {
         self._settingsSaved = settingsSaved
@@ -40,7 +49,7 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationStack() {
+        NavigationStack {
             Form {
                 browseSection
                 contentSection
@@ -166,7 +175,7 @@ struct SettingsView: View {
         )
     }
 
-    /// ツールバーの右側のアイテムを生成するビュー
+    /// ツールバーの右側のアイテムを生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Reset", systemImage: "xmark.circle.fill") {
@@ -187,27 +196,29 @@ struct SettingsView: View {
         .disabled(!settingsUpdated)
     }
 
-    /// 設定が更新されたかどうかを判定するプロパティ
+    /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
-        viewModel.getHasLink() != hasLink ||
-        viewModel.getContentFontSize() != contentFontSize ||
-        viewModel.getContentLineSpacing() != contentLineSpacing ||
-        viewModel.getTitleLineLimit() != titleLineLimit ||
-        viewModel.getTitleFontSize() != titleFontSize ||
-        viewModel.getTitleLineSpacing() != titleLineSpacing ||
-        viewModel.getShowDate() != showDate
+        guard viewModel.getHasLink() == hasLink else { return true }
+        guard viewModel.getContentFontSize() == contentFontSize else { return true }
+        guard viewModel.getContentLineSpacing() == contentLineSpacing else { return true }
+        guard viewModel.getTitleLineLimit() == titleLineLimit else { return true }
+        guard viewModel.getTitleFontSize() == titleFontSize else { return true }
+        guard viewModel.getTitleLineSpacing() == titleLineSpacing else { return true }
+        guard viewModel.getShowDate() == showDate else { return true }
+        return false
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
         if let range = range as? ClosedRange<Int> {
             "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
-        } else if let range = range as? ClosedRange<Float> {
+        }
+        else if let range = range as? ClosedRange<Float> {
             "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
-        } else {
+        }
+        else {
             ""
         }
     }
-
 }
 
 #Preview {

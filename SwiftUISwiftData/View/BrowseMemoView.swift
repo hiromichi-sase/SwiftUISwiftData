@@ -8,27 +8,30 @@
 import SwiftData
 import SwiftUI
 
-/// メモの内容を表示するビュー
+/// メモの内容を表示するビュー。
 struct BrowseMemoView: View {
-    /// ビューの状態を管理するViewModel
-    @ObservedObject var viewModel = BrowseMemoViewModel(
+    /// ビューの状態を管理するViewModel。
+    @ObservedObject
+    var viewModel = BrowseMemoViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
+    /// 表示するメモ。
+    @State
+    private var memo: Memo
+    /// 編集画面を開くかどうかのフラグ。
+    @State
+    private var openEditMemoView = false
+    /// 編集画面を表示するかどうかのフラグ。
+    @State
+    private var showingEditMemo = false
+    /// トーストメッセージの状態変数。
+    @State
+    private var toastMessage = ""
+    /// ナビゲーションパスの状態変数。
+    @State
+    var path = NavigationPath()
 
-    /// 表示するメモ
-    @State private var memo: Memo
-    /// 編集画面を開くかどうかのフラグ
-    @State private var openEditMemoView = false
-
-    /// 編集画面を表示するかどうかのフラグ
-    @State private var showingEditMemo = false
-    /// トーストメッセージの状態変数
-    @State private var toastMessage = ""
-
-    /// ナビゲーションパスの状態変数
-    @State var path = NavigationPath()
-
-    /// イニシャライザ
+    /// イニシャライザ。
     /// - Parameters:
     ///   - memo: 表示するメモ
     ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
@@ -81,7 +84,9 @@ struct BrowseMemoView: View {
         }
     }
 
-    /// ツールバーの右側のアイテムを定義するビュー。タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
+    /// ツールバーの右側のアイテムを定義するビュー。
+    ///
+    /// タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if !memo.title.isEmpty {

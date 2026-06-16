@@ -5,13 +5,14 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import Testing
-@testable import SwiftUISwiftData
 import Foundation
+import Testing
+
+@testable import SwiftUISwiftData
 
 struct ContentViewModelTests {
-
-    @Test func deleteMemos() async throws {
+    @Test
+    func deleteMemos() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
@@ -37,7 +38,8 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func moveMemo() async throws {
+    @Test
+    func moveMemo() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
@@ -67,7 +69,8 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleLineLimit() {
+    @Test
+    func getTitleLineLimit() {
         let titleLineLimit = 3
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
@@ -76,7 +79,8 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleFontSize() {
+    @Test
+    func getTitleFontSize() {
         let titleFontSize = Float(16.0)
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
@@ -85,7 +89,8 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getTitleLineSpacing() {
+    @Test
+    func getTitleLineSpacing() {
         let titleLineSpacing = Float.zero
         let dependency = Dependency()
         dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
@@ -94,7 +99,8 @@ struct ContentViewModelTests {
         dependency.removeUserDefaults()
     }
 
-    @Test func getShowDate() {
+    @Test
+    func getShowDate() {
         let hasLink = false
         let dependency = Dependency()
         dependency.userDefaultsRepository.setShowDate(hasLink)
@@ -102,7 +108,6 @@ struct ContentViewModelTests {
         #expect(dependency.testTarget.getShowDate() == hasLink)
         dependency.removeUserDefaults()
     }
-
 }
 
 extension ContentViewModelTests {
@@ -115,7 +120,10 @@ extension ContentViewModelTests {
 
         init() {
             memoRepository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            userDefaults = UserDefaults(suiteName: ContentViewModelTests.Dependency.suiteName)!
+            guard let userDefaults = UserDefaults(suiteName: ContentViewModelTests.Dependency.suiteName) else {
+                fatalError("Could not create UserDefaults")
+            }
+            self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 memoRepository: memoRepository,
