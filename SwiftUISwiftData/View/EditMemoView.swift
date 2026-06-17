@@ -116,11 +116,12 @@ struct EditMemoView: View {
     /// タイトル編集ビュー。
     private var titleView: some View {
         HStack(spacing: 8) {
-            Button("", systemImage: "xmark") {
+            Button("", systemImage: "menubar.arrow.up.rectangle") {
                 title = titleToStore
                 showTitleView = false
             }
             .imageScale(.large)
+            .tint(.primary)
             TextField("Input Title", text: $title)
                 .padding(6)
                 .border(.primary)
