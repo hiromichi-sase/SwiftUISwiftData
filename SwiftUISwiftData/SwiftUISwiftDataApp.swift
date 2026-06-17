@@ -14,6 +14,9 @@ struct SwiftUISwiftDataApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    UITextField.appearance().clearButtonMode = .whileEditing
+                }
         }
         .modelContainer(ModelContainerManager.shared.modelContainer)
     }

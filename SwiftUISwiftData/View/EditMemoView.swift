@@ -131,10 +131,6 @@ struct EditMemoView: View {
                     titleToStore = title
                     showTitleView = false
                 }
-            Button("", systemImage: "eraser") {
-                title = ""
-            }
-            .imageScale(.large)
         }
         .padding(.bottom, 4)
     }
