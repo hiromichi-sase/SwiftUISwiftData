@@ -116,12 +116,6 @@ struct EditMemoView: View {
     /// タイトル編集ビュー。
     private var titleView: some View {
         HStack(spacing: 8) {
-            Button("", systemImage: "menubar.arrow.up.rectangle") {
-                title = titleToStore
-                showTitleView = false
-            }
-            .imageScale(.large)
-            .tint(.primary)
             TextField("Input Title", text: $title)
                 .padding(6)
                 .border(.primary)
@@ -187,10 +181,14 @@ struct EditMemoView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
-            showTitleView = true
-            textFieldFocus = true
+            showTitleView.toggle()
+            if showTitleView {
+                textFieldFocus = true
+            }
+            else {
+                title = titleToStore
+            }
         }
-        .disabled(showTitleView)
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {
                 let oldTitle = memo.title
