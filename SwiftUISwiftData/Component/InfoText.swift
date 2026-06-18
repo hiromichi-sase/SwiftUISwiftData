@@ -36,3 +36,12 @@ struct InfoText {
         }
     }
 }
+
+#Preview("countView") {
+    InfoText.countView(content: "abcdefg")
+}
+
+#Preview("dateView") {
+    let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
+    InfoText.dateView(for: memo)
+}
