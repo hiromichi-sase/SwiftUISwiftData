@@ -55,10 +55,33 @@ struct BrowseMemoView: View {
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
                 if viewModel.getShowInfo() {
-                    HStack(spacing: 0) {
-                        InfoText(memo.createdAt, style: .createdAt)
-                        Spacer()
-                        InfoText(memo.updatedAt, style: .updatedAt)
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 0) {
+                            InfoText(
+                                memo.content.count,
+                                style: .contentCharacters
+                            )
+                            Text("   ")
+                                .font(.system(size: 8.0))
+                            InfoText(
+                                memo.content.components(separatedBy: .newlines).count,
+                                style: .contentLineNumbers
+                            )
+                            Spacer()
+                        }
+                        HStack(spacing: 0) {
+                            InfoText(
+                                memo.createdAt,
+                                style: .createdAt
+                            )
+                            Text("   ")
+                                .font(.system(size: 8.0))
+                            InfoText(
+                                memo.updatedAt,
+                                style: .updatedAt
+                            )
+                            Spacer()
+                        }
                     }
                 }
             }
