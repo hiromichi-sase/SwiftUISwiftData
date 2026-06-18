@@ -31,7 +31,7 @@ final class BrowseMemoViewModel: ObservableObject {
         userDefaultsRepository.getContentLineSpacing()
     }
 
-    func getShowDate() -> Bool {
-        userDefaultsRepository.getShowDate()
+    func getShowInfo() -> Bool {
+        userDefaultsRepository.getShowInfo()
     }
 }

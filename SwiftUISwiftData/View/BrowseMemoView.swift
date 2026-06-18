@@ -54,7 +54,7 @@ struct BrowseMemoView: View {
                 )
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
-                if viewModel.getShowDate() {
+                if viewModel.getShowInfo() {
                     HStack(spacing: 0) {
                         DateText(memo.createdAt, style: .createdAt)
                         Spacer()

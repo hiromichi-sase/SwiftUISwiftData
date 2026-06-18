@@ -300,7 +300,7 @@ extension ContentView {
             lineLimit: viewModel.getTitleLineLimit(),
             fontSize: viewModel.getTitleFontSize(),
             lineSpacing: viewModel.getTitleLineSpacing(),
-            showDate: viewModel.getShowDate(),
+            showInfo: viewModel.getShowInfo(),
         ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
@@ -322,7 +322,7 @@ extension ContentView {
         let lineLimit: Int
         let fontSize: Float
         let lineSpacing: Float
-        let showDate: Bool
+        let showInfo: Bool
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -338,7 +338,7 @@ extension ContentView {
                             .lineSpacing(CGFloat(lineSpacing))
                         Spacer()
                     }
-                    if showDate {
+                    if showInfo {
                         HStack(spacing: 0) {
                             DateText(memo.createdAt, style: .createdAt)
                             Spacer()
@@ -373,7 +373,7 @@ extension ContentView {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer()
                 }
-                if viewModel.getShowDate() {
+                if viewModel.getShowInfo() {
                     HStack(spacing: 0) {
                         DateText(memo.createdAt, style: .createdAt)
                         Spacer()

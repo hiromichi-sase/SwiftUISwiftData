@@ -74,7 +74,7 @@ struct EditMemoView: View {
                     titleView
                 }
                 contentView
-                if memo != nil, viewModel.getShowDate(), !showTitleView {
+                if memo != nil, viewModel.getShowInfo(), !showTitleView {
                     HStack(spacing: 0) {
                         DateText(memo?.createdAt, style: .createdAt)
                         Spacer()

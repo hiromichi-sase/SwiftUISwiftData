@@ -72,12 +72,12 @@ struct EditMemoViewModelTests {
     }
 
     @Test
-    func getShowDate() {
+    func getShowInfo() {
         let hasLink = false
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setShowDate(hasLink)
+        dependency.userDefaultsRepository.setShowInfo(hasLink)
 
-        #expect(dependency.testTarget.getShowDate() == hasLink)
+        #expect(dependency.testTarget.getShowInfo() == hasLink)
         dependency.removeUserDefaults()
     }
 }

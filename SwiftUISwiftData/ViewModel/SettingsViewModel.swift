@@ -100,11 +100,11 @@ final class SettingsViewModel: ObservableObject {
         userDefaultsRepository.setTitleLineSpacing(value)
     }
 
-    func getShowDate() -> Bool {
-        userDefaultsRepository.getShowDate()
+    func getShowInfo() -> Bool {
+        userDefaultsRepository.getShowInfo()
     }
 
-    func setShowDate(_ value: Bool) {
-        userDefaultsRepository.setShowDate(value)
+    func setShowInfo(_ value: Bool) {
+        userDefaultsRepository.setShowInfo(value)
     }
 }
