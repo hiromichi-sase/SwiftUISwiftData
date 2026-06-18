@@ -340,9 +340,9 @@ extension ContentView {
                     }
                     if showInfo {
                         HStack(spacing: 0) {
-                            DateText(memo.createdAt, style: .createdAt)
+                            InfoText(memo.createdAt, style: .createdAt)
                             Spacer()
-                            DateText(memo.updatedAt, style: .updatedAt)
+                            InfoText(memo.updatedAt, style: .updatedAt)
                         }
                         .padding(.horizontal, 0.0)
                         .padding(.top, 8.0)
@@ -375,9 +375,9 @@ extension ContentView {
                 }
                 if viewModel.getShowInfo() {
                     HStack(spacing: 0) {
-                        DateText(memo.createdAt, style: .createdAt)
+                        InfoText(memo.createdAt, style: .createdAt)
                         Spacer()
-                        DateText(memo.updatedAt, style: .updatedAt)
+                        InfoText(memo.updatedAt, style: .updatedAt)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 8.0)

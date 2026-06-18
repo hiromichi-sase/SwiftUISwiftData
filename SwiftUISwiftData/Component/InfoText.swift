@@ -1,5 +1,5 @@
 //
-//  DateText.swift
+//  InfoText.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/12.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DateText: View {
+struct InfoText: View {
     enum Style {
         case createdAt
         case updatedAt

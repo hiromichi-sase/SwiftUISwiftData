@@ -76,9 +76,9 @@ struct EditMemoView: View {
                 contentView
                 if memo != nil, viewModel.getShowInfo(), !showTitleView {
                     HStack(spacing: 0) {
-                        DateText(memo?.createdAt, style: .createdAt)
+                        InfoText(memo?.createdAt, style: .createdAt)
                         Spacer()
-                        DateText(memo?.updatedAt, style: .updatedAt)
+                        InfoText(memo?.updatedAt, style: .updatedAt)
                     }
                 }
             }
