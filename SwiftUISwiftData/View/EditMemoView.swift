@@ -75,7 +75,7 @@ struct EditMemoView: View {
                 }
                 contentView
                 if viewModel.getShowInfo(), !showTitleView {
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: content)
                         if let memo {
                             InfoText.dateView(for: memo)
@@ -83,7 +83,7 @@ struct EditMemoView: View {
                     }
                 }
             }
-            .padding(.top, 0)
+            .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
             .onAppear {
                 textEditorFocus = true
@@ -241,7 +241,7 @@ struct EditMemoView: View {
 
 #Preview {
     NavigationStack {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
+        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
         EditMemoView(memo: memo)
     }
 }

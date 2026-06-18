@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InfoText {
     static func countView(content: String) -> some View {
-        HStack(spacing: 0) {
+        HStack(spacing: .zero) {
             Text("Content Characters: \(content.count)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
@@ -23,7 +23,7 @@ struct InfoText {
     }
 
     static func dateView(for memo: Memo) -> some View {
-        HStack(spacing: 0) {
+        HStack(spacing: .zero) {
             Text("Created at: \(memo.createdAt.formatted(date: .complete, time: .standard))")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)

@@ -55,13 +55,13 @@ struct BrowseMemoView: View {
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
                 if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)
                         InfoText.dateView(for: memo)
                     }
                 }
             }
-            .padding(.top, 0)
+            .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
             .onAppear {
                 if openEditMemoView {
@@ -102,7 +102,7 @@ struct BrowseMemoView: View {
 
 #Preview {
     NavigationStack {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
+        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
         BrowseMemoView(memo: memo)
     }
 }

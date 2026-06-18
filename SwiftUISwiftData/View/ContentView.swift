@@ -63,7 +63,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             list
-                .contentMargins([.top], 0)
+                .contentMargins([.top], .zero)
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
                 }
@@ -303,18 +303,18 @@ extension ContentView {
                 selection.insert(memo.id)
             }
         }) {
-            VStack(spacing: 0) {
+            VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
                     Spacer()
                 }
                 if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)
                         InfoText.dateView(for: memo)
                     }
                     .padding(.top)
-                    .padding(.horizontal, 0.0)
+                    .padding(.horizontal, .zero)
                 }
             }
         }
@@ -333,7 +333,7 @@ extension ContentView {
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
         HStack {
-            VStack(spacing: 0) {
+            VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
                         .padding()
@@ -341,7 +341,7 @@ extension ContentView {
                     Spacer()
                 }
                 if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)
                         InfoText.dateView(for: memo)
                     }

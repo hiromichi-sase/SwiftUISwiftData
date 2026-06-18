@@ -37,7 +37,7 @@ struct PreviewMemoView: View {
 
 #Preview {
     NavigationStack {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: 0)
+        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
         PreviewMemoView(memo: memo)
     }
 }
