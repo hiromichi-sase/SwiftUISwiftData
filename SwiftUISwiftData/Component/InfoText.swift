@@ -11,6 +11,8 @@ struct InfoText: View {
     enum Style {
         case createdAt
         case updatedAt
+        case contentCharacters
+        case contentLineNumbers
 
         var text: String {
             switch self {
@@ -18,6 +20,10 @@ struct InfoText: View {
                     return "Created at"
                 case .updatedAt:
                     return "Updated at"
+                case .contentCharacters:
+                    return "Content Characters"
+                case .contentLineNumbers:
+                    return "Content Line Numbers"
             }
         }
 
@@ -27,6 +33,10 @@ struct InfoText: View {
                     return .leading
                 case .updatedAt:
                     return .trailing
+                case .contentCharacters:
+                    return .leading
+                case .contentLineNumbers:
+                    return .leading
             }
         }
     }
@@ -42,6 +52,11 @@ struct InfoText: View {
         else {
             self.text = ""
         }
+    }
+
+    init(_ intValue: Int, style: Style) {
+        self.style = style
+        self.text = "\(style.text): \(String(intValue))"
     }
 
     var body: some View {
