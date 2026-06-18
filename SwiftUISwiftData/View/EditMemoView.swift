@@ -74,8 +74,13 @@ struct EditMemoView: View {
                     titleView
                 }
                 contentView
-                if viewModel.getShowInfo() {
-                    infoView
+                if viewModel.getShowInfo(), !showTitleView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        InfoText.countView(content: content)
+                        if let memo {
+                            InfoText.dateView(for: memo)
+                        }
+                    }
                 }
             }
             .padding(.top, 0)
@@ -143,17 +148,6 @@ struct EditMemoView: View {
                         .padding(6)
                 }
             }
-    }
-
-    private var infoView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if !showTitleView {
-                InfoText.countView(content: content)
-                if let memo {
-                    InfoText.dateView(for: memo)
-                }
-            }
-        }
     }
 
     private var closeAlert: Alert {
