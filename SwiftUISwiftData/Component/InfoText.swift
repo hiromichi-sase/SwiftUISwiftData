@@ -26,19 +26,6 @@ struct InfoText: View {
                     return "Content Line Numbers"
             }
         }
-
-        var alignment: TextAlignment {
-            switch self {
-                case .createdAt:
-                    return .leading
-                case .updatedAt:
-                    return .trailing
-                case .contentCharacters:
-                    return .leading
-                case .contentLineNumbers:
-                    return .leading
-            }
-        }
     }
 
     private let text: String
@@ -62,6 +49,6 @@ struct InfoText: View {
     var body: some View {
         Text(text)
             .font(.system(size: 8.0))
-            .multilineTextAlignment(self.style.alignment)
+            .multilineTextAlignment(.leading)
     }
 }
