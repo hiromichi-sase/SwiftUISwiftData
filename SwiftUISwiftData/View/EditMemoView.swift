@@ -133,10 +133,10 @@ struct EditMemoView: View {
     private var contentView: some View {
         TextEditor(text: $content, selection: $textSelection)
             .disabled(showTitleView)
-            .foregroundStyle(showTitleView ? .secondary : .primary)
+            .foregroundStyle(showTitleView ? Color(UIColor.quaternaryLabel) : .primary)
             .font(.system(size: CGFloat(viewModel.getContentFontSize())))
             .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
-            .border(showTitleView ? .secondary : .primary)
+            .border(showTitleView ? Color(UIColor.quaternaryLabel) : .primary)
             .focused($textEditorFocus)
             .overlay(alignment: .topLeading) {
                 if content.isEmpty && !showTitleView {
