@@ -340,32 +340,8 @@ extension ContentView {
                     }
                     if showInfo {
                         VStack(alignment: .leading, spacing: 0) {
-                            HStack(spacing: 0) {
-                                InfoText(
-                                    memo.content.count,
-                                    style: .contentCharacters
-                                )
-                                Spacer()
-                                    .frame(width: 8.0)
-                                InfoText(
-                                    memo.content.components(separatedBy: .newlines).count,
-                                    style: .contentLineNumbers
-                                )
-                                Spacer()
-                            }
-                            HStack(spacing: 0) {
-                                InfoText(
-                                    memo.createdAt,
-                                    style: .createdAt
-                                )
-                                Spacer()
-                                    .frame(width: 8.0)
-                                InfoText(
-                                    memo.updatedAt,
-                                    style: .updatedAt
-                                )
-                                Spacer()
-                            }
+                            InfoText.countView(content: memo.content)
+                            InfoText.dateView(for: memo)
                         }
                         .padding(.top)
                         .padding(.horizontal, 0.0)
@@ -398,32 +374,8 @@ extension ContentView {
                 }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 0) {
-                            InfoText(
-                                memo.content.count,
-                                style: .contentCharacters
-                            )
-                            Spacer()
-                                .frame(width: 8.0)
-                            InfoText(
-                                memo.content.components(separatedBy: .newlines).count,
-                                style: .contentLineNumbers
-                            )
-                            Spacer()
-                        }
-                        HStack(spacing: 0) {
-                            InfoText(
-                                memo.createdAt,
-                                style: .createdAt
-                            )
-                            Spacer()
-                                .frame(width: 8.0)
-                            InfoText(
-                                memo.updatedAt,
-                                style: .updatedAt
-                            )
-                            Spacer()
-                        }
+                        InfoText.countView(content: memo.content)
+                        InfoText.dateView(for: memo)
                     }
                     .padding(.bottom)
                     .padding(.horizontal)

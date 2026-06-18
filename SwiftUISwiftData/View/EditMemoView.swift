@@ -148,43 +148,11 @@ struct EditMemoView: View {
     private var infoView: some View {
         VStack(alignment: .leading, spacing: 0) {
             if !showTitleView {
-                countView
-                if memo != nil {
-                    dateView
+                InfoText.countView(content: content)
+                if let memo {
+                    InfoText.dateView(for: memo)
                 }
             }
-        }
-    }
-
-    private var countView: some View {
-        HStack(spacing: 0) {
-            InfoText(
-                content.count,
-                style: .contentCharacters
-            )
-            Spacer()
-                .frame(width: 8.0)
-            InfoText(
-                content.components(separatedBy: .newlines).count,
-                style: .contentLineNumbers
-            )
-            Spacer()
-        }
-    }
-
-    private var dateView: some View {
-        HStack(spacing: 0) {
-            InfoText(
-                memo?.createdAt,
-                style: .createdAt
-            )
-            Spacer()
-                .frame(width: 8.0)
-            InfoText(
-                memo?.updatedAt,
-                style: .updatedAt
-            )
-            Spacer()
         }
     }
 

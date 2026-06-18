@@ -7,48 +7,32 @@
 
 import SwiftUI
 
-struct InfoText: View {
-    enum Style {
-        case createdAt
-        case updatedAt
-        case contentCharacters
-        case contentLineNumbers
-
-        var text: String {
-            switch self {
-                case .createdAt:
-                    return "Created at"
-                case .updatedAt:
-                    return "Updated at"
-                case .contentCharacters:
-                    return "Content Characters"
-                case .contentLineNumbers:
-                    return "Content Line Numbers"
-            }
+struct InfoText {
+    static func countView(content: String) -> some View {
+        HStack(spacing: 0) {
+            Text("Content Characters: \(content.count)")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
+                .frame(width: 8.0)
+            Text("Content Line Numbers: \(content.components(separatedBy: .newlines).count)")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
         }
     }
 
-    private let text: String
-    private let style: Style
-
-    init(_ date: Date?, style: Style) {
-        self.style = style
-        if let date {
-            self.text = "\(style.text): \(date.formatted(date: .complete, time: .standard))"
+    static func dateView(for memo: Memo) -> some View {
+        HStack(spacing: 0) {
+            Text("Created at: \(memo.createdAt.formatted(date: .complete, time: .standard))")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
+                .frame(width: 8.0)
+            Text("Updated at: \(memo.updatedAt.formatted(date: .complete, time: .standard))")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
         }
-        else {
-            self.text = ""
-        }
-    }
-
-    init(_ intValue: Int, style: Style) {
-        self.style = style
-        self.text = "\(style.text): \(String(intValue))"
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 8.0))
-            .multilineTextAlignment(.leading)
     }
 }
