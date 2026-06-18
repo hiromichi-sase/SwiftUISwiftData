@@ -74,12 +74,8 @@ struct EditMemoView: View {
                     titleView
                 }
                 contentView
-                if memo != nil, viewModel.getShowInfo(), !showTitleView {
-                    HStack(spacing: 0) {
-                        InfoText(memo?.createdAt, style: .createdAt)
-                        Spacer()
-                        InfoText(memo?.updatedAt, style: .updatedAt)
-                    }
+                if viewModel.getShowInfo() {
+                    infoView
                 }
             }
             .padding(.top, 0)
@@ -147,6 +143,49 @@ struct EditMemoView: View {
                         .padding(6)
                 }
             }
+    }
+
+    private var infoView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if !showTitleView {
+                countView
+                if memo != nil {
+                    dateView
+                }
+            }
+        }
+    }
+
+    private var countView: some View {
+        HStack(spacing: 0) {
+            InfoText(
+                content.count,
+                style: .contentCharacters
+            )
+            Spacer()
+                .frame(width: 8.0)
+            InfoText(
+                content.components(separatedBy: .newlines).count,
+                style: .contentLineNumbers
+            )
+            Spacer()
+        }
+    }
+
+    private var dateView: some View {
+        HStack(spacing: 0) {
+            InfoText(
+                memo?.createdAt,
+                style: .createdAt
+            )
+            Spacer()
+                .frame(width: 8.0)
+            InfoText(
+                memo?.updatedAt,
+                style: .updatedAt
+            )
+            Spacer()
+        }
     }
 
     private var closeAlert: Alert {
