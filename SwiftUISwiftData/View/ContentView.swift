@@ -295,63 +295,35 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        ActiveMemoRow(
-            memo: memo,
-            lineLimit: viewModel.getTitleLineLimit(),
-            fontSize: viewModel.getTitleFontSize(),
-            lineSpacing: viewModel.getTitleLineSpacing(),
-            showInfo: viewModel.getShowInfo(),
-        ) { memo in
+        Button(action: {
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             }
             else {
                 selection.insert(memo.id)
             }
+        }) {
+            VStack(spacing: 0) {
+                HStack {
+                    rowText(for: memo)
+                    Spacer()
+                }
+                if viewModel.getShowInfo() {
+                    VStack(alignment: .leading, spacing: 0) {
+                        InfoText.countView(content: memo.content)
+                        InfoText.dateView(for: memo)
+                    }
+                    .padding(.top)
+                    .padding(.horizontal, 0.0)
+                }
+            }
         }
+        .foregroundStyle(.primary)
+        .padding()
+        .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
-    }
-
-    /// 非編集モードで表示する行のビューを生成する関数。
-    ///
-    /// メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
-    private struct ActiveMemoRow: View {
-        let memo: Memo
-        let lineLimit: Int
-        let fontSize: Float
-        let lineSpacing: Float
-        let showInfo: Bool
-        let onTap: (Memo) -> Void
-
-        var body: some View {
-            Button(action: {
-                onTap(memo)
-            }) {
-                VStack(spacing: 0) {
-                    HStack {
-                        Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-                            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
-                            .lineLimit(lineLimit)
-                            .font(.system(size: CGFloat(fontSize)))
-                            .lineSpacing(CGFloat(lineSpacing))
-                        Spacer()
-                    }
-                    if showInfo {
-                        VStack(alignment: .leading, spacing: 0) {
-                            InfoText.countView(content: memo.content)
-                            InfoText.dateView(for: memo)
-                        }
-                        .padding(.top)
-                        .padding(.horizontal, 0.0)
-                    }
-                }
-            }
-            .foregroundStyle(.primary)
-            .padding()
-            .contentShape(Rectangle())
-        }
     }
 
     /// 非編集モードで表示する行のビューを生成する関数。
@@ -363,12 +335,8 @@ extension ContentView {
         HStack {
             VStack(spacing: 0) {
                 HStack {
-                    Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-                        .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
+                    rowText(for: memo)
                         .padding()
-                        .lineLimit(viewModel.getTitleLineLimit())
-                        .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
-                        .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer()
                 }
@@ -400,6 +368,14 @@ extension ContentView {
         }
         .listRowInsets(.init())
         .moveDisabled(true)
+    }
+
+    private func rowText(for memo: Memo) -> some View {
+        Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
+            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
+            .lineLimit(viewModel.getTitleLineLimit())
+            .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
+            .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
     }
 }
 
