@@ -58,7 +58,7 @@ final class EditMemoViewModel: ObservableObject {
         userDefaultsRepository.getContentLineSpacing()
     }
 
-    func getShowDate() -> Bool {
-        userDefaultsRepository.getShowDate()
+    func getShowInfo() -> Bool {
+        userDefaultsRepository.getShowInfo()
     }
 }

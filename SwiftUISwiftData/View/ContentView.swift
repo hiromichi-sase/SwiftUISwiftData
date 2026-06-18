@@ -300,7 +300,7 @@ extension ContentView {
             lineLimit: viewModel.getTitleLineLimit(),
             fontSize: viewModel.getTitleFontSize(),
             lineSpacing: viewModel.getTitleLineSpacing(),
-            showDate: viewModel.getShowDate(),
+            showInfo: viewModel.getShowInfo(),
         ) { memo in
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
@@ -322,7 +322,7 @@ extension ContentView {
         let lineLimit: Int
         let fontSize: Float
         let lineSpacing: Float
-        let showDate: Bool
+        let showInfo: Bool
         let onTap: (Memo) -> Void
 
         var body: some View {
@@ -338,14 +338,13 @@ extension ContentView {
                             .lineSpacing(CGFloat(lineSpacing))
                         Spacer()
                     }
-                    if showDate {
-                        HStack(spacing: 0) {
-                            DateText(memo.createdAt, style: .createdAt)
-                            Spacer()
-                            DateText(memo.updatedAt, style: .updatedAt)
+                    if showInfo {
+                        VStack(alignment: .leading, spacing: 0) {
+                            InfoText.countView(content: memo.content)
+                            InfoText.dateView(for: memo)
                         }
+                        .padding(.top)
                         .padding(.horizontal, 0.0)
-                        .padding(.top, 8.0)
                     }
                 }
             }
@@ -373,14 +372,13 @@ extension ContentView {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer()
                 }
-                if viewModel.getShowDate() {
-                    HStack(spacing: 0) {
-                        DateText(memo.createdAt, style: .createdAt)
-                        Spacer()
-                        DateText(memo.updatedAt, style: .updatedAt)
+                if viewModel.getShowInfo() {
+                    VStack(alignment: .leading, spacing: 0) {
+                        InfoText.countView(content: memo.content)
+                        InfoText.dateView(for: memo)
                     }
+                    .padding(.bottom)
                     .padding(.horizontal)
-                    .padding(.bottom, 8.0)
                 }
             }
         }

@@ -74,11 +74,12 @@ struct EditMemoView: View {
                     titleView
                 }
                 contentView
-                if viewModel.getShowDate() {
-                    HStack(spacing: 0) {
-                        DateText(memo?.createdAt, style: .createdAt)
-                        Spacer()
-                        DateText(memo?.updatedAt, style: .updatedAt)
+                if viewModel.getShowInfo(), !showTitleView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        InfoText.countView(content: content)
+                        if let memo {
+                            InfoText.dateView(for: memo)
+                        }
                     }
                 }
             }

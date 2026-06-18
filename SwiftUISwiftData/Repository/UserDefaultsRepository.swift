@@ -15,7 +15,7 @@ final class UserDefaultsRepository {
         case titleLineLimit
         case titleFontSize
         case titleLineSpacing
-        case showDate
+        case showInfo
 
         var defaultValue: Any? {
             switch self {
@@ -25,7 +25,7 @@ final class UserDefaultsRepository {
                 case .titleLineLimit: 3
                 case .titleFontSize: Float(16.0)
                 case .titleLineSpacing: Float.zero
-                case .showDate: false
+                case .showInfo: false
             }
         }
 
@@ -37,7 +37,7 @@ final class UserDefaultsRepository {
                 case .titleLineLimit: 5
                 case .titleFontSize: Float(100.0)
                 case .titleLineSpacing: Float(10.0)
-                case .showDate: nil
+                case .showInfo: nil
             }
         }
 
@@ -49,7 +49,7 @@ final class UserDefaultsRepository {
                 case .titleLineLimit: 1
                 case .titleFontSize: Float(5.0)
                 case .titleLineSpacing: Float.zero
-                case .showDate: nil
+                case .showInfo: nil
             }
         }
     }
@@ -103,11 +103,11 @@ final class UserDefaultsRepository {
                         fatalError("Failed to get Float value")
                     }
                     changedCount += getTitleLineSpacing() != value ? 1 : .zero
-                case .showDate:
+                case .showInfo:
                     guard let value = value as? Bool else {
                         fatalError("Failed to get Bool value")
                     }
-                    changedCount += getShowDate() != value ? 1 : .zero
+                    changedCount += getShowInfo() != value ? 1 : .zero
             }
         }
         return changedCount > .zero
@@ -201,12 +201,12 @@ final class UserDefaultsRepository {
         userDefaults.set(value, forKey: Key.titleLineSpacing.rawValue)
     }
 
-    func getShowDate() -> Bool {
-        userDefaults.bool(forKey: Key.showDate.rawValue)
+    func getShowInfo() -> Bool {
+        userDefaults.bool(forKey: Key.showInfo.rawValue)
     }
 
-    func setShowDate(_ value: Bool) {
-        guard getShowDate() != value else { return }
-        userDefaults.set(value, forKey: Key.showDate.rawValue)
+    func setShowInfo(_ value: Bool) {
+        guard getShowInfo() != value else { return }
+        userDefaults.set(value, forKey: Key.showInfo.rawValue)
     }
 }

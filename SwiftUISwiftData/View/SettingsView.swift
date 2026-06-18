@@ -30,7 +30,7 @@ struct SettingsView: View {
     @State
     private var titleLineSpacing: Float = .zero
     @State
-    private var showDate: Bool = false
+    private var showInfo: Bool = false
     @State
     private var showResetAlert = false
     /// ビューを閉じるための環境変数。
@@ -45,7 +45,7 @@ struct SettingsView: View {
         self._titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
         self._titleFontSize = State(initialValue: viewModel.getTitleFontSize())
         self._titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
-        self._showDate = State(initialValue: viewModel.getShowDate())
+        self._showInfo = State(initialValue: viewModel.getShowInfo())
     }
 
     var body: some View {
@@ -54,7 +54,7 @@ struct SettingsView: View {
                 browseSection
                 contentSection
                 titleSection
-                dateSection
+                infoSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -145,13 +145,13 @@ struct SettingsView: View {
         }
     }
 
-    private var dateSection: some View {
-        Section("Date") {
+    private var infoSection: some View {
+        Section("Info") {
             VStack(alignment: .leading) {
-                Text("Show Date(CreatedAt, UpdatedAt)")
+                Text("Show Info\n(Content Characters, Content Line Numbers, CreatedAt, UpdatedAt)")
                     .font(.system(size: 12.0))
-                Toggle(isOn: $showDate) {
-                    Text(showDate ? "ON" : "OFF")
+                Toggle(isOn: $showInfo) {
+                    Text(showInfo ? "ON" : "OFF")
                 }
             }
         }
@@ -168,7 +168,7 @@ struct SettingsView: View {
                 titleLineLimit = viewModel.getTitleLineLimit()
                 titleFontSize = viewModel.getTitleFontSize()
                 titleLineSpacing = viewModel.getTitleLineSpacing()
-                showDate = viewModel.getShowDate()
+                showInfo = viewModel.getShowInfo()
                 settingsSaved = true
             },
             secondaryButton: .cancel()
@@ -189,7 +189,7 @@ struct SettingsView: View {
             viewModel.setTitleLineLimit(titleLineLimit)
             viewModel.setTitleFontSize(titleFontSize)
             viewModel.setTitleLineSpacing(titleLineSpacing)
-            viewModel.setShowDate(showDate)
+            viewModel.setShowInfo(showInfo)
             settingsSaved = true
             dismiss()
         }
@@ -204,7 +204,7 @@ struct SettingsView: View {
         guard viewModel.getTitleLineLimit() == titleLineLimit else { return true }
         guard viewModel.getTitleFontSize() == titleFontSize else { return true }
         guard viewModel.getTitleLineSpacing() == titleLineSpacing else { return true }
-        guard viewModel.getShowDate() == showDate else { return true }
+        guard viewModel.getShowInfo() == showInfo else { return true }
         return false
     }
 

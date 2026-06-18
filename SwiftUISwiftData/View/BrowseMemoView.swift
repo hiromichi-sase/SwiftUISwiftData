@@ -54,11 +54,10 @@ struct BrowseMemoView: View {
                 )
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
-                if viewModel.getShowDate() {
-                    HStack(spacing: 0) {
-                        DateText(memo.createdAt, style: .createdAt)
-                        Spacer()
-                        DateText(memo.updatedAt, style: .updatedAt)
+                if viewModel.getShowInfo() {
+                    VStack(alignment: .leading, spacing: 0) {
+                        InfoText.countView(content: memo.content)
+                        InfoText.dateView(for: memo)
                     }
                 }
             }
