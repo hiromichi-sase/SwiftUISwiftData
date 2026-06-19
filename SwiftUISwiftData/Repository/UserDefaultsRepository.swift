@@ -8,7 +8,7 @@
 import Foundation
 
 final class UserDefaultsRepository {
-    enum Key: String, CaseIterable {
+    private enum Key: String, CaseIterable {
         case hasLink
         case contentFontSize
         case contentLineSpacing
