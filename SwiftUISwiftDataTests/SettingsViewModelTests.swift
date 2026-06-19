@@ -73,7 +73,7 @@ struct SettingsViewModelTests {
 
     @Test
     func showInfo() {
-        let showInfo = true
+        let showInfo = false
         let dependency = Dependency()
         dependency.testTarget.setShowInfo(showInfo)
 
