@@ -12,7 +12,7 @@ import SwiftData
 final class ContentViewModel: ObservableObject {
     /// An array of Memo objects that are published to update the UI when changes occur.
     @Published
-    var memos: [Memo] = []
+    private(set) var memos: [Memo] = []
     /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
     ///
     /// It provides functions to add and update memos in the memoRepository.
