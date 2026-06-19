@@ -47,6 +47,7 @@ final class MemoRepository {
             memo.updatedAt = now
             memo.order = memos().count + 1
             modelContext.insert(memo)
+            reorder()
         }
     }
 
@@ -85,6 +86,7 @@ final class MemoRepository {
                 order: memo.order + 1
             )
             modelContext.insert(memo)
+            reorder()
         }
     }
 
@@ -98,10 +100,7 @@ final class MemoRepository {
             for memo in memos {
                 modelContext.delete(memo)
             }
-
-            for (index, memo) in self.memos().enumerated() {
-                memo.order = index + 1
-            }
+            reorder()
         }
     }
 
@@ -123,6 +122,13 @@ final class MemoRepository {
                     existingMemo.order = index + 1
                 }
             }
+        }
+    }
+
+    /// Reorder all memos in the model context.
+    private func reorder() {
+        for (index, memo) in memos().enumerated() {
+            memo.order = index + 1
         }
     }
 }
