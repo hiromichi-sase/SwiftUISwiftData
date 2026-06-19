@@ -246,7 +246,8 @@ struct ContentView: View {
             case .inactive:
                 if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
                     if let memoDuplicateSource,
-                       memoDuplicateSource.order + 1 == newMemo.order {
+                        memoDuplicateSource.order + 1 == newMemo.order
+                    {
                         self.memoDuplicateSource = nil
                         return
                     }
