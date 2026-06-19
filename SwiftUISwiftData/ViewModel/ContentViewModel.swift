@@ -41,6 +41,16 @@ final class ContentViewModel: ObservableObject {
         self.memos = memoRepository.memos()
     }
 
+    /// Duplicated the specified memo in the model context.
+    ///
+    /// This function takes a Memo object as a parameter and attempts to duplicate it in the memoRepository.
+    /// If an error occurs during the duplication, it throws an error.
+    /// - Parameter memo: The Memo object that needs to be duplicated in the memoRepository.
+    /// - throws: An error.
+    func duplicate(_ memo: Memo) throws {
+        try memoRepository.duplicate(memo)
+    }
+
     /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list.
     ///
     /// If an error occurs during the deletion, it throws an error.

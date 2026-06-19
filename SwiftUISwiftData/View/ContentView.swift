@@ -53,6 +53,8 @@ struct ContentView: View {
     private var error: Error?
     @State
     private var showErrorAlert = false
+    @State
+    private var memoDuplicateSource: Memo?
 
     /// イニシャライザ。
     init() {
@@ -243,6 +245,12 @@ struct ContentView: View {
                 }
             case .inactive:
                 if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
+                    if let memoDuplicateSource,
+                       memoDuplicateSource.order + 1 == newMemo.order {
+                        self.memoDuplicateSource = nil
+                        return
+                    }
+
                     DispatchQueue.main.async {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
@@ -359,6 +367,9 @@ extension ContentView {
                 openEditMemoView = true
                 selectedMemoId = memo.id
             }
+            Button("Duplicate", systemImage: "plus.square") {
+                duplicateMemo(memo)
+            }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
                 showDeleteAlert = true
@@ -380,6 +391,20 @@ extension ContentView {
 }
 
 extension ContentView {
+    private func duplicateMemo(_ memo: Memo) {
+        do {
+            memoDuplicateSource = memo
+            try viewModel.duplicate(memo)
+            toastMessage = "Successfully duplicated!"
+        }
+        catch {
+            memoDuplicateSource = nil
+            self.error = error
+            showErrorAlert = true
+            print("Failed to duplicate memo: \(memo)")
+        }
+    }
+
     /// 指定されたメモを削除する関数。
     ///
     /// 削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
