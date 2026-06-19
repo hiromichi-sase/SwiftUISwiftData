@@ -13,77 +13,115 @@ import Testing
 struct SettingsViewModelTests {
     @Test
     func hasLink() {
-        let hasLink = true
         let dependency = Dependency()
-        dependency.testTarget.setHasLink(hasLink)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getHasLink() == hasLink)
-        dependency.removeUserDefaults()
+        let defaultValue: Bool = true
+        dependency.testTarget.setHasLink(defaultValue)
+        #expect(dependency.testTarget.getHasLink() == defaultValue)
     }
 
     @Test
     func contentFontSize() {
-        let contentFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.testTarget.setContentFontSize(contentFontSize)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
-        dependency.removeUserDefaults()
+        let defaultValue: Float = 16.0
+        dependency.testTarget.setContentFontSize(defaultValue)
+        #expect(dependency.testTarget.getContentFontSize() == defaultValue)
+
+        let lowerBound: Float = 5.0
+        let upperBound: Float = 100.0
+        #expect(dependency.testTarget.contentFontSizeRange == lowerBound ... upperBound)
     }
 
     @Test
     func contentLineSpacing() {
-        let contentLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.testTarget.setContentLineSpacing(contentLineSpacing)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
-        dependency.removeUserDefaults()
+        let defaultValue: Float = .zero
+        dependency.testTarget.setContentLineSpacing(defaultValue)
+        #expect(dependency.testTarget.getContentLineSpacing() == defaultValue)
+
+        let lowerBound: Float = .zero
+        let upperBound: Float = 10.0
+        #expect(dependency.testTarget.contentLineSpacingRange == lowerBound ... upperBound)
     }
 
     @Test
     func titleLineLimit() {
-        let titleLineLimit = 3
         let dependency = Dependency()
-        dependency.testTarget.setTitleLineLimit(titleLineLimit)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getTitleLineLimit() == titleLineLimit)
-        dependency.removeUserDefaults()
+        let defaultValue: Int = 3
+        dependency.testTarget.setTitleLineLimit(defaultValue)
+        #expect(dependency.testTarget.getTitleLineLimit() == defaultValue)
+
+        let lowerBound: Int = 1
+        let upperBound: Int = 5
+        #expect(dependency.testTarget.titleLineLimitRange == lowerBound ... upperBound)
     }
 
     @Test
     func titleFontSize() {
-        let titleFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.testTarget.setTitleFontSize(titleFontSize)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
-        dependency.removeUserDefaults()
+        let defaultValue: Float = 16.0
+        dependency.testTarget.setTitleFontSize(defaultValue)
+        #expect(dependency.testTarget.getTitleFontSize() == defaultValue)
+
+        let lowerBound: Float = 5.0
+        let upperBound: Float = 100.0
+        #expect(dependency.testTarget.titleFontSizeRange == lowerBound ... upperBound)
     }
 
     @Test
     func titleLineSpacing() {
-        let titleLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.testTarget.setTitleLineSpacing(titleLineSpacing)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
-        dependency.removeUserDefaults()
+        let defaultValue: Float = .zero
+        dependency.testTarget.setTitleLineSpacing(defaultValue)
+        #expect(dependency.testTarget.getTitleLineSpacing() == defaultValue)
+
+        let lowerBound: Float = .zero
+        let upperBound: Float = 10.0
+        #expect(dependency.testTarget.titleLineSpacingRange == lowerBound ... upperBound)
     }
 
     @Test
     func showInfo() {
-        let showInfo = false
         let dependency = Dependency()
-        dependency.testTarget.setShowInfo(showInfo)
+        defer {
+            dependency.removeUserDefaults()
+        }
 
-        #expect(dependency.testTarget.getShowInfo() == showInfo)
-        dependency.removeUserDefaults()
+        let defaultValue: Bool = false
+        dependency.testTarget.setShowInfo(defaultValue)
+        #expect(dependency.testTarget.getShowInfo() == defaultValue)
     }
 
     @Test
     func reset() {
         let dependency = Dependency()
+        defer {
+            dependency.removeUserDefaults()
+        }
+
         dependency.testTarget.setHasLink(false)
         dependency.testTarget.setContentFontSize(30.0)
         dependency.testTarget.setContentLineSpacing(5.0)
@@ -92,10 +130,9 @@ struct SettingsViewModelTests {
         dependency.testTarget.setTitleLineSpacing(5.0)
         dependency.testTarget.setShowInfo(true)
         #expect(dependency.testTarget.settingsChanged)
-        dependency.testTarget.reset()
 
+        dependency.testTarget.reset()
         #expect(!dependency.testTarget.settingsChanged)
-        dependency.removeUserDefaults()
     }
 }
 
