@@ -148,7 +148,7 @@ struct SettingsView: View {
     private var infoSection: some View {
         Section("Info") {
             VStack(alignment: .leading) {
-                Text("Show Info\n(Content Characters, Content Line Numbers, CreatedAt, UpdatedAt)")
+                Text("Show Info\n(Content Characters, Content Line Numbers, Created At, Updated At)")
                     .font(.system(size: 12.0))
                 Toggle(isOn: $showInfo) {
                     Text(showInfo ? "ON" : "OFF")
