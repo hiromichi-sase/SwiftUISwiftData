@@ -75,7 +75,9 @@ struct ContentView: View {
                     settingsSaved = false
                 }
                 .onReceive(willSavePublisher) { _ in
-                    viewModel.fetchMemos()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        viewModel.fetchMemos()
+                    }
                 }
                 .alert(isPresented: $showDeleteAlert) {
                     deleteAlert
