@@ -47,6 +47,7 @@ final class MemoRepository {
             memo.updatedAt = now
             memo.order = memos().count + 1
             modelContext.insert(memo)
+            reorder()
         }
     }
 
@@ -66,6 +67,29 @@ final class MemoRepository {
         }
     }
 
+    /// Duplicated the specified memo in the model context.
+    /// - Parameter memo: The Memo object that needs to be duplicated in the model context.
+    /// - throws: An error.
+    func duplicate(_ memo: Memo) throws {
+        try modelContext.transaction {
+            let memos = self.memos().filter { $0.order > memo.order }
+            for memo in memos {
+                memo.order += 1
+            }
+
+            let now = Date()
+            let memo = Memo(
+                title: memo.title,
+                content: memo.content,
+                createdAt: now,
+                updatedAt: now,
+                order: memo.order + 1
+            )
+            modelContext.insert(memo)
+            reorder()
+        }
+    }
+
     /// Deletes the specified memos from the model context.
     ///
     /// This function iterates through the array of memos to be deleted, removes them from the context, and renumbers the order of memos in the model context. ant then iterates through the list of memos, sorted by their current order, and updates the order property of each memo to reflect their new positions based on their index in the sorted list. After updating the order, it saves the context. If an error occurs during saving, it throws an error.
@@ -76,10 +100,7 @@ final class MemoRepository {
             for memo in memos {
                 modelContext.delete(memo)
             }
-
-            for (index, memo) in self.memos().enumerated() {
-                memo.order = index + 1
-            }
+            reorder()
         }
     }
 
@@ -101,6 +122,13 @@ final class MemoRepository {
                     existingMemo.order = index + 1
                 }
             }
+        }
+    }
+
+    /// Reorder all memos in the model context.
+    private func reorder() {
+        for (index, memo) in memos().enumerated() {
+            memo.order = index + 1
         }
     }
 }
