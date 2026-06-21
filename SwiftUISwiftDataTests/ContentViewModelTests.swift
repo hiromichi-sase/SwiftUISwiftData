@@ -12,6 +12,36 @@ import Testing
 
 struct ContentViewModelTests {
     @Test
+    func duplicate() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+
+        let countBeforeDuplication = await dependency.memoRepository.memos().count
+        try await dependency.testTarget.duplicate(memo1)
+
+        let memos = await dependency.memoRepository.memos()
+        #expect(memos.count == countBeforeDuplication + 1)
+
+        #expect(memos[0].title == memo1.title)
+        #expect(memos[0].content == memo1.content)
+        #expect(memos[0].order == memo1.order)
+
+        #expect(memos[1].title == memos[0].title)
+        #expect(memos[1].content == memos[0].content)
+        #expect(memos[1].order == memos[0].order + 1)
+
+        #expect(memos[2].title == memo2.title)
+        #expect(memos[2].content == memo2.content)
+        #expect(memos[2].order == memos[1].order + 1)
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
     func deleteMemos() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
