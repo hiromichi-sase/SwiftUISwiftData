@@ -66,8 +66,16 @@ struct InfoText {
     }
 }
 
-#Preview("countView") {
-    InfoText.countView(content: "abcdefg")
+#Preview("countView_no_content") {
+    let content = ""
+    let textSelection: TextSelection? = nil
+    InfoText.countView(content: content, textSelection: textSelection)
+}
+
+#Preview("countView_not_selected") {
+    let content = "abcdefg"
+    let textSelection: TextSelection? = nil
+    InfoText.countView(content: content, textSelection: textSelection)
 }
 
 #Preview("countView_selected") {
