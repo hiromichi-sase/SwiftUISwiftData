@@ -13,12 +13,13 @@ struct InfoText {
             Text("Content Characters: \(content.count)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
-            Spacer()
-                .frame(width: 8.0)
-            Text("Content Line Numbers: \(content.components(separatedBy: .newlines).count)")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
-            Spacer()
+            if !content.isEmpty {
+                Spacer()
+                    .frame(width: 8.0)
+                Text("Content Line Numbers: \(content.components(separatedBy: .newlines).count)")
+                    .font(.system(size: 8.0))
+                    .multilineTextAlignment(.leading)
+            }
             if let textSelection,
                 let selection = selectedText(text: content, selection: textSelection),
                 !selection.isEmpty
