@@ -76,7 +76,7 @@ struct EditMemoView: View {
                 contentView
                 if viewModel.getShowInfo(), !showTitleView {
                     VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: content)
+                        InfoText.countView(content: content, textSelection: textSelection)
                         if let memo {
                             InfoText.dateView(for: memo)
                         }
