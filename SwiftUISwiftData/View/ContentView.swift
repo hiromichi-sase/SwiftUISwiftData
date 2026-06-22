@@ -380,7 +380,11 @@ extension ContentView {
             VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
-                    Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if memo.protected {
+                        Image(systemName: "lock.fill")
+                            .imageScale(.large)
+                    }
                 }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
@@ -409,8 +413,13 @@ extension ContentView {
             VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                    Spacer()
+                    if memo.protected {
+                        Image(systemName: "lock.fill")
+                            .imageScale(.large)
+                            .padding(.trailing)
+                    }
                 }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
