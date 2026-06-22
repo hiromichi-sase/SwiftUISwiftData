@@ -12,6 +12,9 @@ import SwiftUI
 struct ContentView: View {
     enum AlertType: Identifiable {
         case delete
+        case containsProtectedMemo
+        case protect
+        case unprotect
         case error
         var id: AlertType { self }
     }
@@ -86,6 +89,12 @@ struct ContentView: View {
                     switch alertType {
                         case .delete:
                             deleteAlert
+                        case .containsProtectedMemo:
+                            containsProtectedMemoAlert
+                        case .protect:
+                            protectAlert
+                        case .unprotect:
+                            unprotectAlert
                         case .error:
                             errorAlert
                     }
@@ -141,6 +150,36 @@ struct ContentView: View {
             title: Text("The Error occured."),
             message: Text(error?.localizedDescription ?? ""),
             dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var containsProtectedMemoAlert: Alert {
+        .init(
+            title: Text("Protected memos are contained in selected memos."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var protectAlert: Alert {
+        .init(
+            title: Text("Protect selected memos?"),
+            primaryButton: .default(Text("Protect")) {
+                guard !selectedMemos.isEmpty else { return }
+                protect(selectedMemos)
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private var unprotectAlert: Alert {
+        .init(
+            title: Text("Unprotect selected memos?"),
+            primaryButton: .default(Text("Unprotect")) {
+                guard !selectedMemos.isEmpty else { return }
+                unprotect(selectedMemos)
+            },
+            secondaryButton: .cancel()
         )
     }
 
@@ -231,16 +270,21 @@ struct ContentView: View {
         }
         else {
             Button("Protect", systemImage: "lock.fill") {
-                protect(selectedMemos)
+                currentAlert = .protect
             }
             .disabled(selection.isEmpty)
             Button("Unprotect", systemImage: "lock.open.fill") {
-                unprotect(selectedMemos)
+                currentAlert = .unprotect
             }
             .disabled(selection.isEmpty)
             Spacer()
             Button("Delete", systemImage: "trash") {
-                currentAlert = .delete
+                if selectedMemos.filter({ $0.protected }).isEmpty {
+                    currentAlert = .delete
+                }
+                else {
+                    currentAlert = .containsProtectedMemo
+                }
             }
             .disabled(selection.isEmpty)
         }
@@ -336,7 +380,10 @@ extension ContentView {
             VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
-                    Spacer()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if memo.protected {
+                        Image(systemName: "lock.fill")
+                    }
                 }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
@@ -365,8 +412,12 @@ extension ContentView {
             VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                    Spacer()
+                    if memo.protected {
+                        Image(systemName: "lock.fill")
+                            .padding(.trailing)
+                    }
                 }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
@@ -396,12 +447,12 @@ extension ContentView {
                 Button("Duplicate", systemImage: "plus.square") {
                     duplicateMemo(memo)
                 }
+                Button("Protect", systemImage: "lock.fill") {
+                    protect([memo])
+                }
                 Button("Delete", systemImage: "trash", role: .destructive) {
                     memoToDelete = memo
-                    showDeleteAlert = true
-                }
-                Button("Protect", systemImage: "lock.fill", role: .destructive) {
-                    protect([memo])
+                    currentAlert = .delete
                 }
             }
         } preview: {
@@ -484,7 +535,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to protect memos: \(error)")
         }
     }
@@ -495,7 +546,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to unprotect memos: \(error)")
         }
     }
