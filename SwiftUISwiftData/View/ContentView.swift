@@ -383,7 +383,6 @@ extension ContentView {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if memo.protected {
                         Image(systemName: "lock.fill")
-                            .imageScale(.large)
                     }
                 }
                 if viewModel.getShowInfo() {
@@ -417,7 +416,6 @@ extension ContentView {
                         .padding()
                     if memo.protected {
                         Image(systemName: "lock.fill")
-                            .imageScale(.large)
                             .padding(.trailing)
                     }
                 }
