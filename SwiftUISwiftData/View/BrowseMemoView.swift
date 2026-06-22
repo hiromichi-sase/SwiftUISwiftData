@@ -94,8 +94,10 @@ struct BrowseMemoView: View {
                 toastMessage = "Successfully copied!"
             }
         }
-        Button("Edit", systemImage: "pencil") {
-            showingEditMemo = true
+        if !memo.protected {
+            Button("Edit", systemImage: "pencil") {
+                showingEditMemo = true
+            }
         }
     }
 }

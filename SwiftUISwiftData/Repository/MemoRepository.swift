@@ -125,6 +125,22 @@ final class MemoRepository {
         }
     }
 
+    func protect(_ memos: [Memo]) throws {
+        try modelContext.transaction {
+            for memo in memos {
+                memo.protected = true
+            }
+        }
+    }
+
+    func unprotect(_ memos: [Memo]) throws {
+        try modelContext.transaction {
+            for memo in memos {
+                memo.protected = false
+            }
+        }
+    }
+
     /// Reorder all memos in the model context.
     private func reorder() {
         for (index, memo) in memos().enumerated() {

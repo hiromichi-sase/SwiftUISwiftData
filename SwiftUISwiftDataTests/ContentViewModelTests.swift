@@ -100,6 +100,52 @@ struct ContentViewModelTests {
     }
 
     @Test
+    func protectMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: false)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: false)
+        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: false)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
+
+        try await dependency.testTarget.protect([memo1])
+        try await dependency.testTarget.protect([memo2])
+        try await dependency.testTarget.protect([memo3])
+
+        let memos = await dependency.memoRepository.memos()
+        for memo in memos {
+            #expect(memo.protected)
+        }
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
+    func unprotectMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: true)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: true)
+        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: true)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
+
+        try await dependency.testTarget.unprotect([memo1])
+        try await dependency.testTarget.unprotect([memo2])
+        try await dependency.testTarget.unprotect([memo3])
+
+        let memos = await dependency.memoRepository.memos()
+        for memo in memos {
+            #expect(!memo.protected)
+        }
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
     func getTitleLineLimit() {
         let titleLineLimit = 3
         let dependency = Dependency()
