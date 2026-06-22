@@ -364,16 +364,26 @@ extension ContentView {
             selectedMemoId = memo.id
         }
         .contextMenu {
-            Button("Edit", systemImage: "pencil") {
-                openEditMemoView = true
-                selectedMemoId = memo.id
+            if memo.protected {
+                Button("Unprotect", systemImage: "lock.open.fill") {
+                    unprotect([memo])
+                }
             }
-            Button("Duplicate", systemImage: "plus.square") {
-                duplicateMemo(memo)
-            }
-            Button("Delete", systemImage: "trash", role: .destructive) {
-                memoToDelete = memo
-                showDeleteAlert = true
+            else {
+                Button("Edit", systemImage: "pencil") {
+                    openEditMemoView = true
+                    selectedMemoId = memo.id
+                }
+                Button("Duplicate", systemImage: "plus.square") {
+                    duplicateMemo(memo)
+                }
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    memoToDelete = memo
+                    showDeleteAlert = true
+                }
+                Button("Protect", systemImage: "lock.fill", role: .destructive) {
+                    protect([memo])
+                }
             }
         } preview: {
             PreviewMemoView(memo: memo)
@@ -446,6 +456,28 @@ extension ContentView {
                 showErrorAlert = true
                 print("Failed to move memo: \(error)")
             }
+        }
+    }
+
+    private func protect(_ memos: [Memo]) {
+        do {
+            try viewModel.protect(memos)
+        }
+        catch {
+            self.error = error
+            showErrorAlert = true
+            print("Failed to protect memos: \(error)")
+        }
+    }
+
+    private func unprotect(_ memos: [Memo]) {
+        do {
+            try viewModel.unprotect(memos)
+        }
+        catch {
+            self.error = error
+            showErrorAlert = true
+            print("Failed to unprotect memos: \(error)")
         }
     }
 }
