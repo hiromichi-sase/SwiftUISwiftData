@@ -164,7 +164,7 @@ struct ContentView: View {
     private var protectAlert: Alert {
         .init(
             title: Text("Protect selected memos?"),
-            primaryButton: .destructive(Text("Protect")) {
+            primaryButton: .default(Text("Protect")) {
                 guard !selectedMemos.isEmpty else { return }
                 protect(selectedMemos)
             },
@@ -175,7 +175,7 @@ struct ContentView: View {
     private var unprotectAlert: Alert {
         .init(
             title: Text("Unprotect selected memos?"),
-            primaryButton: .destructive(Text("Unprotect")) {
+            primaryButton: .default(Text("Unprotect")) {
                 guard !selectedMemos.isEmpty else { return }
                 unprotect(selectedMemos)
             },
