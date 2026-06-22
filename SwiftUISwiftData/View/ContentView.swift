@@ -12,6 +12,8 @@ import SwiftUI
 struct ContentView: View {
     enum AlertType: Identifiable {
         case delete
+        case protect
+        case unprotect
         case error
         var id: AlertType { self }
     }
@@ -86,6 +88,10 @@ struct ContentView: View {
                     switch alertType {
                         case .delete:
                             deleteAlert
+                        case .protect:
+                            protectAlert
+                        case .unprotect:
+                            unprotectAlert
                         case .error:
                             errorAlert
                     }
@@ -141,6 +147,28 @@ struct ContentView: View {
             title: Text("The Error occured."),
             message: Text(error?.localizedDescription ?? ""),
             dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var protectAlert: Alert {
+        .init(
+            title: Text("Protect selected memos?"),
+            primaryButton: .destructive(Text("Protect")) {
+                guard !selectedMemos.isEmpty else { return }
+                protect(selectedMemos)
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private var unprotectAlert: Alert {
+        .init(
+            title: Text("Unprotect selected memos?"),
+            primaryButton: .destructive(Text("Unprotect")) {
+                guard !selectedMemos.isEmpty else { return }
+                unprotect(selectedMemos)
+            },
+            secondaryButton: .cancel()
         )
     }
 
@@ -231,11 +259,11 @@ struct ContentView: View {
         }
         else {
             Button("Protect", systemImage: "lock.fill") {
-                protect(selectedMemos)
+                currentAlert = .protect
             }
             .disabled(selection.isEmpty)
             Button("Unprotect", systemImage: "lock.open.fill") {
-                unprotect(selectedMemos)
+                currentAlert = .unprotect
             }
             .disabled(selection.isEmpty)
             Spacer()
