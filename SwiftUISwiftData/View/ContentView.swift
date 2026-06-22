@@ -398,7 +398,7 @@ extension ContentView {
                 }
                 Button("Delete", systemImage: "trash", role: .destructive) {
                     memoToDelete = memo
-                    showDeleteAlert = true
+                    currentAlert = .delete
                 }
                 Button("Protect", systemImage: "lock.fill", role: .destructive) {
                     protect([memo])
@@ -484,7 +484,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to protect memos: \(error)")
         }
     }
@@ -495,7 +495,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to unprotect memos: \(error)")
         }
     }
