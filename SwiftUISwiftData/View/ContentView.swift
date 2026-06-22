@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentView: View {
     enum AlertType: Identifiable {
         case delete
+        case containsProtectedMemo
         case protect
         case unprotect
         case error
@@ -88,6 +89,8 @@ struct ContentView: View {
                     switch alertType {
                         case .delete:
                             deleteAlert
+                        case .containsProtectedMemo:
+                            containsProtectedMemoAlert
                         case .protect:
                             protectAlert
                         case .unprotect:
@@ -145,6 +148,14 @@ struct ContentView: View {
     private var errorAlert: Alert {
         .init(
             title: Text("The Error occured."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var containsProtectedMemoAlert: Alert {
+        .init(
+            title: Text("Protected memos are contained in selected memos."),
             message: Text(error?.localizedDescription ?? ""),
             dismissButton: .default(Text("OK"))
         )
@@ -268,7 +279,12 @@ struct ContentView: View {
             .disabled(selection.isEmpty)
             Spacer()
             Button("Delete", systemImage: "trash") {
-                currentAlert = .delete
+                if selectedMemos.filter({ $0.protected }).isEmpty {
+                    currentAlert = .delete
+                }
+                else {
+                    currentAlert = .containsProtectedMemo
+                }
             }
             .disabled(selection.isEmpty)
         }
