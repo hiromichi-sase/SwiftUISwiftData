@@ -10,6 +10,12 @@ import SwiftUI
 
 /// メモのリストを表示するビュー。
 struct ContentView: View {
+    enum AlertType: Identifiable {
+        case delete
+        case error
+        var id: AlertType { self }
+    }
+
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
@@ -31,9 +37,6 @@ struct ContentView: View {
     /// スクロールビューのプロキシを保持する状態変数。
     @State
     private var scrollViewProxy: ScrollViewProxy?
-    /// メモを削除するかどうかの確認アラートを表示するフラグ。
-    @State
-    private var showDeleteAlert = false
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
     private var showingAddMemo = false
@@ -52,9 +55,9 @@ struct ContentView: View {
     @State
     private var error: Error?
     @State
-    private var showErrorAlert = false
-    @State
     private var memoDuplicateSource: Memo?
+    @State
+    private var currentAlert: AlertType?
 
     /// イニシャライザ。
     init() {
@@ -79,13 +82,13 @@ struct ContentView: View {
                         viewModel.fetchMemos()
                     }
                 }
-                .alert(isPresented: $showDeleteAlert) {
-                    deleteAlert
-                }
-                .alert("The Error occured.", isPresented: $showErrorAlert) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(error?.localizedDescription ?? "")
+                .alert(item: $currentAlert) { alertType in
+                    switch alertType {
+                        case .delete:
+                            deleteAlert
+                        case .error:
+                            errorAlert
+                    }
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
@@ -130,6 +133,14 @@ struct ContentView: View {
                 }
             },
             secondaryButton: .cancel()
+        )
+    }
+
+    private var errorAlert: Alert {
+        .init(
+            title: Text("The Error occured."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
         )
     }
 
@@ -221,7 +232,7 @@ struct ContentView: View {
         else {
             Spacer()
             Button("Delete", systemImage: "trash") {
-                showDeleteAlert = true
+                currentAlert = .delete
             }
             .disabled(selection.isEmpty)
         }
@@ -373,7 +384,7 @@ extension ContentView {
             }
             Button("Delete", systemImage: "trash", role: .destructive) {
                 memoToDelete = memo
-                showDeleteAlert = true
+                currentAlert = .delete
             }
         } preview: {
             PreviewMemoView(memo: memo)
@@ -401,7 +412,7 @@ extension ContentView {
         catch {
             memoDuplicateSource = nil
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to duplicate memo: \(memo)")
         }
     }
@@ -423,7 +434,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to delete memos: \(error)")
         }
     }
@@ -443,7 +454,7 @@ extension ContentView {
             }
             catch {
                 self.error = error
-                showErrorAlert = true
+                currentAlert = .error
                 print("Failed to move memo: \(error)")
             }
         }
