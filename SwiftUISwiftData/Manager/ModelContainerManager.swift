@@ -23,7 +23,11 @@ final class ModelContainerManager {
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isStoredInMemoryOnly)
 
         do {
-            modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            modelContainer = try ModelContainer(
+                for: schema,
+                migrationPlan: MemoMigrationPlan.self,
+                configurations: [modelConfiguration]
+            )
             modelContainer.mainContext.autosaveEnabled = false
         }
         catch {
