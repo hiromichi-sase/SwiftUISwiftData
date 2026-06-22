@@ -219,6 +219,14 @@ struct ContentView: View {
             }
         }
         else {
+            Button("Protect", systemImage: "lock.fill") {
+                protect(selectedMemos)
+            }
+            .disabled(selection.isEmpty)
+            Button("Unprotect", systemImage: "lock.open.fill") {
+                unprotect(selectedMemos)
+            }
+            .disabled(selection.isEmpty)
             Spacer()
             Button("Delete", systemImage: "trash") {
                 showDeleteAlert = true
