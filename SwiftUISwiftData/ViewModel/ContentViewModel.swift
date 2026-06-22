@@ -71,6 +71,14 @@ final class ContentViewModel: ObservableObject {
         try memoRepository.moveMemo(from: source, to: destination)
     }
 
+    func protect(_ memos: [Memo]) throws {
+        try memoRepository.protect(memos)
+    }
+
+    func unprotect(_ memos: [Memo]) throws {
+        try memoRepository.unprotect(memos)
+    }
+
     func getTitleLineLimit() -> Int {
         userDefaultsRepository.getTitleLineLimit()
     }
