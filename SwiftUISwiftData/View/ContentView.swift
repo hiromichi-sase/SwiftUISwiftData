@@ -317,7 +317,6 @@ extension ContentView {
             VStack(spacing: .zero) {
                 HStack {
                     rowText(for: memo)
-                        .padding(.bottom)
                     Spacer()
                 }
                 if viewModel.getShowInfo() {
@@ -325,6 +324,7 @@ extension ContentView {
                         InfoText.countView(content: memo.content)
                         InfoText.dateView(for: memo)
                     }
+                    .padding(.top)
                 }
             }
         }
