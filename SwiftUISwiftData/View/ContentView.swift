@@ -369,30 +369,21 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        Button(action: {
+        Button {
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             }
             else {
                 selection.insert(memo.id)
             }
-        }) {
-            VStack(spacing: .zero) {
-                HStack {
-                    rowText(for: memo)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    if memo.protected {
-                        Image(systemName: "lock.fill")
-                    }
-                }
-                if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: memo.content)
-                        InfoText.dateView(for: memo)
-                    }
-                    .padding(.top)
-                }
-            }
+        } label: {
+            ActiveRow(
+                memo: memo,
+                titleLineLimit: viewModel.getTitleLineLimit(),
+                titleFontSize: viewModel.getTitleFontSize(),
+                titleLineSpacing: viewModel.getTitleLineSpacing(),
+                showInfo: viewModel.getShowInfo()
+            )
         }
         .foregroundStyle(.primary)
         .padding()
@@ -408,27 +399,13 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        HStack {
-            VStack(spacing: .zero) {
-                HStack {
-                    rowText(for: memo)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                    if memo.protected {
-                        Image(systemName: "lock.fill")
-                            .padding(.trailing)
-                    }
-                }
-                if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: memo.content)
-                        InfoText.dateView(for: memo)
-                    }
-                    .padding(.bottom)
-                    .padding(.horizontal)
-                }
-            }
-        }
+        InactiveRow(
+            memo: memo,
+            titleLineLimit: viewModel.getTitleLineLimit(),
+            titleFontSize: viewModel.getTitleFontSize(),
+            titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showInfo: viewModel.getShowInfo()
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             selectedMemoId = memo.id
@@ -460,14 +437,6 @@ extension ContentView {
         }
         .listRowInsets(.init())
         .moveDisabled(true)
-    }
-
-    private func rowText(for memo: Memo) -> some View {
-        Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
-            .lineLimit(viewModel.getTitleLineLimit())
-            .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
-            .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
     }
 }
 
