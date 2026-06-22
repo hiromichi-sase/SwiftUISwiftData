@@ -449,12 +449,12 @@ extension ContentView {
                 Button("Duplicate", systemImage: "plus.square") {
                     duplicateMemo(memo)
                 }
+                Button("Protect", systemImage: "lock.fill") {
+                    protect([memo])
+                }
                 Button("Delete", systemImage: "trash", role: .destructive) {
                     memoToDelete = memo
                     currentAlert = .delete
-                }
-                Button("Protect", systemImage: "lock.fill", role: .destructive) {
-                    protect([memo])
                 }
             }
         } preview: {
