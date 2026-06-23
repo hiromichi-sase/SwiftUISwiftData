@@ -166,7 +166,9 @@ struct ContentView: View {
             title: Text("Protect selected memos?"),
             primaryButton: .default(Text("Protect")) {
                 guard !selectedMemos.isEmpty else { return }
-                protect(selectedMemos)
+                Task {
+                    await protect(selectedMemos)
+                }
             },
             secondaryButton: .cancel()
         )
@@ -177,7 +179,9 @@ struct ContentView: View {
             title: Text("Unprotect selected memos?"),
             primaryButton: .default(Text("Unprotect")) {
                 guard !selectedMemos.isEmpty else { return }
-                unprotect(selectedMemos)
+                Task {
+                    await unprotect(selectedMemos)
+                }
             },
             secondaryButton: .cancel()
         )
@@ -413,7 +417,9 @@ extension ContentView {
         .contextMenu {
             if memo.protected {
                 Button("Unprotect", systemImage: "lock.open.fill") {
-                    unprotect([memo])
+                    Task {
+                        await unprotect([memo])
+                    }
                 }
             }
             else {
@@ -425,7 +431,9 @@ extension ContentView {
                     duplicateMemo(memo)
                 }
                 Button("Protect", systemImage: "lock.fill") {
-                    protect([memo])
+                    Task {
+                        await protect([memo])
+                    }
                 }
                 Button("Delete", systemImage: "trash", role: .destructive) {
                     memoToDelete = memo
@@ -498,8 +506,9 @@ extension ContentView {
         }
     }
 
-    private func protect(_ memos: [Memo]) {
+    private func protect(_ memos: [Memo]) async {
         do {
+            guard try await authenticate() else { return }
             try viewModel.protect(memos)
         }
         catch {
@@ -509,8 +518,9 @@ extension ContentView {
         }
     }
 
-    private func unprotect(_ memos: [Memo]) {
+    private func unprotect(_ memos: [Memo]) async {
         do {
+            guard try await authenticate() else { return }
             try viewModel.unprotect(memos)
         }
         catch {
@@ -518,6 +528,17 @@ extension ContentView {
             currentAlert = .error
             print("Failed to unprotect memos: \(error)")
         }
+    }
+
+    private func authenticate() async throws -> Bool {
+        let result = try await AuthenticationManager.shared.authenticate()
+        guard result.success else {
+            guard let error = result.error else {
+                fatalError("Failed to get error from result.")
+            }
+            throw error
+        }
+        return result.success
     }
 }
 
