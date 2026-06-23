@@ -430,14 +430,15 @@ extension ContentView {
                 Button("Duplicate", systemImage: "plus.square") {
                     duplicateMemo(memo)
                 }
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    memoToDelete = memo
+                    currentAlert = .delete
+                }
+                Divider()
                 Button("Protect", systemImage: "lock.fill") {
                     Task {
                         await protect([memo])
                     }
-                }
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    memoToDelete = memo
-                    currentAlert = .delete
                 }
             }
         } preview: {
