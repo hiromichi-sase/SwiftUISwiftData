@@ -108,9 +108,6 @@ struct ContentView: View {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
                     }
-                    ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarItemBottomBar
-                    }
                 }
                 .environment(\.editMode, $editMode)
                 .fullScreenCover(isPresented: $showingAddMemo) {
@@ -232,6 +229,9 @@ struct ContentView: View {
                     editMode = .active
                 }
             }
+            Button("Settings", systemImage: "gearshape.fill") {
+                showSettingsView = true
+            }
         }
         else {
             Button("Done", systemImage: "checkmark") {
@@ -250,6 +250,24 @@ struct ContentView: View {
             }
         }
         else {
+            Menu("Action", systemImage: "square.and.arrow.up") {
+                Button("Protect", systemImage: "lock.fill") {
+                    currentAlert = .protect
+                }
+                Button("Unprotect", systemImage: "lock.open.fill") {
+                    currentAlert = .unprotect
+                }
+                Divider()
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    if selectedMemos.filter({ $0.protected }).isEmpty {
+                        currentAlert = .delete
+                    }
+                    else {
+                        currentAlert = .containsProtectedMemo
+                    }
+                }
+            }
+            .disabled(selection.isEmpty)
             Menu("Menu", systemImage: "ellipsis.circle") {
                 Button("Select All", systemImage: "checkmark.circle") {
                     selection = Set(viewModel.memos.map { $0.id })
@@ -258,39 +276,8 @@ struct ContentView: View {
                 Button("Deselect All", systemImage: "circle") {
                     selection.removeAll()
                 }
-                .disabled(selection.count == .zero)
+                .disabled(selection.isEmpty)
             }
-        }
-    }
-
-    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー。
-    @ViewBuilder
-    private var toolbarItemBottomBar: some View {
-        if editMode == .inactive {
-            Spacer()
-            Button("Settings", systemImage: "gearshape.fill") {
-                showSettingsView = true
-            }
-        }
-        else {
-            Button("Protect", systemImage: "lock.fill") {
-                currentAlert = .protect
-            }
-            .disabled(selection.isEmpty)
-            Button("Unprotect", systemImage: "lock.open.fill") {
-                currentAlert = .unprotect
-            }
-            .disabled(selection.isEmpty)
-            Spacer()
-            Button("Delete", systemImage: "trash") {
-                if selectedMemos.filter({ $0.protected }).isEmpty {
-                    currentAlert = .delete
-                }
-                else {
-                    currentAlert = .containsProtectedMemo
-                }
-            }
-            .disabled(selection.isEmpty)
         }
     }
 
