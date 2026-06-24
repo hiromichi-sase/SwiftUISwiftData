@@ -195,7 +195,9 @@ struct EditMemoView: View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
             showTitleView.toggle()
             if showTitleView {
-                textFieldFocus = true
+                DispatchQueue.main.async {
+                    textFieldFocus = true
+                }
             }
             else {
                 title = titleToStore
