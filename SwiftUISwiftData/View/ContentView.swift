@@ -272,7 +272,7 @@ struct ContentView: View {
                 }
             }
             .disabled(selection.isEmpty)
-            Menu("Menu", systemImage: "ellipsis.circle") {
+            Menu("Select", systemImage: "circle.grid.2x2.topleft.checkmark.filled") {
                 Button("Select All", systemImage: "checkmark.circle") {
                     selection = Set(viewModel.memos.map { $0.id })
                 }
