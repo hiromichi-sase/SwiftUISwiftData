@@ -93,11 +93,13 @@ struct BrowseMemoView: View {
                 UIPasteboard.general.string = memo.title
                 toastMessage = "Successfully copied!"
             }
+            .keyboardShortcut("c", modifiers: [.command, .shift])
         }
         if !memo.protected {
             Button("Edit", systemImage: "pencil") {
                 showingEditMemo = true
             }
+            .keyboardShortcut("e", modifiers: [.command, .shift])
         }
     }
 }

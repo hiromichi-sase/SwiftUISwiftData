@@ -182,6 +182,7 @@ struct SettingsView: View {
             showResetAlert = true
         }
         .disabled(!viewModel.settingsChanged)
+        .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark") {
             viewModel.setHasLink(hasLink)
             viewModel.setContentFontSize(contentFontSize)
@@ -194,6 +195,7 @@ struct SettingsView: View {
             dismiss()
         }
         .disabled(!settingsUpdated)
+        .keyboardShortcut("s", modifiers: [.command])
     }
 
     /// 設定が更新されたかどうかを判定するプロパティ。

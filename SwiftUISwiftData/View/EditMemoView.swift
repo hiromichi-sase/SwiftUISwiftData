@@ -201,6 +201,7 @@ struct EditMemoView: View {
                 title = titleToStore
             }
         }
+        .keyboardShortcut("t", modifiers: [.command])
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {
                 let oldTitle = memo.title
@@ -235,6 +236,7 @@ struct EditMemoView: View {
             }
         }
         .disabled(!memoUpdated || showTitleView)
+        .keyboardShortcut("s", modifiers: [.command])
     }
 
     /// メモが更新されたかどうかを判定するプロパティ。

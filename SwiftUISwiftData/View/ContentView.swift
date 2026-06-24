@@ -228,16 +228,19 @@ struct ContentView: View {
                     selectedMemoId = nil
                     editMode = .active
                 }
+                .keyboardShortcut("e", modifiers: [.command])
             }
             Button("Settings", systemImage: "gearshape.fill") {
                 showSettingsView = true
             }
+            .keyboardShortcut(",", modifiers: [.command, .shift])
         }
         else {
             Button("Done", systemImage: "checkmark") {
                 selection.removeAll()
                 editMode = .inactive
             }
+            .keyboardShortcut(".", modifiers: [.command])
         }
     }
 
@@ -248,6 +251,7 @@ struct ContentView: View {
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
+            .keyboardShortcut("n", modifiers: [.command])
         }
         else {
             Menu("Action", systemImage: "square.and.arrow.up") {
