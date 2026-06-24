@@ -64,8 +64,8 @@ struct ContentView: View {
 
     /// イニシャライザ。
     init() {
-        self._toastMessage = State(initialValue: "")
-        self._error = State(initialValue: nil)
+        _toastMessage = State(initialValue: "")
+        _error = State(initialValue: nil)
     }
 
     var body: some View {
@@ -312,9 +312,9 @@ struct ContentView: View {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
                         withTransaction(transaction) {
-                            self.selection.removeAll()
-                            self.selectedMemoId = newMemo.id
-                            if let proxy = self.scrollViewProxy {
+                            selection.removeAll()
+                            selectedMemoId = newMemo.id
+                            if let proxy = scrollViewProxy {
                                 proxy.scrollTo(newMemo.id, anchor: .center)
                             }
                         }

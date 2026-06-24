@@ -63,11 +63,11 @@ struct EditMemoView: View {
     /// - Parameter memo: 編集するメモ（デフォルトはnilで新規作成）
     init(memo: Memo? = nil) {
         self.memo = memo
-        self._title = State(initialValue: memo?.title ?? "")
-        self._content = State(initialValue: memo?.content ?? "")
-        self._titleToStore = State(initialValue: memo?.title ?? "")
-        self._toastMessage = State(initialValue: "")
-        self._error = State(initialValue: nil)
+        _title = State(initialValue: memo?.title ?? "")
+        _content = State(initialValue: memo?.content ?? "")
+        _titleToStore = State(initialValue: memo?.title ?? "")
+        _toastMessage = State(initialValue: "")
+        _error = State(initialValue: nil)
     }
 
     var body: some View {

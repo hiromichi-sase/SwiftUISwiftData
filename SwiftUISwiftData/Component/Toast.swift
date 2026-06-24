@@ -65,6 +65,6 @@ struct Toast: ViewModifier {
 
 extension View {
     func toast(message: Binding<String>) -> some View {
-        self.modifier(Toast(message: message))
+        modifier(Toast(message: message))
     }
 }

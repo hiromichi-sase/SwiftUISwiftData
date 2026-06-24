@@ -37,8 +37,8 @@ struct BrowseMemoView: View {
     ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
     init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
-        self._openEditMemoView = State(initialValue: openEditMemoView)
-        self._toastMessage = State(initialValue: "")
+        _openEditMemoView = State(initialValue: openEditMemoView)
+        _toastMessage = State(initialValue: "")
     }
 
     var body: some View {

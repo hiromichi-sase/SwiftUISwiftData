@@ -38,7 +38,7 @@ final class ContentViewModel: ObservableObject {
 
     /// Fetches memos from the memoRepository and updates the published memos array.
     func fetchMemos() {
-        self.memos = memoRepository.memos()
+        memos = memoRepository.memos()
     }
 
     /// Duplicated the specified memo in the model context.

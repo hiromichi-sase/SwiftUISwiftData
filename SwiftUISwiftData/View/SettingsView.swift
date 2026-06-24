@@ -38,14 +38,14 @@ struct SettingsView: View {
     private var dismiss
 
     init(settingsSaved: Binding<Bool>) {
-        self._settingsSaved = settingsSaved
-        self._hasLink = State(initialValue: viewModel.getHasLink())
-        self._contentFontSize = State(initialValue: viewModel.getContentFontSize())
-        self._contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
-        self._titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
-        self._titleFontSize = State(initialValue: viewModel.getTitleFontSize())
-        self._titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
-        self._showInfo = State(initialValue: viewModel.getShowInfo())
+        _settingsSaved = settingsSaved
+        _hasLink = State(initialValue: viewModel.getHasLink())
+        _contentFontSize = State(initialValue: viewModel.getContentFontSize())
+        _contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
+        _titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
+        _titleFontSize = State(initialValue: viewModel.getTitleFontSize())
+        _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
+        _showInfo = State(initialValue: viewModel.getShowInfo())
     }
 
     var body: some View {
