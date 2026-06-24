@@ -57,9 +57,10 @@ struct Toast: ViewModifier {
                             message = ""
                         }
                     }
-                    .transition(.opacity)
             }
         }
+        .animation(.linear(duration: 1.0), value: message)
+        .transition(.opacity)
     }
 }
 
