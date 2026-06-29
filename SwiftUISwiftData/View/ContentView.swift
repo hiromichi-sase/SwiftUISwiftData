@@ -61,6 +61,12 @@ struct ContentView: View {
     private var memoDuplicateSource: Memo?
     @State
     private var currentAlert: AlertType?
+    @State
+    private var searchText: String = ""
+    @State
+    private var isSearching: Bool = false
+    @FocusState
+    private var searchViewFocus: Bool
 
     /// イニシャライザ。
     init() {
@@ -70,56 +76,68 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            list
-                .contentMargins([.top], .zero)
-                .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                    onChange(oldMemos: oldMemos, newMemos: newMemos)
+            VStack(spacing: 8.0) {
+                if isSearching {
+                    SearchView(
+                        text: $searchText,
+                        focus: _searchViewFocus
+                    )
                 }
-                .onChange(of: settingsSaved) { _, _ in
-                    guard settingsSaved else { return }
-                    viewModel.fetchMemos()
-                    settingsSaved = false
-                }
-                .onReceive(willSavePublisher) { _ in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                list
+                    .contentMargins([.top], .zero)
+                    .onChange(of: viewModel.memos) { oldMemos, newMemos in
+                        onChange(oldMemos: oldMemos, newMemos: newMemos)
+                    }
+                    .onChange(of: settingsSaved) { _, _ in
+                        guard settingsSaved else { return }
                         viewModel.fetchMemos()
+                        settingsSaved = false
                     }
-                }
-                .alert(item: $currentAlert) { alertType in
-                    switch alertType {
-                        case .delete:
-                            deleteAlert
-                        case .containsProtectedMemo:
-                            containsProtectedMemoAlert
-                        case .protect:
-                            protectAlert
-                        case .unprotect:
-                            unprotectAlert
-                        case .error:
-                            errorAlert
+                    .onChange(of: searchText) {
+                        print("===== [onChange]: \(searchText)")
                     }
-                }
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItemGroup(placement: .topBarLeading) {
-                        toolbarItemTopBarLeading
+                    .onReceive(willSavePublisher) { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            viewModel.fetchMemos()
+                        }
                     }
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        toolbarItemTopBarTrailing
+                    .alert(item: $currentAlert) { alertType in
+                        switch alertType {
+                            case .delete:
+                                deleteAlert
+                            case .containsProtectedMemo:
+                                containsProtectedMemoAlert
+                            case .protect:
+                                protectAlert
+                            case .unprotect:
+                                unprotectAlert
+                            case .error:
+                                errorAlert
+                        }
                     }
-                }
-                .environment(\.editMode, $editMode)
-                .fullScreenCover(isPresented: $showingAddMemo) {
-                    EditMemoView()
-                }
-                .sheet(isPresented: $showSettingsView) {
-                    SettingsView(settingsSaved: $settingsSaved)
-                }
-                .onDisappear {
-                    openEditMemoView = false
-                }
-                .toast(message: $toastMessage)
+                    .navigationTitle(navigationTitle)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .topBarLeading) {
+                            toolbarItemTopBarLeading
+                        }
+                        ToolbarItemGroup(placement: .topBarTrailing) {
+                            toolbarItemTopBarTrailing
+                        }
+                    }
+                    .environment(\.editMode, $editMode)
+                    .fullScreenCover(isPresented: $showingAddMemo) {
+                        EditMemoView()
+                    }
+                    .sheet(isPresented: $showSettingsView) {
+                        SettingsView(settingsSaved: $settingsSaved)
+                    }
+                    .onDisappear {
+                        openEditMemoView = false
+                    }
+                    .toast(message: $toastMessage)
+            }
+            .background(Color("ContentViewListBackground"))
         } detail: {
             detailView
         }
@@ -228,11 +246,13 @@ struct ContentView: View {
                     selectedMemoId = nil
                     editMode = .active
                 }
+                .disabled(isSearching)
                 .keyboardShortcut("e", modifiers: [.command])
             }
             Button("Settings", systemImage: "gearshape.fill") {
                 showSettingsView = true
             }
+            .disabled(isSearching)
             .keyboardShortcut(",", modifiers: [.command, .shift])
         }
         else {
@@ -251,7 +271,17 @@ struct ContentView: View {
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
+            .disabled(isSearching)
             .keyboardShortcut("n", modifiers: [.command])
+            Button("Search", systemImage: "magnifyingglass") {
+                isSearching.toggle()
+                if isSearching {
+                    DispatchQueue.main.async {
+                        searchViewFocus = true
+                    }
+                }
+            }
+            .disabled(viewModel.memos.isEmpty)
         }
         else {
             Menu("Action", systemImage: "square.and.arrow.up") {
