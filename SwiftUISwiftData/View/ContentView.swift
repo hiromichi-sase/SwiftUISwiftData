@@ -19,6 +19,8 @@ struct ContentView: View {
         var id: AlertType { self }
     }
 
+    @Environment(\.scenePhase)
+    private var scenePhase
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
@@ -139,6 +141,14 @@ struct ContentView: View {
                         openEditMemoView = false
                     }
                     .toast(message: $toastMessage)
+                    .onChange(of: scenePhase) {
+                        switch scenePhase {
+                            case .inactive:
+                                searchViewFocus = false
+                            default:
+                                break
+                        }
+                    }
             }
             .background(Color("ContentViewListBackground"))
         } detail: {
