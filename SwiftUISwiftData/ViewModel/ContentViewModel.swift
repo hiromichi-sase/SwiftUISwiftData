@@ -36,6 +36,8 @@ final class ContentViewModel: ObservableObject {
         memoRepository.modelContext
     }
 
+    var searchWords: [String] = []
+
     /// Fetches memos from the memoRepository and updates the published memos array.
     func fetchMemos() {
         memos = memoRepository.memos()
@@ -43,10 +45,11 @@ final class ContentViewModel: ObservableObject {
 
     func filteredMemos(by searchText: String) -> [Memo] {
         guard !searchText.isEmpty else {
+            searchWords = []
             return memos
         }
 
-        let searchWords = searchText.split(separator: " ")
+        searchWords = searchText.split(separator: " ").map { String($0) }
         var conditions: [(Memo) -> Bool] = []
 
         for word in searchWords {

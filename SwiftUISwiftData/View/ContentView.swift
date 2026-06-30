@@ -468,7 +468,8 @@ extension ContentView {
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
-            showInfo: viewModel.getShowInfo()
+            showInfo: viewModel.getShowInfo(),
+            searchWords: viewModel.searchWords
         )
         .contentShape(Rectangle())
         .onTapGesture {
