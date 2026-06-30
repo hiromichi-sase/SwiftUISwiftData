@@ -29,7 +29,7 @@ struct SearchView: View {
                         .foregroundColor(.gray)
                     TextField(placeholder, text: $text)
                         .focused($focus)
-                        .submitLabel(.search)
+                        .submitLabel(.done)
                     Spacer()
                         .frame(width: 8)
                 }
