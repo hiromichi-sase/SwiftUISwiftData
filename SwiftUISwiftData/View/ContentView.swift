@@ -85,7 +85,8 @@ struct ContentView: View {
                 if isSearching {
                     SearchView(
                         text: $searchText,
-                        focus: _searchViewFocus
+                        focus: _searchViewFocus,
+                        placeholder: "Input keywords to search by title"
                     )
                 }
                 list

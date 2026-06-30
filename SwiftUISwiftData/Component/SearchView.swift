@@ -12,6 +12,8 @@ struct SearchView: View {
     var text: String
     @FocusState
     var focus: Bool
+    @State
+    var placeholder: String
 
     var body: some View {
         VStack {
@@ -25,7 +27,7 @@ struct SearchView: View {
                         .frame(width: 12)
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
-                    TextField("Input keywords to search", text: $text)
+                    TextField(placeholder, text: $text)
                         .focused($focus)
                         .submitLabel(.search)
                     Spacer()
