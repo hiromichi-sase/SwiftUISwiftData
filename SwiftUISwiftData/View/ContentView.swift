@@ -67,6 +67,9 @@ struct ContentView: View {
     private var isSearching: Bool = false
     @FocusState
     private var searchViewFocus: Bool
+    private var filteredMemos: [Memo] {
+        viewModel.filteredMemos(by: searchText)
+    }
 
     /// イニシャライザ。
     init() {
@@ -218,7 +221,7 @@ struct ContentView: View {
                 }
                 else {
                     List(selection: $selectedMemoId) {
-                        ForEach(viewModel.memos) { memo in
+                        ForEach(filteredMemos) { memo in
                             inactiveRow(for: memo)
                                 .id(memo.id)
                                 .tag(memo.id)
@@ -234,7 +237,19 @@ struct ContentView: View {
 
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
-        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(viewModel.memos.count))"
+        var title = "Memos ("
+        if editMode == .active {
+            title = title + "\(selection.count)/\(viewModel.memos.count))"
+        }
+        else {
+            if isSearching {
+                title = title + "\(filteredMemos.count)/\(viewModel.memos.count))"
+            }
+            else {
+                title = title + "\(viewModel.memos.count))"
+            }
+        }
+        return title
     }
 
     /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー。
@@ -279,6 +294,9 @@ struct ContentView: View {
                     DispatchQueue.main.async {
                         searchViewFocus = true
                     }
+                }
+                else {
+                    searchText = ""
                 }
             }
             .disabled(viewModel.memos.isEmpty)
@@ -370,7 +388,17 @@ struct ContentView: View {
                     .id(memo.id)
             }
             else {
-                Text("Select a memo")
+                if isSearching {
+                    if searchText.isEmpty {
+                        Text("Select a memo")
+                    }
+                    else {
+                        Text("No matching memo for '\(searchText)'")
+                    }
+                }
+                else {
+                    Text("Select a memo")
+                }
             }
         }
         else {

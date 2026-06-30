@@ -41,6 +41,23 @@ final class ContentViewModel: ObservableObject {
         memos = memoRepository.memos()
     }
 
+    func filteredMemos(by searchText: String) -> [Memo] {
+        guard !searchText.isEmpty else {
+            return memos
+        }
+
+        let searchWords = searchText.split(separator: " ")
+        var conditions: [(Memo) -> Bool] = []
+
+        for word in searchWords {
+            conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        }
+
+        return memos.filter { memo in
+            conditions.reduce(false) { $0 || $1(memo) }
+        }
+    }
+
     /// Duplicated the specified memo in the model context.
     ///
     /// This function takes a Memo object as a parameter and attempts to duplicate it in the memoRepository.
