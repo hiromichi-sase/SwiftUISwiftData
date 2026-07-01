@@ -399,13 +399,8 @@ struct ContentView: View {
                     .id(memo.id)
             }
             else {
-                if isSearching {
-                    if searchText.isEmpty {
-                        Text("Select a memo")
-                    }
-                    else {
-                        Text("No matching memo for '\(searchText)'")
-                    }
+                if filteredMemos.isEmpty {
+                    Text("")
                 }
                 else {
                     Text("Select a memo")
