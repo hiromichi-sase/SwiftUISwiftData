@@ -37,3 +37,18 @@ struct SearchView: View {
         }
     }
 }
+
+#Preview {
+    @Previewable
+    @FocusState
+    var focus: Bool
+
+    SearchView(
+        text: Binding(projectedValue: .constant("a b c")),
+        focus: _focus,
+        placeholder: "Input search text"
+    )
+    .onAppear {
+        focus = true
+    }
+}
