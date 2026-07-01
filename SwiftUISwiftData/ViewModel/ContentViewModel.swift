@@ -49,7 +49,12 @@ final class ContentViewModel: ObservableObject {
             return memos
         }
 
-        searchWords = searchText.split(separator: " ").map { String($0) }
+        if userDefaultsRepository.getDivideKeywordsBySpace() {
+            searchWords = searchText.split(separator: " ").map { String($0) }
+        }
+        else {
+            searchWords = [searchText]
+        }
         var conditions: [(Memo) -> Bool] = []
 
         for word in searchWords {
