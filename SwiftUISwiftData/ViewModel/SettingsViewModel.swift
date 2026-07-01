@@ -107,4 +107,12 @@ final class SettingsViewModel: ObservableObject {
     func setShowInfo(_ value: Bool) {
         userDefaultsRepository.setShowInfo(value)
     }
+
+    func getDivideKeywordsBySpace() -> Bool {
+        userDefaultsRepository.getDivideKeywordsBySpace()
+    }
+
+    func setDivideKeywordsBySpace(_ value: Bool) {
+        userDefaultsRepository.setDivideKeywordsBySpace(value)
+    }
 }

@@ -116,6 +116,18 @@ struct SettingsViewModelTests {
     }
 
     @Test
+    func divideKeywordsBySpace() {
+        let dependency = Dependency()
+        defer {
+            dependency.removeUserDefaults()
+        }
+
+        let defaultValue: Bool = false
+        dependency.testTarget.setDivideKeywordsBySpace(defaultValue)
+        #expect(dependency.testTarget.getDivideKeywordsBySpace() == defaultValue)
+    }
+
+    @Test
     func reset() {
         let dependency = Dependency()
         defer {
@@ -129,6 +141,7 @@ struct SettingsViewModelTests {
         dependency.testTarget.setTitleFontSize(30.0)
         dependency.testTarget.setTitleLineSpacing(5.0)
         dependency.testTarget.setShowInfo(true)
+        dependency.testTarget.setDivideKeywordsBySpace(true)
         #expect(dependency.testTarget.settingsChanged)
 
         dependency.testTarget.reset()

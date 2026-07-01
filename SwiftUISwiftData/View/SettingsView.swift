@@ -32,6 +32,8 @@ struct SettingsView: View {
     @State
     private var showInfo: Bool = false
     @State
+    private var divideKeywordsBySpace: Bool = false
+    @State
     private var showResetAlert = false
     /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
@@ -46,6 +48,7 @@ struct SettingsView: View {
         _titleFontSize = State(initialValue: viewModel.getTitleFontSize())
         _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfo = State(initialValue: viewModel.getShowInfo())
+        _divideKeywordsBySpace = State(initialValue: viewModel.getDivideKeywordsBySpace())
     }
 
     var body: some View {
@@ -55,6 +58,7 @@ struct SettingsView: View {
                 contentSection
                 titleSection
                 infoSection
+                searchSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -157,6 +161,18 @@ struct SettingsView: View {
         }
     }
 
+    private var searchSection: some View {
+        Section("Search") {
+            VStack(alignment: .leading) {
+                Text("Divide Keywords By Space")
+                    .font(.system(size: 12.0))
+                Toggle(isOn: $divideKeywordsBySpace) {
+                    Text(divideKeywordsBySpace ? "ON" : "OFF")
+                }
+            }
+        }
+    }
+
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset all settings?"),
@@ -169,6 +185,7 @@ struct SettingsView: View {
                 titleFontSize = viewModel.getTitleFontSize()
                 titleLineSpacing = viewModel.getTitleLineSpacing()
                 showInfo = viewModel.getShowInfo()
+                divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
                 settingsSaved = true
             },
             secondaryButton: .cancel()
@@ -191,6 +208,7 @@ struct SettingsView: View {
             viewModel.setTitleFontSize(titleFontSize)
             viewModel.setTitleLineSpacing(titleLineSpacing)
             viewModel.setShowInfo(showInfo)
+            viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             settingsSaved = true
             dismiss()
         }
@@ -207,6 +225,7 @@ struct SettingsView: View {
         guard viewModel.getTitleFontSize() == titleFontSize else { return true }
         guard viewModel.getTitleLineSpacing() == titleLineSpacing else { return true }
         guard viewModel.getShowInfo() == showInfo else { return true }
+        guard viewModel.getDivideKeywordsBySpace() == divideKeywordsBySpace else { return true }
         return false
     }
 
