@@ -21,7 +21,6 @@ struct SearchView: View {
                 RoundedRectangle(cornerRadius: 24)
                     .fill(Color(uiColor: .tertiarySystemBackground))
                     .frame(height: 48)
-                    .padding(.horizontal, 4)
                 HStack(spacing: 6) {
                     Spacer()
                         .frame(width: 12)
