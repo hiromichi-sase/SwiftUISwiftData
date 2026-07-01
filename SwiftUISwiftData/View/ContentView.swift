@@ -313,6 +313,7 @@ struct ContentView: View {
                 }
             }
             .disabled(viewModel.memos.isEmpty)
+            .keyboardShortcut("s", modifiers: [.command])
         }
         else {
             Menu("Action", systemImage: "square.and.arrow.up") {
