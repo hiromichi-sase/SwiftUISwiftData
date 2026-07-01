@@ -21,10 +21,13 @@ struct ContentViewModelTests {
         try await dependency.memoRepository.add(memo2)
         await dependency.testTarget.fetchMemos()
 
-        let searchText: String = "1"
-        let filteredMemos = await dependency.testTarget.filteredMemos(by: searchText)
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
+        var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        #expect(filteredMemos.count == 2)
+
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
+        filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
         #expect(filteredMemos.count == 1)
-        #expect(filteredMemos.first?.title == memo1.title)
 
         dependency.removeUserDefaults()
     }
