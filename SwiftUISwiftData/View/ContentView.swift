@@ -99,9 +99,6 @@ struct ContentView: View {
                         viewModel.fetchMemos()
                         settingsSaved = false
                     }
-                    .onChange(of: searchText) {
-                        print("===== [onChange]: \(searchText)")
-                    }
                     .onReceive(willSavePublisher) { _ in
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                             viewModel.fetchMemos()
