@@ -231,11 +231,16 @@ struct ContentView: View {
                     }
                 }
                 else {
-                    List(selection: $selectedMemoId) {
-                        ForEach(filteredMemos) { memo in
-                            inactiveRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
+                    if filteredMemos.isEmpty {
+                        EmptyListView(message: "No memos found")
+                    }
+                    else {
+                        List(selection: $selectedMemoId) {
+                            ForEach(filteredMemos) { memo in
+                                inactiveRow(for: memo)
+                                    .id(memo.id)
+                                    .tag(memo.id)
+                            }
                         }
                     }
                 }
