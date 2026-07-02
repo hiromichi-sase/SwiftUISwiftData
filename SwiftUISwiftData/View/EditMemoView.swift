@@ -55,6 +55,8 @@ struct EditMemoView: View {
     private var error: Error?
     @State
     private var currentAlert: AlertType?
+    @FocusState
+    private var inputViewFocus: Bool
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -74,7 +76,23 @@ struct EditMemoView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 4) {
                 if showTitleView {
-                    titleView
+                    InputView(
+                        text: $title,
+                        focus: _inputViewFocus,
+                        placeholder: "Input title",
+                        textFieldBackground: Color(uiColor: .secondarySystemBackground),
+                        submitLabel: .done,
+                        icon: .none,
+                        submitButtonTapped: {
+                            titleToStore = title
+                            showTitleView = false
+                        },
+                        cancelButtonTapped: {
+                            showTitleView = false
+                            title = titleToStore
+                        }
+                    )
+                    .padding(.bottom, 4)
                 }
                 contentView
                 if viewModel.getShowInfo(), !showTitleView {
@@ -87,7 +105,8 @@ struct EditMemoView: View {
                 }
             }
             .padding(.top, .zero)
-            .padding([.horizontal, .bottom], 16)
+            .padding(.horizontal)
+            .padding(.bottom, 8)
             .onAppear {
                 textEditorFocus = true
                 DispatchQueue.main.async {
@@ -115,22 +134,6 @@ struct EditMemoView: View {
             }
             .toast(message: $toastMessage)
         }
-    }
-
-    /// タイトル編集ビュー。
-    private var titleView: some View {
-        HStack(spacing: 8) {
-            TextField("Input Title", text: $title)
-                .padding(6)
-                .border(.primary)
-                .focused($textFieldFocus)
-                .submitLabel(.done)
-                .onSubmit {
-                    titleToStore = title
-                    showTitleView = false
-                }
-        }
-        .padding(.bottom, 4)
     }
 
     /// 内容編集ビュー。
@@ -193,16 +196,12 @@ struct EditMemoView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
-            showTitleView.toggle()
-            if showTitleView {
-                DispatchQueue.main.async {
-                    textFieldFocus = true
-                }
-            }
-            else {
-                title = titleToStore
+            showTitleView = true
+            DispatchQueue.main.async {
+                inputViewFocus = true
             }
         }
+        .disabled(showTitleView)
         .keyboardShortcut("t", modifiers: [.command])
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {

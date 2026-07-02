@@ -68,7 +68,7 @@ struct ContentView: View {
     @State
     private var isSearching: Bool = false
     @FocusState
-    private var searchViewFocus: Bool
+    private var inputViewFocus: Bool
     private var filteredMemos: [Memo] {
         viewModel.filteredMemos(by: searchText)
     }
@@ -83,14 +83,18 @@ struct ContentView: View {
         NavigationSplitView {
             VStack(spacing: 8.0) {
                 if isSearching {
-                    SearchView(
+                    InputView(
                         text: $searchText,
-                        focus: _searchViewFocus,
-                        placeholder: "Input keywords to search by title"
-                    ) {
-                        isSearching = false
-                        searchText = ""
-                    }
+                        focus: _inputViewFocus,
+                        placeholder: "Input keywords to search by title",
+                        textFieldBackground: Color(uiColor: .tertiarySystemBackground),
+                        submitLabel: .done,
+                        icon: .search,
+                        cancelButtonTapped: {
+                            isSearching = false
+                            searchText = ""
+                        }
+                    )
                     .padding(.horizontal)
                 }
                 list
@@ -146,7 +150,7 @@ struct ContentView: View {
                     .onChange(of: scenePhase) {
                         switch scenePhase {
                             case .inactive:
-                                searchViewFocus = false
+                                inputViewFocus = false
                             default:
                                 break
                         }
@@ -292,7 +296,7 @@ struct ContentView: View {
                 selection.removeAll()
                 editMode = .inactive
             }
-            .keyboardShortcut(".", modifiers: [.command])
+            .keyboardShortcut(.cancelAction)
         }
     }
 
@@ -303,7 +307,7 @@ struct ContentView: View {
             Button("Search", systemImage: "magnifyingglass") {
                 isSearching = true
                 DispatchQueue.main.async {
-                    searchViewFocus = true
+                    inputViewFocus = true
                 }
             }
             .disabled(viewModel.memos.isEmpty || isSearching)
