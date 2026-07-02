@@ -79,7 +79,7 @@ struct EditMemoView: View {
                     InputView(
                         text: $title,
                         focus: _inputViewFocus,
-                        placeholder: "Input keywords to search by title",
+                        placeholder: "Input title",
                         textFieldBackground: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
                         icon: .none,
