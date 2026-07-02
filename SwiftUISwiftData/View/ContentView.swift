@@ -88,11 +88,12 @@ struct ContentView: View {
                         focus: _inputViewFocus,
                         placeholder: "Input keywords to search by title",
                         submitLabel: .done,
-                        icon: .search
-                    ) {
-                        isSearching = false
-                        searchText = ""
-                    }
+                        icon: .search,
+                        cancelButtonTapped: {
+                            isSearching = false
+                            searchText = ""
+                        }
+                    )
                     .padding(.horizontal)
                 }
                 list

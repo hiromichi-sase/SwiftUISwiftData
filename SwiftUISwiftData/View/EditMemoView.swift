@@ -81,11 +81,16 @@ struct EditMemoView: View {
                         focus: _inputViewFocus,
                         placeholder: "Input keywords to search by title",
                         submitLabel: .done,
-                        icon: .search
-                    ) {
-                        showTitleView = false
-                        title = titleToStore
-                    }
+                        icon: .none,
+                        submitButtonTapped: {
+                            titleToStore = title
+                            showTitleView = false
+                        },
+                        cancelButtonTapped: {
+                            showTitleView = false
+                            title = titleToStore
+                        }
+                    )
                 }
                 contentView
                 if viewModel.getShowInfo(), !showTitleView {

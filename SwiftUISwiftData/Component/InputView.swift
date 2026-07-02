@@ -32,6 +32,7 @@ struct InputView: View {
     var submitLabel: SubmitLabel = .done
     @State
     var icon: Icon = .none
+    var submitButtonTapped: (() -> Void)?
     var cancelButtonTapped: (() -> Void)?
 
     var body: some View {
@@ -50,6 +51,9 @@ struct InputView: View {
                     TextField(placeholder, text: $text)
                         .focused($focus)
                         .submitLabel(submitLabel)
+                        .onSubmit {
+                            submitButtonTapped?()
+                        }
                     Spacer()
                         .frame(width: 8)
                 }
