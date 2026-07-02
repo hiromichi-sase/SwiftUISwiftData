@@ -402,7 +402,7 @@ struct ContentView: View {
             }
             else {
                 if filteredMemos.isEmpty {
-                    Text("")
+                    EmptyView()
                 }
                 else {
                     Text("Select a memo")
