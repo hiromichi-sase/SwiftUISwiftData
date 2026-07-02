@@ -1,5 +1,5 @@
 //
-//  SearchView.swift
+//  InputView.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/30.
@@ -7,13 +7,31 @@
 
 import SwiftUI
 
-struct SearchView: View {
+struct InputView: View {
+    enum Icon {
+        case search
+        case none
+
+        var systemName: String {
+            switch self {
+                case .search:
+                    "magnifyingglass"
+                case .none:
+                    ""
+            }
+        }
+    }
+
     @Binding
     var text: String
     @FocusState
     var focus: Bool
     @State
     var placeholder: String
+    @State
+    var submitLabel: SubmitLabel = .done
+    @State
+    var icon: Icon = .none
     var cancelButtonTapped: (() -> Void)?
 
     var body: some View {
@@ -25,11 +43,13 @@ struct SearchView: View {
                 HStack(spacing: 6) {
                     Spacer()
                         .frame(width: 12)
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+                    if !icon.systemName.isEmpty {
+                        Image(systemName: icon.systemName)
+                            .foregroundColor(.gray)
+                    }
                     TextField(placeholder, text: $text)
                         .focused($focus)
-                        .submitLabel(.done)
+                        .submitLabel(submitLabel)
                     Spacer()
                         .frame(width: 8)
                 }
@@ -56,7 +76,7 @@ struct SearchView: View {
     @FocusState
     var focus: Bool
 
-    SearchView(
+    InputView(
         text: Binding(projectedValue: .constant("a b c")),
         focus: _focus,
         placeholder: "Input search text"
