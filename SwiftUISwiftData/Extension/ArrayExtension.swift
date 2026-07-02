@@ -10,6 +10,6 @@ import SwiftUI
 extension Array where Element == Memo {
     mutating func move(from: [Int], to: Int) {
         let source = IndexSet(from)
-        self.move(fromOffsets: source, toOffset: to)
+        move(fromOffsets: source, toOffset: to)
     }
 }

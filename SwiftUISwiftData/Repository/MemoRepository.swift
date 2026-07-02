@@ -72,7 +72,7 @@ final class MemoRepository {
     /// - throws: An error.
     func duplicate(_ memo: Memo) throws {
         try modelContext.transaction {
-            let memos = self.memos().filter { $0.order > memo.order }
+            let memos = memos().filter { $0.order > memo.order }
             for memo in memos {
                 memo.order += 1
             }
@@ -113,7 +113,7 @@ final class MemoRepository {
     /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try modelContext.transaction {
-            let memos = self.memos()
+            let memos = memos()
             var orderedMemos = memos.sorted(by: { $0.order < $1.order })
             orderedMemos.move(from: source, to: destination)
 
@@ -121,6 +121,22 @@ final class MemoRepository {
                 if let existingMemo = memos.first(where: { $0.id == memo.id }) {
                     existingMemo.order = index + 1
                 }
+            }
+        }
+    }
+
+    func protect(_ memos: [Memo]) throws {
+        try modelContext.transaction {
+            for memo in memos {
+                memo.protected = true
+            }
+        }
+    }
+
+    func unprotect(_ memos: [Memo]) throws {
+        try modelContext.transaction {
+            for memo in memos {
+                memo.protected = false
             }
         }
     }

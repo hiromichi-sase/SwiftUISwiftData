@@ -10,6 +10,17 @@ import SwiftUI
 
 /// メモのリストを表示するビュー。
 struct ContentView: View {
+    enum AlertType: Identifiable {
+        case delete
+        case containsProtectedMemo
+        case protect
+        case unprotect
+        case error
+        var id: AlertType { self }
+    }
+
+    @Environment(\.scenePhase)
+    private var scenePhase
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
@@ -31,9 +42,6 @@ struct ContentView: View {
     /// スクロールビューのプロキシを保持する状態変数。
     @State
     private var scrollViewProxy: ScrollViewProxy?
-    /// メモを削除するかどうかの確認アラートを表示するフラグ。
-    @State
-    private var showDeleteAlert = false
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
     private var showingAddMemo = false
@@ -52,65 +60,99 @@ struct ContentView: View {
     @State
     private var error: Error?
     @State
-    private var showErrorAlert = false
-    @State
     private var memoDuplicateSource: Memo?
+    @State
+    private var currentAlert: AlertType?
+    @State
+    private var searchText: String = ""
+    @State
+    private var isSearching: Bool = false
+    @FocusState
+    private var searchViewFocus: Bool
+    private var filteredMemos: [Memo] {
+        viewModel.filteredMemos(by: searchText)
+    }
 
     /// イニシャライザ。
     init() {
-        self._toastMessage = State(initialValue: "")
-        self._error = State(initialValue: nil)
+        _toastMessage = State(initialValue: "")
+        _error = State(initialValue: nil)
     }
 
     var body: some View {
         NavigationSplitView {
-            list
-                .contentMargins([.top], .zero)
-                .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                    onChange(oldMemos: oldMemos, newMemos: newMemos)
+            VStack(spacing: 8.0) {
+                if isSearching {
+                    SearchView(
+                        text: $searchText,
+                        focus: _searchViewFocus,
+                        placeholder: "Input keywords to search by title"
+                    ) {
+                        isSearching = false
+                        searchText = ""
+                    }
+                    .padding(.horizontal)
                 }
-                .onChange(of: settingsSaved) { _, _ in
-                    guard settingsSaved else { return }
-                    viewModel.fetchMemos()
-                    settingsSaved = false
-                }
-                .onReceive(willSavePublisher) { _ in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                list
+                    .contentMargins([.top], .zero)
+                    .onChange(of: viewModel.memos) { oldMemos, newMemos in
+                        onChange(oldMemos: oldMemos, newMemos: newMemos)
+                    }
+                    .onChange(of: settingsSaved) { _, _ in
+                        guard settingsSaved else { return }
                         viewModel.fetchMemos()
+                        settingsSaved = false
                     }
-                }
-                .alert(isPresented: $showDeleteAlert) {
-                    deleteAlert
-                }
-                .alert("The Error occured.", isPresented: $showErrorAlert) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(error?.localizedDescription ?? "")
-                }
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItemGroup(placement: .topBarLeading) {
-                        toolbarItemTopBarLeading
+                    .onReceive(willSavePublisher) { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            viewModel.fetchMemos()
+                        }
                     }
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        toolbarItemTopBarTrailing
+                    .alert(item: $currentAlert) { alertType in
+                        switch alertType {
+                            case .delete:
+                                deleteAlert
+                            case .containsProtectedMemo:
+                                containsProtectedMemoAlert
+                            case .protect:
+                                protectAlert
+                            case .unprotect:
+                                unprotectAlert
+                            case .error:
+                                errorAlert
+                        }
                     }
-                    ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarItemBottomBar
+                    .navigationTitle(navigationTitle)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .topBarLeading) {
+                            toolbarItemTopBarLeading
+                        }
+                        ToolbarItemGroup(placement: .topBarTrailing) {
+                            toolbarItemTopBarTrailing
+                        }
                     }
-                }
-                .environment(\.editMode, $editMode)
-                .fullScreenCover(isPresented: $showingAddMemo) {
-                    EditMemoView()
-                }
-                .sheet(isPresented: $showSettingsView) {
-                    SettingsView(settingsSaved: $settingsSaved)
-                }
-                .onDisappear {
-                    openEditMemoView = false
-                }
-                .toast(message: $toastMessage)
+                    .environment(\.editMode, $editMode)
+                    .fullScreenCover(isPresented: $showingAddMemo) {
+                        EditMemoView()
+                    }
+                    .sheet(isPresented: $showSettingsView) {
+                        SettingsView(settingsSaved: $settingsSaved)
+                    }
+                    .onDisappear {
+                        openEditMemoView = false
+                    }
+                    .toast(message: $toastMessage)
+                    .onChange(of: scenePhase) {
+                        switch scenePhase {
+                            case .inactive:
+                                searchViewFocus = false
+                            default:
+                                break
+                        }
+                    }
+            }
+            .background(Color("ContentViewListBackground"))
         } detail: {
             detailView
         }
@@ -133,6 +175,48 @@ struct ContentView: View {
         )
     }
 
+    private var errorAlert: Alert {
+        .init(
+            title: Text("The Error occured."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var containsProtectedMemoAlert: Alert {
+        .init(
+            title: Text("Protected memos are contained in selected memos."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
+    private var protectAlert: Alert {
+        .init(
+            title: Text("Protect selected memos?"),
+            primaryButton: .default(Text("Protect")) {
+                guard !selectedMemos.isEmpty else { return }
+                Task {
+                    await protect(selectedMemos)
+                }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private var unprotectAlert: Alert {
+        .init(
+            title: Text("Unprotect selected memos?"),
+            primaryButton: .default(Text("Unprotect")) {
+                guard !selectedMemos.isEmpty else { return }
+                Task {
+                    await unprotect(selectedMemos)
+                }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
     /// メモのリストを表示するビュー。
     private var list: some View {
         ScrollViewReader { proxy in
@@ -148,11 +232,16 @@ struct ContentView: View {
                     }
                 }
                 else {
-                    List(selection: $selectedMemoId) {
-                        ForEach(viewModel.memos) { memo in
-                            inactiveRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
+                    if filteredMemos.isEmpty {
+                        EmptyListView(message: "No memos found")
+                    }
+                    else {
+                        List(selection: $selectedMemoId) {
+                            ForEach(filteredMemos) { memo in
+                                inactiveRow(for: memo)
+                                    .id(memo.id)
+                                    .tag(memo.id)
+                            }
                         }
                     }
                 }
@@ -165,7 +254,19 @@ struct ContentView: View {
 
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
-        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(viewModel.memos.count))"
+        var title = "Memos ("
+        if editMode == .active {
+            title = title + "\(selection.count)/\(viewModel.memos.count))"
+        }
+        else {
+            if isSearching {
+                title = title + "\(filteredMemos.count)/\(viewModel.memos.count))"
+            }
+            else {
+                title = title + "\(viewModel.memos.count))"
+            }
+        }
+        return title
     }
 
     /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー。
@@ -177,13 +278,21 @@ struct ContentView: View {
                     selectedMemoId = nil
                     editMode = .active
                 }
+                .disabled(isSearching)
+                .keyboardShortcut("e", modifiers: [.command])
             }
+            Button("Settings", systemImage: "gearshape.fill") {
+                showSettingsView = true
+            }
+            .disabled(isSearching)
+            .keyboardShortcut(",", modifiers: [.command, .shift])
         }
         else {
             Button("Done", systemImage: "checkmark") {
                 selection.removeAll()
                 editMode = .inactive
             }
+            .keyboardShortcut(".", modifiers: [.command])
         }
     }
 
@@ -191,12 +300,40 @@ struct ContentView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
+            Button("Search", systemImage: "magnifyingglass") {
+                isSearching = true
+                DispatchQueue.main.async {
+                    searchViewFocus = true
+                }
+            }
+            .disabled(viewModel.memos.isEmpty || isSearching)
+            .keyboardShortcut("s", modifiers: [.command])
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
+            .disabled(isSearching)
+            .keyboardShortcut("n", modifiers: [.command])
         }
         else {
-            Menu("Menu", systemImage: "ellipsis.circle") {
+            Menu("Action", systemImage: "square.and.arrow.up") {
+                Button("Protect", systemImage: "lock.fill") {
+                    currentAlert = .protect
+                }
+                Button("Unprotect", systemImage: "lock.open.fill") {
+                    currentAlert = .unprotect
+                }
+                Divider()
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    if selectedMemos.filter({ $0.protected }).isEmpty {
+                        currentAlert = .delete
+                    }
+                    else {
+                        currentAlert = .containsProtectedMemo
+                    }
+                }
+            }
+            .disabled(selection.isEmpty)
+            Menu("Select", systemImage: "circle.grid.2x2.topleft.checkmark.filled") {
                 Button("Select All", systemImage: "checkmark.circle") {
                     selection = Set(viewModel.memos.map { $0.id })
                 }
@@ -204,26 +341,8 @@ struct ContentView: View {
                 Button("Deselect All", systemImage: "circle") {
                     selection.removeAll()
                 }
-                .disabled(selection.count == .zero)
+                .disabled(selection.isEmpty)
             }
-        }
-    }
-
-    /// ツールバーの下側のアイテムを編集モードの状態に応じて動的に生成するビュー。
-    @ViewBuilder
-    private var toolbarItemBottomBar: some View {
-        if editMode == .inactive {
-            Spacer()
-            Button("Settings", systemImage: "gearshape.fill") {
-                showSettingsView = true
-            }
-        }
-        else {
-            Spacer()
-            Button("Delete", systemImage: "trash") {
-                showDeleteAlert = true
-            }
-            .disabled(selection.isEmpty)
         }
     }
 
@@ -258,9 +377,9 @@ struct ContentView: View {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
                         withTransaction(transaction) {
-                            self.selection.removeAll()
-                            self.selectedMemoId = newMemo.id
-                            if let proxy = self.scrollViewProxy {
+                            selection.removeAll()
+                            selectedMemoId = newMemo.id
+                            if let proxy = scrollViewProxy {
                                 proxy.scrollTo(newMemo.id, anchor: .center)
                             }
                         }
@@ -282,7 +401,12 @@ struct ContentView: View {
                     .id(memo.id)
             }
             else {
-                Text("Select a memo")
+                if filteredMemos.isEmpty {
+                    EmptyView()
+                }
+                else {
+                    Text("Select a memo")
+                }
             }
         }
         else {
@@ -306,27 +430,21 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
-        Button(action: {
+        Button {
             if selection.contains(memo.id) {
                 selection.remove(memo.id)
             }
             else {
                 selection.insert(memo.id)
             }
-        }) {
-            VStack(spacing: .zero) {
-                HStack {
-                    rowText(for: memo)
-                        .padding(.bottom)
-                    Spacer()
-                }
-                if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: memo.content)
-                        InfoText.dateView(for: memo)
-                    }
-                }
-            }
+        } label: {
+            ActiveRow(
+                memo: memo,
+                titleLineLimit: viewModel.getTitleLineLimit(),
+                titleFontSize: viewModel.getTitleFontSize(),
+                titleLineSpacing: viewModel.getTitleLineSpacing(),
+                showInfo: viewModel.getShowInfo()
+            )
         }
         .foregroundStyle(.primary)
         .padding()
@@ -342,52 +460,50 @@ extension ContentView {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        HStack {
-            VStack(spacing: .zero) {
-                HStack {
-                    rowText(for: memo)
-                        .padding()
-                    Spacer()
-                }
-                if viewModel.getShowInfo() {
-                    VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: memo.content)
-                        InfoText.dateView(for: memo)
-                    }
-                    .padding(.bottom)
-                    .padding(.horizontal)
-                }
-            }
-        }
+        InactiveRow(
+            memo: memo,
+            titleLineLimit: viewModel.getTitleLineLimit(),
+            titleFontSize: viewModel.getTitleFontSize(),
+            titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showInfo: viewModel.getShowInfo(),
+            searchWords: viewModel.searchWords
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             selectedMemoId = memo.id
         }
         .contextMenu {
-            Button("Edit", systemImage: "pencil") {
-                openEditMemoView = true
-                selectedMemoId = memo.id
+            if memo.protected {
+                Button("Unprotect", systemImage: "lock.open.fill") {
+                    Task {
+                        await unprotect([memo])
+                    }
+                }
             }
-            Button("Duplicate", systemImage: "plus.square") {
-                duplicateMemo(memo)
-            }
-            Button("Delete", systemImage: "trash", role: .destructive) {
-                memoToDelete = memo
-                showDeleteAlert = true
+            else {
+                Button("Edit", systemImage: "pencil") {
+                    openEditMemoView = true
+                    selectedMemoId = memo.id
+                }
+                Button("Duplicate", systemImage: "plus.square") {
+                    duplicateMemo(memo)
+                }
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    memoToDelete = memo
+                    currentAlert = .delete
+                }
+                Divider()
+                Button("Protect", systemImage: "lock.fill") {
+                    Task {
+                        await protect([memo])
+                    }
+                }
             }
         } preview: {
             PreviewMemoView(memo: memo)
         }
         .listRowInsets(.init())
         .moveDisabled(true)
-    }
-
-    private func rowText(for memo: Memo) -> some View {
-        Text(memo.title.isEmpty ? CommonString.noTitle : memo.title)
-            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
-            .lineLimit(viewModel.getTitleLineLimit())
-            .font(.system(size: CGFloat(viewModel.getTitleFontSize())))
-            .lineSpacing(CGFloat(viewModel.getTitleLineSpacing()))
     }
 }
 
@@ -401,7 +517,7 @@ extension ContentView {
         catch {
             memoDuplicateSource = nil
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to duplicate memo: \(memo)")
         }
     }
@@ -423,7 +539,7 @@ extension ContentView {
         }
         catch {
             self.error = error
-            showErrorAlert = true
+            currentAlert = .error
             print("Failed to delete memos: \(error)")
         }
     }
@@ -443,10 +559,45 @@ extension ContentView {
             }
             catch {
                 self.error = error
-                showErrorAlert = true
+                currentAlert = .error
                 print("Failed to move memo: \(error)")
             }
         }
+    }
+
+    private func protect(_ memos: [Memo]) async {
+        do {
+            guard try await authenticate() else { return }
+            try viewModel.protect(memos)
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+            print("Failed to protect memos: \(error)")
+        }
+    }
+
+    private func unprotect(_ memos: [Memo]) async {
+        do {
+            guard try await authenticate() else { return }
+            try viewModel.unprotect(memos)
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+            print("Failed to unprotect memos: \(error)")
+        }
+    }
+
+    private func authenticate() async throws -> Bool {
+        let result = try await AuthenticationManager.shared.authenticate()
+        guard result.success else {
+            guard let error = result.error else {
+                fatalError("Failed to get error from result.")
+            }
+            throw error
+        }
+        return result.success
     }
 }
 

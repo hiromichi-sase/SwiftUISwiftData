@@ -37,8 +37,8 @@ struct BrowseMemoView: View {
     ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
     init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
-        self._openEditMemoView = State(initialValue: openEditMemoView)
-        self._toastMessage = State(initialValue: "")
+        _openEditMemoView = State(initialValue: openEditMemoView)
+        _toastMessage = State(initialValue: "")
     }
 
     var body: some View {
@@ -93,9 +93,13 @@ struct BrowseMemoView: View {
                 UIPasteboard.general.string = memo.title
                 toastMessage = "Successfully copied!"
             }
+            .keyboardShortcut("c", modifiers: [.command, .shift])
         }
-        Button("Edit", systemImage: "pencil") {
-            showingEditMemo = true
+        if !memo.protected {
+            Button("Edit", systemImage: "pencil") {
+                showingEditMemo = true
+            }
+            .keyboardShortcut("e", modifiers: [.command, .shift])
         }
     }
 }

@@ -36,7 +36,7 @@ struct TextView: UIViewRepresentable {
         contentFontSize: Float = .zero,
         contentLineSpacing: Float = .zero
     ) {
-        self._text = text
+        _text = text
         self.isEditable = isEditable
         self.defaultText = defaultText
         self.hasLink = hasLink
@@ -111,6 +111,6 @@ final class Coordinator: NSObject, UITextViewDelegate {
     /// Called whenever the text in the UITextView changes, allowing the Coordinator to update the SwiftUI state with the new text content.
     /// - Parameter textView: The UITextView instance whose text has changed.
     func textViewDidChange(_ textView: UITextView) {
-        self.text.wrappedValue = textView.text
+        text.wrappedValue = textView.text
     }
 }

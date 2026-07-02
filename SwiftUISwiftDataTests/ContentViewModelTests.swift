@@ -12,6 +12,27 @@ import Testing
 
 struct ContentViewModelTests {
     @Test
+    func filteredMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        await dependency.testTarget.fetchMemos()
+
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
+        var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        #expect(filteredMemos.count == 2)
+
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
+        filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        #expect(filteredMemos.count == 1)
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
     func duplicate() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
@@ -96,6 +117,52 @@ struct ContentViewModelTests {
         #expect(memos[2].order == 3)
         #expect(memos[2].title == "Test Title 2")
         #expect(memos[2].content == "Test Memo 2")
+        dependency.removeUserDefaults()
+    }
+
+    @Test
+    func protectMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: false)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: false)
+        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: false)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
+
+        try await dependency.testTarget.protect([memo1])
+        try await dependency.testTarget.protect([memo2])
+        try await dependency.testTarget.protect([memo3])
+
+        let memos = await dependency.memoRepository.memos()
+        for memo in memos {
+            #expect(memo.protected)
+        }
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
+    func unprotectMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: true)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: true)
+        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: true)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        try await dependency.memoRepository.add(memo3)
+
+        try await dependency.testTarget.unprotect([memo1])
+        try await dependency.testTarget.unprotect([memo2])
+        try await dependency.testTarget.unprotect([memo3])
+
+        let memos = await dependency.memoRepository.memos()
+        for memo in memos {
+            #expect(!memo.protected)
+        }
+
         dependency.removeUserDefaults()
     }
 

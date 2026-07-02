@@ -119,6 +119,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				452E90CF2FEB7E380013E8B8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				45D8A3E22FA8836A003C123D /* SwiftUISwiftData */,
@@ -210,6 +211,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4569ECFF2FDE500300CCFCAC /* XCRemoteSwiftPackageReference "swift-format" */,
+				45AB38A62FEB7E1900922BB5 /* XCLocalSwiftPackageReference "SwiftFormatBuildToolPlugin" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45D8A3E12FA8836A003C123D /* Products */;
@@ -272,6 +274,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		452E90CF2FEB7E380013E8B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 452E90CE2FEB7E380013E8B8 /* SwiftFormatBuildToolPlugin */;
+		};
 		45D8A3F32FA8836A003C123D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 45D8A3DF2FA8836A003C123D /* SwiftUISwiftData */;
@@ -297,6 +303,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftUISwiftData/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app uses Touch ID / Face ID to secure your data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -331,6 +338,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftUISwiftData/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app uses Touch ID / Face ID to secure your data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -601,6 +609,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		45AB38A62FEB7E1900922BB5 /* XCLocalSwiftPackageReference "SwiftFormatBuildToolPlugin" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = SwiftFormatBuildToolPlugin;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		4569ECFF2FDE500300CCFCAC /* XCRemoteSwiftPackageReference "swift-format" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -611,6 +626,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		452E90CE2FEB7E380013E8B8 /* SwiftFormatBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45AB38A62FEB7E1900922BB5 /* XCLocalSwiftPackageReference "SwiftFormatBuildToolPlugin" */;
+			productName = "plugin:SwiftFormatBuildToolPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 45D8A3D82FA8836A003C123D /* Project object */;
 }

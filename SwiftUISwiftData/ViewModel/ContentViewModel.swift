@@ -36,9 +36,34 @@ final class ContentViewModel: ObservableObject {
         memoRepository.modelContext
     }
 
+    var searchWords: [String] = []
+
     /// Fetches memos from the memoRepository and updates the published memos array.
     func fetchMemos() {
-        self.memos = memoRepository.memos()
+        memos = memoRepository.memos()
+    }
+
+    func filteredMemos(by searchText: String) -> [Memo] {
+        guard !searchText.isEmpty else {
+            searchWords = []
+            return memos
+        }
+
+        if userDefaultsRepository.getDivideKeywordsBySpace() {
+            searchWords = searchText.split(separator: " ").map { String($0) }
+        }
+        else {
+            searchWords = [searchText]
+        }
+        var conditions: [(Memo) -> Bool] = []
+
+        for word in searchWords {
+            conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        }
+
+        return memos.filter { memo in
+            conditions.reduce(false) { $0 || $1(memo) }
+        }
     }
 
     /// Duplicated the specified memo in the model context.
@@ -69,6 +94,14 @@ final class ContentViewModel: ObservableObject {
     /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
         try memoRepository.moveMemo(from: source, to: destination)
+    }
+
+    func protect(_ memos: [Memo]) throws {
+        try memoRepository.protect(memos)
+    }
+
+    func unprotect(_ memos: [Memo]) throws {
+        try memoRepository.unprotect(memos)
     }
 
     func getTitleLineLimit() -> Int {

@@ -57,14 +57,15 @@ struct Toast: ViewModifier {
                             message = ""
                         }
                     }
-                    .transition(.opacity)
             }
         }
+        .animation(.linear(duration: 1.0), value: message)
+        .transition(.opacity)
     }
 }
 
 extension View {
     func toast(message: Binding<String>) -> some View {
-        self.modifier(Toast(message: message))
+        modifier(Toast(message: message))
     }
 }

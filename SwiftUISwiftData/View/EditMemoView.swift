@@ -10,6 +10,12 @@ import SwiftUI
 
 /// メモの内容を編集するビュー。
 struct EditMemoView: View {
+    enum AlertType: Identifiable {
+        case close
+        case error
+        var id: AlertType { self }
+    }
+
     /// ビューモデルの状態変数。
     @ObservedObject
     var viewModel = EditMemoViewModel(
@@ -31,9 +37,6 @@ struct EditMemoView: View {
     /// 内容の状態変数。
     @State
     private var content: String
-    /// 変更を破棄して閉じるかどうかの確認アラートを表示するフラグ。
-    @State
-    private var showCloseAlert = false
     /// タイトル編集ビューを表示するフラグ。
     @State
     private var showTitleView = false
@@ -51,7 +54,7 @@ struct EditMemoView: View {
     @State
     private var error: Error?
     @State
-    private var showErrorAlert = false
+    private var currentAlert: AlertType?
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -60,11 +63,11 @@ struct EditMemoView: View {
     /// - Parameter memo: 編集するメモ（デフォルトはnilで新規作成）
     init(memo: Memo? = nil) {
         self.memo = memo
-        self._title = State(initialValue: memo?.title ?? "")
-        self._content = State(initialValue: memo?.content ?? "")
-        self._titleToStore = State(initialValue: memo?.title ?? "")
-        self._toastMessage = State(initialValue: "")
-        self._error = State(initialValue: nil)
+        _title = State(initialValue: memo?.title ?? "")
+        _content = State(initialValue: memo?.content ?? "")
+        _titleToStore = State(initialValue: memo?.title ?? "")
+        _toastMessage = State(initialValue: "")
+        _error = State(initialValue: nil)
     }
 
     var body: some View {
@@ -91,13 +94,13 @@ struct EditMemoView: View {
                     textSelection = .init(insertionPoint: content.startIndex)
                 }
             }
-            .alert(isPresented: $showCloseAlert) {
-                closeAlert
-            }
-            .alert("The Error occured.", isPresented: $showErrorAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(error?.localizedDescription ?? "")
+            .alert(item: $currentAlert) { alertType in
+                switch alertType {
+                    case .close:
+                        closeAlert
+                    case .error:
+                        errorAlert
+                }
             }
             .navigationTitle(titleToStore)
             .navigationBarTitleDisplayMode(.inline)
@@ -160,6 +163,14 @@ struct EditMemoView: View {
         )
     }
 
+    private var errorAlert: Alert {
+        .init(
+            title: Text("The Error occured."),
+            message: Text(error?.localizedDescription ?? ""),
+            dismissButton: .default(Text("OK"))
+        )
+    }
+
     /// ツールバーの左側のアイテムを定義するビュー。
     ///
     /// 変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
@@ -167,7 +178,7 @@ struct EditMemoView: View {
     private var toolbarItemTopBarLeading: some View {
         Button("Close", systemImage: "xmark") {
             if memoUpdated {
-                showCloseAlert = true
+                currentAlert = .close
             }
             else {
                 dismiss()
@@ -184,12 +195,15 @@ struct EditMemoView: View {
         Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
             showTitleView.toggle()
             if showTitleView {
-                textFieldFocus = true
+                DispatchQueue.main.async {
+                    textFieldFocus = true
+                }
             }
             else {
                 title = titleToStore
             }
         }
+        .keyboardShortcut("t", modifiers: [.command])
         Button("Save", systemImage: "square.and.pencil") {
             if let memo {
                 let oldTitle = memo.title
@@ -201,7 +215,7 @@ struct EditMemoView: View {
                 }
                 catch {
                     self.error = error
-                    showErrorAlert = true
+                    currentAlert = .error
 
                     memo.title = oldTitle
                     memo.content = oldContent
@@ -218,12 +232,13 @@ struct EditMemoView: View {
                 }
                 catch {
                     self.error = error
-                    showErrorAlert = true
+                    currentAlert = .error
                     print("Failed to add memo: \(error)")
                 }
             }
         }
         .disabled(!memoUpdated || showTitleView)
+        .keyboardShortcut("s", modifiers: [.command])
     }
 
     /// メモが更新されたかどうかを判定するプロパティ。
