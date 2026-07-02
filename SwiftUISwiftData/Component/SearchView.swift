@@ -14,9 +14,10 @@ struct SearchView: View {
     var focus: Bool
     @State
     var placeholder: String
+    var cancelButtonTapped: (() -> Void)?
 
     var body: some View {
-        VStack {
+        HStack(spacing: 0.0) {
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
                     .fill(Color(uiColor: .tertiarySystemBackground))
@@ -33,7 +34,19 @@ struct SearchView: View {
                         .frame(width: 8)
                 }
             }
-            .padding(.horizontal)
+            .padding(.trailing, 7)
+            Button {
+                cancelButtonTapped?()
+            } label: {
+                Image(systemName: "xmark.circle")
+                    .font(.system(size: 29))
+                    .fontWeight(.light)
+            }
+            .padding(.leading, 0)
+            .padding(.trailing, -5)
+            .buttonBorderShape(.circle)
+            .buttonStyle(.glass)
+            .keyboardShortcut(.cancelAction)
         }
     }
 }

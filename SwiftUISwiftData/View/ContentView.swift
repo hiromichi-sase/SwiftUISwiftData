@@ -87,7 +87,11 @@ struct ContentView: View {
                         text: $searchText,
                         focus: _searchViewFocus,
                         placeholder: "Input keywords to search by title"
-                    )
+                    ) {
+                        isSearching = false
+                        searchText = ""
+                    }
+                    .padding(.horizontal)
                 }
                 list
                     .contentMargins([.top], .zero)
