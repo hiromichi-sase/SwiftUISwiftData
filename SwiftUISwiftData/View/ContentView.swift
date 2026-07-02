@@ -19,6 +19,8 @@ struct ContentView: View {
         var id: AlertType { self }
     }
 
+    @Environment(\.scenePhase)
+    private var scenePhase
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
@@ -61,6 +63,15 @@ struct ContentView: View {
     private var memoDuplicateSource: Memo?
     @State
     private var currentAlert: AlertType?
+    @State
+    private var searchText: String = ""
+    @State
+    private var isSearching: Bool = false
+    @FocusState
+    private var searchViewFocus: Bool
+    private var filteredMemos: [Memo] {
+        viewModel.filteredMemos(by: searchText)
+    }
 
     /// イニシャライザ。
     init() {
@@ -70,56 +81,78 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            list
-                .contentMargins([.top], .zero)
-                .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                    onChange(oldMemos: oldMemos, newMemos: newMemos)
+            VStack(spacing: 8.0) {
+                if isSearching {
+                    SearchView(
+                        text: $searchText,
+                        focus: _searchViewFocus,
+                        placeholder: "Input keywords to search by title"
+                    ) {
+                        isSearching = false
+                        searchText = ""
+                    }
+                    .padding(.horizontal)
                 }
-                .onChange(of: settingsSaved) { _, _ in
-                    guard settingsSaved else { return }
-                    viewModel.fetchMemos()
-                    settingsSaved = false
-                }
-                .onReceive(willSavePublisher) { _ in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                list
+                    .contentMargins([.top], .zero)
+                    .onChange(of: viewModel.memos) { oldMemos, newMemos in
+                        onChange(oldMemos: oldMemos, newMemos: newMemos)
+                    }
+                    .onChange(of: settingsSaved) { _, _ in
+                        guard settingsSaved else { return }
                         viewModel.fetchMemos()
+                        settingsSaved = false
                     }
-                }
-                .alert(item: $currentAlert) { alertType in
-                    switch alertType {
-                        case .delete:
-                            deleteAlert
-                        case .containsProtectedMemo:
-                            containsProtectedMemoAlert
-                        case .protect:
-                            protectAlert
-                        case .unprotect:
-                            unprotectAlert
-                        case .error:
-                            errorAlert
+                    .onReceive(willSavePublisher) { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            viewModel.fetchMemos()
+                        }
                     }
-                }
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItemGroup(placement: .topBarLeading) {
-                        toolbarItemTopBarLeading
+                    .alert(item: $currentAlert) { alertType in
+                        switch alertType {
+                            case .delete:
+                                deleteAlert
+                            case .containsProtectedMemo:
+                                containsProtectedMemoAlert
+                            case .protect:
+                                protectAlert
+                            case .unprotect:
+                                unprotectAlert
+                            case .error:
+                                errorAlert
+                        }
                     }
-                    ToolbarItemGroup(placement: .topBarTrailing) {
-                        toolbarItemTopBarTrailing
+                    .navigationTitle(navigationTitle)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .topBarLeading) {
+                            toolbarItemTopBarLeading
+                        }
+                        ToolbarItemGroup(placement: .topBarTrailing) {
+                            toolbarItemTopBarTrailing
+                        }
                     }
-                }
-                .environment(\.editMode, $editMode)
-                .fullScreenCover(isPresented: $showingAddMemo) {
-                    EditMemoView()
-                }
-                .sheet(isPresented: $showSettingsView) {
-                    SettingsView(settingsSaved: $settingsSaved)
-                }
-                .onDisappear {
-                    openEditMemoView = false
-                }
-                .toast(message: $toastMessage)
+                    .environment(\.editMode, $editMode)
+                    .fullScreenCover(isPresented: $showingAddMemo) {
+                        EditMemoView()
+                    }
+                    .sheet(isPresented: $showSettingsView) {
+                        SettingsView(settingsSaved: $settingsSaved)
+                    }
+                    .onDisappear {
+                        openEditMemoView = false
+                    }
+                    .toast(message: $toastMessage)
+                    .onChange(of: scenePhase) {
+                        switch scenePhase {
+                            case .inactive:
+                                searchViewFocus = false
+                            default:
+                                break
+                        }
+                    }
+            }
+            .background(Color("ContentViewListBackground"))
         } detail: {
             detailView
         }
@@ -199,11 +232,16 @@ struct ContentView: View {
                     }
                 }
                 else {
-                    List(selection: $selectedMemoId) {
-                        ForEach(viewModel.memos) { memo in
-                            inactiveRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
+                    if filteredMemos.isEmpty {
+                        EmptyListView(message: "No memos found")
+                    }
+                    else {
+                        List(selection: $selectedMemoId) {
+                            ForEach(filteredMemos) { memo in
+                                inactiveRow(for: memo)
+                                    .id(memo.id)
+                                    .tag(memo.id)
+                            }
                         }
                     }
                 }
@@ -216,7 +254,19 @@ struct ContentView: View {
 
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
-        "Memos (\(editMode == .active ? "\(selection.count)/" : "")\(viewModel.memos.count))"
+        var title = "Memos ("
+        if editMode == .active {
+            title = title + "\(selection.count)/\(viewModel.memos.count))"
+        }
+        else {
+            if isSearching {
+                title = title + "\(filteredMemos.count)/\(viewModel.memos.count))"
+            }
+            else {
+                title = title + "\(viewModel.memos.count))"
+            }
+        }
+        return title
     }
 
     /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー。
@@ -228,11 +278,13 @@ struct ContentView: View {
                     selectedMemoId = nil
                     editMode = .active
                 }
+                .disabled(isSearching)
                 .keyboardShortcut("e", modifiers: [.command])
             }
             Button("Settings", systemImage: "gearshape.fill") {
                 showSettingsView = true
             }
+            .disabled(isSearching)
             .keyboardShortcut(",", modifiers: [.command, .shift])
         }
         else {
@@ -248,9 +300,18 @@ struct ContentView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
+            Button("Search", systemImage: "magnifyingglass") {
+                isSearching = true
+                DispatchQueue.main.async {
+                    searchViewFocus = true
+                }
+            }
+            .disabled(viewModel.memos.isEmpty || isSearching)
+            .keyboardShortcut("s", modifiers: [.command])
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
+            .disabled(isSearching)
             .keyboardShortcut("n", modifiers: [.command])
         }
         else {
@@ -340,7 +401,12 @@ struct ContentView: View {
                     .id(memo.id)
             }
             else {
-                Text("Select a memo")
+                if filteredMemos.isEmpty {
+                    EmptyView()
+                }
+                else {
+                    Text("Select a memo")
+                }
             }
         }
         else {
@@ -399,7 +465,8 @@ extension ContentView {
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
-            showInfo: viewModel.getShowInfo()
+            showInfo: viewModel.getShowInfo(),
+            searchWords: viewModel.searchWords
         )
         .contentShape(Rectangle())
         .onTapGesture {

@@ -36,9 +36,34 @@ final class ContentViewModel: ObservableObject {
         memoRepository.modelContext
     }
 
+    var searchWords: [String] = []
+
     /// Fetches memos from the memoRepository and updates the published memos array.
     func fetchMemos() {
         memos = memoRepository.memos()
+    }
+
+    func filteredMemos(by searchText: String) -> [Memo] {
+        guard !searchText.isEmpty else {
+            searchWords = []
+            return memos
+        }
+
+        if userDefaultsRepository.getDivideKeywordsBySpace() {
+            searchWords = searchText.split(separator: " ").map { String($0) }
+        }
+        else {
+            searchWords = [searchText]
+        }
+        var conditions: [(Memo) -> Bool] = []
+
+        for word in searchWords {
+            conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        }
+
+        return memos.filter { memo in
+            conditions.reduce(false) { $0 || $1(memo) }
+        }
     }
 
     /// Duplicated the specified memo in the model context.

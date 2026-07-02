@@ -12,6 +12,27 @@ import Testing
 
 struct ContentViewModelTests {
     @Test
+    func filteredMemos() async throws {
+        let dependency = Dependency()
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+        await dependency.testTarget.fetchMemos()
+
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
+        var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        #expect(filteredMemos.count == 2)
+
+        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
+        filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        #expect(filteredMemos.count == 1)
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
     func duplicate() async throws {
         let dependency = Dependency()
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)

@@ -13,6 +13,7 @@ struct InactiveRow: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
+    let searchWords: [String]
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -21,7 +22,8 @@ struct InactiveRow: View {
                     memo: memo,
                     titleLineLimit: titleLineLimit,
                     titleFontSize: titleFontSize,
-                    titleLineSpacing: titleLineSpacing
+                    titleLineSpacing: titleLineSpacing,
+                    searchWords: searchWords
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()

@@ -16,6 +16,7 @@ final class UserDefaultsRepository {
         case titleFontSize
         case titleLineSpacing
         case showInfo
+        case divideKeywordsBySpace
 
         var defaultValue: Any? {
             switch self {
@@ -26,6 +27,7 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(16.0)
                 case .titleLineSpacing: Float.zero
                 case .showInfo: false
+                case .divideKeywordsBySpace: false
             }
         }
 
@@ -38,6 +40,7 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(100.0)
                 case .titleLineSpacing: Float(10.0)
                 case .showInfo: nil
+                case .divideKeywordsBySpace: nil
             }
         }
 
@@ -50,6 +53,7 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(5.0)
                 case .titleLineSpacing: Float.zero
                 case .showInfo: nil
+                case .divideKeywordsBySpace: nil
             }
         }
     }
@@ -108,6 +112,11 @@ final class UserDefaultsRepository {
                         fatalError("Failed to get Bool value")
                     }
                     changedCount += getShowInfo() != value ? 1 : .zero
+                case .divideKeywordsBySpace:
+                    guard let value = value as? Bool else {
+                        fatalError("Failed to get Bool value")
+                    }
+                    changedCount += getDivideKeywordsBySpace() != value ? 1 : .zero
             }
         }
         return changedCount > .zero
@@ -208,5 +217,14 @@ final class UserDefaultsRepository {
     func setShowInfo(_ value: Bool) {
         guard getShowInfo() != value else { return }
         userDefaults.set(value, forKey: Key.showInfo.rawValue)
+    }
+
+    func getDivideKeywordsBySpace() -> Bool {
+        userDefaults.bool(forKey: Key.divideKeywordsBySpace.rawValue)
+    }
+
+    func setDivideKeywordsBySpace(_ value: Bool) {
+        guard getDivideKeywordsBySpace() != value else { return }
+        userDefaults.set(value, forKey: Key.divideKeywordsBySpace.rawValue)
     }
 }
