@@ -300,24 +300,19 @@ struct ContentView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode == .inactive {
+            Button("Search", systemImage: "magnifyingglass") {
+                isSearching = true
+                DispatchQueue.main.async {
+                    searchViewFocus = true
+                }
+            }
+            .disabled(viewModel.memos.isEmpty || isSearching)
+            .keyboardShortcut("s", modifiers: [.command])
             Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
             .disabled(isSearching)
             .keyboardShortcut("n", modifiers: [.command])
-            Button("Search", systemImage: "magnifyingglass") {
-                isSearching.toggle()
-                if isSearching {
-                    DispatchQueue.main.async {
-                        searchViewFocus = true
-                    }
-                }
-                else {
-                    searchText = ""
-                }
-            }
-            .disabled(viewModel.memos.isEmpty)
-            .keyboardShortcut("s", modifiers: [.command])
         }
         else {
             Menu("Action", systemImage: "square.and.arrow.up") {
