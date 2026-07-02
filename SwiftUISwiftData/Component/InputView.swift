@@ -72,7 +72,7 @@ struct InputView: View {
             .padding(.trailing, -5)
             .buttonBorderShape(.circle)
             .buttonStyle(.glass)
-            .keyboardShortcut(.cancelAction)
+            .keyboardShortcut(".", modifiers: [.command])
         }
     }
 }
