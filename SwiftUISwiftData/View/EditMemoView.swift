@@ -92,6 +92,7 @@ struct EditMemoView: View {
                             title = titleToStore
                         }
                     )
+                    .padding(.bottom, 4)
                 }
                 contentView
                 if viewModel.getShowInfo(), !showTitleView {
@@ -104,7 +105,8 @@ struct EditMemoView: View {
                 }
             }
             .padding(.top, .zero)
-            .padding([.horizontal, .bottom], 16)
+            .padding(.horizontal)
+            .padding(.bottom, 8)
             .onAppear {
                 textEditorFocus = true
                 DispatchQueue.main.async {
