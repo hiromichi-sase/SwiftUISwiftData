@@ -80,6 +80,7 @@ struct EditMemoView: View {
                         text: $title,
                         focus: _inputViewFocus,
                         placeholder: "Input keywords to search by title",
+                        textFieldBackground: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
                         icon: .none,
                         submitButtonTapped: {

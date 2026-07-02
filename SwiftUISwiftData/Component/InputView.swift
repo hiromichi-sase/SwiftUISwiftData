@@ -29,6 +29,8 @@ struct InputView: View {
     @State
     var placeholder: String
     @State
+    var textFieldBackground: Color
+    @State
     var submitLabel: SubmitLabel = .done
     @State
     var icon: Icon = .none
@@ -39,7 +41,7 @@ struct InputView: View {
         HStack(spacing: 0.0) {
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color(uiColor: .tertiarySystemBackground))
+                    .fill(textFieldBackground)
                     .frame(height: 48)
                 HStack(spacing: 6) {
                     Spacer()
@@ -83,7 +85,8 @@ struct InputView: View {
     InputView(
         text: Binding(projectedValue: .constant("a b c")),
         focus: _focus,
-        placeholder: "Input search text"
+        placeholder: "Input search text",
+        textFieldBackground: Color(uiColor: .secondarySystemBackground)
     )
     .onAppear {
         focus = true
