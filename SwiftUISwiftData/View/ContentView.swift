@@ -292,7 +292,7 @@ struct ContentView: View {
                 selection.removeAll()
                 editMode = .inactive
             }
-            .keyboardShortcut(".", modifiers: [.command])
+            .keyboardShortcut(.cancelAction)
         }
     }
 
