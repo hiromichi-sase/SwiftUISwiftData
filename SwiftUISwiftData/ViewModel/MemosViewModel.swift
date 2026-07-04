@@ -1,5 +1,5 @@
 //
-//  ContentViewModel.swift
+//  MemosViewModel.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/04.
@@ -8,8 +8,8 @@
 internal import Combine
 import SwiftData
 
-/// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
-final class ContentViewModel: ObservableObject {
+/// MemosViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
+final class MemosViewModel: ObservableObject {
     /// An array of Memo objects that are published to update the UI when changes occur.
     @Published
     private(set) var memos: [Memo] = []

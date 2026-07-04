@@ -1,5 +1,5 @@
 //
-//  ContentViewModelTests.swift
+//  MemosViewModel.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/04.
@@ -10,7 +10,7 @@ import Testing
 
 @testable import SwiftUISwiftData
 
-struct ContentViewModelTests {
+struct MemosViewModelTests {
     @Test
     func filteredMemos() async throws {
         let dependency = Dependency()
@@ -207,9 +207,9 @@ struct ContentViewModelTests {
     }
 }
 
-extension ContentViewModelTests {
+extension MemosViewModelTests {
     struct Dependency {
-        let testTarget: ContentViewModel
+        let testTarget: MemosViewModel
         let memoRepository: MemoRepository
         private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
@@ -217,7 +217,7 @@ extension ContentViewModelTests {
 
         init() {
             memoRepository = MemoRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            guard let userDefaults = UserDefaults(suiteName: ContentViewModelTests.Dependency.suiteName) else {
+            guard let userDefaults = UserDefaults(suiteName: MemosViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")
             }
             self.userDefaults = userDefaults
@@ -229,7 +229,7 @@ extension ContentViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: ContentViewModelTests.Dependency.suiteName)
+            userDefaults.removePersistentDomain(forName: MemosViewModelTests.Dependency.suiteName)
         }
     }
 }
