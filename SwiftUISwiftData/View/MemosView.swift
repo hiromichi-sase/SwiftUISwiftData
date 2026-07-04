@@ -97,7 +97,6 @@ struct MemosView: View {
                 .padding(.horizontal)
             }
             list
-                .contentMargins([.top], .zero)
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
                 }
@@ -147,7 +146,6 @@ struct MemosView: View {
                     }
                 }
         }
-        .background(Color("ContentViewListBackground"))
     }
 
     private var deleteAlert: Alert {

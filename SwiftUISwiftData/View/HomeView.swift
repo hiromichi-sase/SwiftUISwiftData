@@ -45,6 +45,7 @@ struct HomeView: View {
             List(Section.allCases, selection: $section) { section in
                 HStack {
                     Image(systemName: section.icon)
+                        .frame(maxWidth: 24.0)
                     Text(section.title)
                     Spacer()
                     Image(systemName: "chevron.right")
