@@ -17,7 +17,7 @@ struct ContentView: View {
     )
     /// 編集モードの状態を管理する状態変数。
     @State
-    var editMode: EditMode = .inactive
+    var memosViewEditMode: EditMode = .inactive
     @State
     var selectedMemo: Memo?
     /// メモの内容を編集するビューを開くかどうかのフラグ。
@@ -27,12 +27,12 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             MemosView(
-                editMode: $editMode,
+                editMode: $memosViewEditMode,
                 selectedMemo: $selectedMemo,
                 openEditMemoView: $openEditMemoView
             )
         } detail: {
-            if editMode == .inactive {
+            if memosViewEditMode == .inactive {
                 if let selectedMemo {
                     BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
                         .modelContext(viewModel.modelContext)
