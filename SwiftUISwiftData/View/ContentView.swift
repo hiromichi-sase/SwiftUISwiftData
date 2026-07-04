@@ -39,7 +39,7 @@ struct ContentView: View {
                         .id(selectedMemo.id)
                 }
                 else {
-                    EmptyView()
+                    Text("No memos selected")
                 }
             }
             else {
