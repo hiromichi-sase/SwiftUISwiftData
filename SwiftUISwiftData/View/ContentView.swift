@@ -39,7 +39,7 @@ struct ContentView: View {
                         openEditMemoView: $openEditMemoView
                     )
                 case .settingsView:
-                    SettingsView(settingsSaved: .constant(false))
+                    SettingsView()
                 default:
                     EmptyView()
             }
@@ -70,5 +70,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
 }

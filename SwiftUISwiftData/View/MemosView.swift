@@ -47,15 +47,9 @@ struct MemosView: View {
     /// メモの内容を編集するビューを開くかどうかのフラグ。
     @Binding
     private var openEditMemoView: Bool
-    /// 設定画面をフルスクリーンカバーで表示するフラグ。
-    @State
-    private var showSettingsView = false
     /// トーストメッセージの状態変数。
     @State
     private var toastMessage = ""
-    /// 設定画面で変更保存したかどうかのフラグ。
-    @State
-    private var settingsSaved = false
     @State
     private var error: Error?
     @State
@@ -107,11 +101,6 @@ struct MemosView: View {
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
                 }
-                .onChange(of: settingsSaved) { _, _ in
-                    guard settingsSaved else { return }
-                    viewModel.fetchMemos()
-                    settingsSaved = false
-                }
                 .onReceive(willSavePublisher) { _ in
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         viewModel.fetchMemos()
@@ -144,9 +133,6 @@ struct MemosView: View {
                 .environment(\.editMode, $editMode)
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
-                }
-                .sheet(isPresented: $showSettingsView) {
-                    SettingsView(settingsSaved: $settingsSaved)
                 }
                 .onDisappear {
                     openEditMemoView = false
@@ -287,11 +273,6 @@ struct MemosView: View {
                 .disabled(isSearching)
                 .keyboardShortcut("e", modifiers: [.command])
             }
-            Button("Settings", systemImage: "gearshape.fill") {
-                showSettingsView = true
-            }
-            .disabled(isSearching)
-            .keyboardShortcut(",", modifiers: [.command, .shift])
         }
         else {
             Button("Done", systemImage: "checkmark") {

@@ -15,8 +15,6 @@ struct SettingsView: View {
     var viewModel = SettingsViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-    @Binding
-    private var settingsSaved: Bool
     @State
     private var hasLink: Bool = false
     @State
@@ -39,8 +37,7 @@ struct SettingsView: View {
     @Environment(\.dismiss)
     private var dismiss
 
-    init(settingsSaved: Binding<Bool>) {
-        _settingsSaved = settingsSaved
+    init() {
         _hasLink = State(initialValue: viewModel.getHasLink())
         _contentFontSize = State(initialValue: viewModel.getContentFontSize())
         _contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
@@ -186,7 +183,6 @@ struct SettingsView: View {
                 titleLineSpacing = viewModel.getTitleLineSpacing()
                 showInfo = viewModel.getShowInfo()
                 divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
-                settingsSaved = true
             },
             secondaryButton: .cancel()
         )
@@ -209,8 +205,6 @@ struct SettingsView: View {
             viewModel.setTitleLineSpacing(titleLineSpacing)
             viewModel.setShowInfo(showInfo)
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
-            settingsSaved = true
-            dismiss()
         }
         .disabled(!settingsUpdated)
         .keyboardShortcut("s", modifiers: [.command])
@@ -243,7 +237,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    NavigationStack {
-        SettingsView(settingsSaved: .constant(true))
-    }
+    SettingsView()
 }
