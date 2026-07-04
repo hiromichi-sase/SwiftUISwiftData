@@ -12,9 +12,8 @@ import SwiftUI
 struct ContentView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
-    var viewModel = MemosViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
-        userDefaultsRepository: UserDefaultsRepository()
+    var viewModel = ContentViewModel(
+        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer)
     )
     /// 編集モードの状態を管理する状態変数。
     @State
