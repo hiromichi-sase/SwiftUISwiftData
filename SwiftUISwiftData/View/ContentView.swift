@@ -15,6 +15,9 @@ struct ContentView: View {
     var viewModel = ContentViewModel(
         memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer)
     )
+
+    @State
+    var selectedSection: HomeView.Section?
     /// 編集モードの状態を管理する状態変数。
     @State
     var memosViewEditMode: EditMode = .inactive
@@ -26,24 +29,40 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            MemosView(
-                editMode: $memosViewEditMode,
-                selectedMemo: $selectedMemo,
-                openEditMemoView: $openEditMemoView
-            )
-        } detail: {
-            if memosViewEditMode == .inactive {
-                if let selectedMemo {
-                    BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
-                        .modelContext(viewModel.modelContext)
-                        .id(selectedMemo.id)
-                }
-                else {
-                    Text("No memos selected")
-                }
+            HomeView(section: $selectedSection)
+        } content: {
+            switch selectedSection {
+                case .memosView:
+                    MemosView(
+                        editMode: $memosViewEditMode,
+                        selectedMemo: $selectedMemo,
+                        openEditMemoView: $openEditMemoView
+                    )
+                case .settingsView:
+                    SettingsView(settingsSaved: .constant(false))
+                default:
+                    EmptyView()
             }
-            else {
-                Text("Select memos to edit or delete")
+        } detail: {
+            switch selectedSection {
+                case .memosView:
+                    if memosViewEditMode == .inactive {
+                        if let selectedMemo {
+                            BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
+                                .modelContext(viewModel.modelContext)
+                                .id(selectedMemo.id)
+                        }
+                        else {
+                            Text("No memos selected")
+                        }
+                    }
+                    else {
+                        Text("Select memos to edit or delete")
+                    }
+                case .settingsView:
+                    EmptyView()
+                default:
+                    EmptyView()
             }
         }
     }
