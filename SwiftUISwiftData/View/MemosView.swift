@@ -121,6 +121,7 @@ struct MemosView: View {
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
+                .navigationBarBackButtonHidden(editMode.isEditing)
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarLeading) {
                         toolbarItemTopBarLeading
