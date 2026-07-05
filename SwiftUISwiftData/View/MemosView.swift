@@ -28,16 +28,16 @@ struct MemosView: View {
     )
     /// 編集モードの状態を管理する状態変数。
     @Binding
-    private var editMode: EditMode
+    var editMode: EditMode
     /// 削除するメモを保持する状態変数。
     @State
-    private var memoToDelete: Memo?
+    var memoToDelete: Memo?
     /// 選択されたメモのIDを保持する状態変数。
     @Binding
     var selectedMemo: Memo?
     /// 複数選択されたメモのIDを保持する状態変数。
     @State
-    private var selection: Set<UUID> = []
+    var selection: Set<UUID> = []
     /// スクロールビューのプロキシを保持する状態変数。
     @State
     private var scrollViewProxy: ScrollViewProxy?
@@ -49,21 +49,25 @@ struct MemosView: View {
     private var openEditMemoView: Bool
     /// トーストメッセージの状態変数。
     @State
-    private var toastMessage = ""
+    var toastMessage = ""
     @State
-    private var error: Error?
+    var error: Error?
     @State
-    private var memoDuplicateSource: Memo?
+    var memoDuplicateSource: Memo?
     @State
-    private var currentAlert: AlertType?
+    var currentAlert: AlertType?
     @State
-    private var searchText: String = ""
+    var searchText: String = ""
     @State
     private var isSearching: Bool = false
     @FocusState
     private var inputViewFocus: Bool
-    private var filteredMemos: [Memo] {
-        viewModel.filteredMemos(by: searchText)
+    /// モデルコンテキストの保存前に通知を受け取るためのパブリ ッシャー。
+    ///
+    /// これを使用して、メモが更新されたときにビューを更新することができる。
+    private var willSavePublisher: NotificationCenter.Publisher {
+        NotificationCenter.default
+            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
     }
 
     /// イニシャライザ。
@@ -148,65 +152,6 @@ struct MemosView: View {
                     .padding(.bottom, 8)
             }
         }
-    }
-
-    private var deleteAlert: Alert {
-        .init(
-            title: Text("Delete \(editMode.isEditing ? "selected memos" : "this memo")?"),
-            primaryButton: .destructive(Text("Delete")) {
-                if editMode.isEditing {
-                    guard !selectedMemos.isEmpty else { return }
-                    deleteMemos(selectedMemos)
-                }
-                else {
-                    guard let memoToDelete = memoToDelete else { return }
-                    deleteMemos([memoToDelete])
-                }
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
-    private var errorAlert: Alert {
-        .init(
-            title: Text("The Error occured."),
-            message: Text(error?.localizedDescription ?? ""),
-            dismissButton: .default(Text("OK"))
-        )
-    }
-
-    private var containsProtectedMemoAlert: Alert {
-        .init(
-            title: Text("Protected memos are contained in selected memos."),
-            message: Text(error?.localizedDescription ?? ""),
-            dismissButton: .default(Text("OK"))
-        )
-    }
-
-    private var protectAlert: Alert {
-        .init(
-            title: Text("Protect selected memos?"),
-            primaryButton: .default(Text("Protect")) {
-                guard !selectedMemos.isEmpty else { return }
-                Task {
-                    await protect(selectedMemos)
-                }
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
-    private var unprotectAlert: Alert {
-        .init(
-            title: Text("Unprotect selected memos?"),
-            primaryButton: .default(Text("Unprotect")) {
-                guard !selectedMemos.isEmpty else { return }
-                Task {
-                    await unprotect(selectedMemos)
-                }
-            },
-            secondaryButton: .cancel()
-        )
     }
 
     /// メモのリストを表示するビュー。
@@ -339,11 +284,6 @@ struct MemosView: View {
         }
     }
 
-    /// 選択されたメモの配列を返す計算プロパティ。
-    private var selectedMemos: [Memo] {
-        viewModel.memos.filter { selection.contains($0.id) }
-    }
-
     /// メモの配列が変更されたときに呼び出される関数。
     ///
     /// 編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
@@ -383,16 +323,6 @@ struct MemosView: View {
         }
     }
 
-    /// モデルコンテキストの保存前に通知を受け取るためのパブリッシャー。
-    ///
-    /// これを使用して、メモが更新されたときにビューを更新することができる。
-    private var willSavePublisher: NotificationCenter.Publisher {
-        NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
-    }
-}
-
-extension MemosView {
     /// 編集モードで表示する行のビューを生成する関数。
     ///
     /// メモをタップすると選択状態が切り替わるようになっている。
@@ -474,99 +404,5 @@ extension MemosView {
         .listRowInsets(.init())
         .moveDisabled(true)
         .listRowBackground(Color(uiColor: memo == selectedMemo ? .quaternaryLabel : .systemBackground))
-    }
-}
-
-extension MemosView {
-    private func duplicateMemo(_ memo: Memo) {
-        do {
-            memoDuplicateSource = memo
-            try viewModel.duplicate(memo)
-            toastMessage = "Successfully duplicated!"
-        }
-        catch {
-            memoDuplicateSource = nil
-            self.error = error
-            currentAlert = .error
-            print("Failed to duplicate memo: \(memo)")
-        }
-    }
-
-    /// 指定されたメモを削除する関数。
-    ///
-    /// 削除後に選択状態を更新し、すべてのメモの順序を再計算して保存する。
-    /// - Parameter memos: 削除するメモの配列
-    private func deleteMemos(_ memos: [Memo]) {
-        do {
-            try viewModel.delete(memos)
-
-            for memo in memos where selectedMemo == memo {
-                selectedMemo = nil
-            }
-
-            selection.removeAll()
-            toastMessage = "Successfully deleted!"
-        }
-        catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to delete memos: \(error)")
-        }
-    }
-
-    /// 指定されたメモを新しい位置に移動する関数。
-    ///
-    /// 移動後にすべてのメモの順序を再計算して保存する。
-    /// - Parameters:
-    ///   - source: 移動するメモのインデックス
-    ///   - destination: 移動先のインデックス
-    private func moveMemo(from source: IndexSet, to destination: Int) {
-        let indices = source.map { $0 }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            do {
-                try viewModel.moveMemo(from: indices, to: destination)
-            }
-            catch {
-                self.error = error
-                currentAlert = .error
-                print("Failed to move memo: \(error)")
-            }
-        }
-    }
-
-    private func protect(_ memos: [Memo]) async {
-        do {
-            guard try await authenticate() else { return }
-            try viewModel.protect(memos)
-        }
-        catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to protect memos: \(error)")
-        }
-    }
-
-    private func unprotect(_ memos: [Memo]) async {
-        do {
-            guard try await authenticate() else { return }
-            try viewModel.unprotect(memos)
-        }
-        catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to unprotect memos: \(error)")
-        }
-    }
-
-    private func authenticate() async throws -> Bool {
-        let result = try await AuthenticationManager.shared.authenticate()
-        guard result.success else {
-            guard let error = result.error else {
-                fatalError("Failed to get error from result.")
-            }
-            throw error
-        }
-        return result.success
     }
 }
