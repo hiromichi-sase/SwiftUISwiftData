@@ -150,9 +150,9 @@ struct MemosView: View {
 
     private var deleteAlert: Alert {
         .init(
-            title: Text("Delete \(editMode == .active ? "selected memos" : "this memo")?"),
+            title: Text("Delete \(editMode.isEditing ? "selected memos" : "this memo")?"),
             primaryButton: .destructive(Text("Delete")) {
-                if editMode == .active {
+                if editMode.isEditing {
                     guard !selectedMemos.isEmpty else { return }
                     deleteMemos(selectedMemos)
                 }
@@ -211,7 +211,7 @@ struct MemosView: View {
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
-                if editMode == .active {
+                if editMode.isEditing {
                     List(selection: $selection) {
                         ForEach(viewModel.memos) { memo in
                             activeRow(for: memo)
@@ -325,7 +325,7 @@ struct MemosView: View {
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
         var title = "Memos ("
-        if editMode == .active {
+        if editMode.isEditing {
             title = title + "\(selection.count)/\(viewModel.memos.count))"
         }
         else {

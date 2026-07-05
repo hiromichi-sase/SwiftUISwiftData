@@ -46,7 +46,10 @@ struct ContentView: View {
         } detail: {
             switch selectedSection {
                 case .memosView:
-                    if memosViewEditMode == .inactive {
+                    if memosViewEditMode.isEditing {
+                        Text("Select memos to edit or delete")
+                    }
+                    else {
                         if let selectedMemo {
                             BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
                                 .modelContext(viewModel.modelContext)
@@ -55,9 +58,6 @@ struct ContentView: View {
                         else {
                             Text("No memos selected")
                         }
-                    }
-                    else {
-                        Text("Select memos to edit or delete")
                     }
                 case .settingsView:
                     EmptyView()
