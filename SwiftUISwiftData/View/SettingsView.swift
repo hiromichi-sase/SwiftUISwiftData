@@ -15,8 +15,6 @@ struct SettingsView: View {
     var viewModel = SettingsViewModel(
         userDefaultsRepository: UserDefaultsRepository()
     )
-    @Binding
-    private var settingsSaved: Bool
     @State
     private var hasLink: Bool = false
     @State
@@ -33,14 +31,34 @@ struct SettingsView: View {
     private var showInfo: Bool = false
     @State
     private var divideKeywordsBySpace: Bool = false
+
+    @State
+    private var hasLinkToStore: Bool = false
+    @State
+    private var contentFontSizeToStore: Float = .zero
+    @State
+    private var contentLineSpacingToStore: Float = .zero
+    @State
+    private var titleLineLimitToStore: Int = .zero
+    @State
+    private var titleFontSizeToStore: Float = .zero
+    @State
+    private var titleLineSpacingToStore: Float = .zero
+    @State
+    private var showInfoToStore: Bool = false
+    @State
+    private var divideKeywordsBySpaceToStore: Bool = false
+
+    /// トーストメッセージの状態変数。
+    @State
+    private var toastMessage = ""
     @State
     private var showResetAlert = false
     /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
 
-    init(settingsSaved: Binding<Bool>) {
-        _settingsSaved = settingsSaved
+    init() {
         _hasLink = State(initialValue: viewModel.getHasLink())
         _contentFontSize = State(initialValue: viewModel.getContentFontSize())
         _contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
@@ -49,6 +67,15 @@ struct SettingsView: View {
         _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfo = State(initialValue: viewModel.getShowInfo())
         _divideKeywordsBySpace = State(initialValue: viewModel.getDivideKeywordsBySpace())
+
+        _hasLinkToStore = State(initialValue: viewModel.getHasLink())
+        _contentFontSizeToStore = State(initialValue: viewModel.getContentFontSize())
+        _contentLineSpacingToStore = State(initialValue: viewModel.getContentLineSpacing())
+        _titleLineLimitToStore = State(initialValue: viewModel.getTitleLineLimit())
+        _titleFontSizeToStore = State(initialValue: viewModel.getTitleFontSize())
+        _titleLineSpacingToStore = State(initialValue: viewModel.getTitleLineSpacing())
+        _showInfoToStore = State(initialValue: viewModel.getShowInfo())
+        _divideKeywordsBySpaceToStore = State(initialValue: viewModel.getDivideKeywordsBySpace())
     }
 
     var body: some View {
@@ -70,6 +97,7 @@ struct SettingsView: View {
             .alert(isPresented: $showResetAlert) {
                 resetAlert
             }
+            .toast(message: $toastMessage)
         }
     }
 
@@ -186,7 +214,8 @@ struct SettingsView: View {
                 titleLineSpacing = viewModel.getTitleLineSpacing()
                 showInfo = viewModel.getShowInfo()
                 divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
-                settingsSaved = true
+                updateStore()
+                toastMessage = "Successfully reset!"
             },
             secondaryButton: .cancel()
         )
@@ -209,8 +238,8 @@ struct SettingsView: View {
             viewModel.setTitleLineSpacing(titleLineSpacing)
             viewModel.setShowInfo(showInfo)
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
-            settingsSaved = true
-            dismiss()
+            updateStore()
+            toastMessage = "Successfully saved!"
         }
         .disabled(!settingsUpdated)
         .keyboardShortcut("s", modifiers: [.command])
@@ -218,15 +247,26 @@ struct SettingsView: View {
 
     /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
-        guard viewModel.getHasLink() == hasLink else { return true }
-        guard viewModel.getContentFontSize() == contentFontSize else { return true }
-        guard viewModel.getContentLineSpacing() == contentLineSpacing else { return true }
-        guard viewModel.getTitleLineLimit() == titleLineLimit else { return true }
-        guard viewModel.getTitleFontSize() == titleFontSize else { return true }
-        guard viewModel.getTitleLineSpacing() == titleLineSpacing else { return true }
-        guard viewModel.getShowInfo() == showInfo else { return true }
-        guard viewModel.getDivideKeywordsBySpace() == divideKeywordsBySpace else { return true }
+        guard hasLinkToStore == hasLink else { return true }
+        guard contentFontSizeToStore == contentFontSize else { return true }
+        guard contentLineSpacingToStore == contentLineSpacing else { return true }
+        guard titleLineLimitToStore == titleLineLimit else { return true }
+        guard titleFontSizeToStore == titleFontSize else { return true }
+        guard titleLineSpacingToStore == titleLineSpacing else { return true }
+        guard showInfoToStore == showInfo else { return true }
+        guard divideKeywordsBySpaceToStore == divideKeywordsBySpace else { return true }
         return false
+    }
+
+    private func updateStore() {
+        hasLinkToStore = hasLink
+        contentFontSizeToStore = contentFontSize
+        contentLineSpacingToStore = contentLineSpacing
+        titleLineLimitToStore = titleLineLimit
+        titleFontSizeToStore = titleFontSize
+        titleLineSpacingToStore = titleLineSpacing
+        showInfoToStore = showInfo
+        divideKeywordsBySpaceToStore = divideKeywordsBySpace
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
@@ -243,7 +283,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    NavigationStack {
-        SettingsView(settingsSaved: .constant(true))
-    }
+    SettingsView()
 }
