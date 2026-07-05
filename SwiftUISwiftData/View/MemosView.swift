@@ -121,7 +121,7 @@ struct MemosView: View {
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(editMode.isEditing)
+                .navigationBarBackButtonHidden(editMode.isEditing || isSearching)
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
@@ -143,8 +143,10 @@ struct MemosView: View {
                             break
                     }
                 }
-            bottomBar
-                .padding(.bottom, 8)
+            if !isSearching {
+                bottomBar
+                    .padding(.bottom, 8)
+            }
         }
     }
 
