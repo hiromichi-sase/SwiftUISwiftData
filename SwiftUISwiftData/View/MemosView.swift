@@ -471,6 +471,7 @@ extension MemosView {
         }
         .listRowInsets(.init())
         .moveDisabled(true)
+        .listRowBackground(Color(uiColor: memo == selectedMemo ? .quaternaryLabel : .systemBackground))
     }
 }
 
