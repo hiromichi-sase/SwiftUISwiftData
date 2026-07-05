@@ -61,17 +61,11 @@ struct InputView: View {
                 }
             }
             .padding(.trailing, 7)
-            Button {
+            GlassButton(imageSystemName: "xmark.circle") {
                 cancelButtonTapped?()
-            } label: {
-                Image(systemName: "xmark.circle")
-                    .font(.system(size: 29))
-                    .fontWeight(.light)
             }
             .padding(.leading, 0)
             .padding(.trailing, -5)
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
             .keyboardShortcut(".", modifiers: [.command])
         }
     }

@@ -290,30 +290,18 @@ struct MemosView: View {
                 .buttonStyle(.glass)
             }
             else {
-                Button {
+                GlassButton(imageSystemName: "magnifyingglass") {
                     isSearching = true
                     DispatchQueue.main.async {
                         inputViewFocus = true
                     }
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 22))
-                        .frame(width: 34, height: 34)
                 }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glass)
                 .disabled(viewModel.memos.isEmpty || isSearching)
                 .keyboardShortcut("s", modifiers: [.command])
                 Spacer()
-                Button {
+                GlassButton(imageSystemName: "plus.circle") {
                     showingAddMemo = true
-                } label: {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 22))
-                        .frame(width: 34, height: 34)
                 }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glass)
                 .disabled(isSearching)
                 .keyboardShortcut("n", modifiers: [.command])
             }
