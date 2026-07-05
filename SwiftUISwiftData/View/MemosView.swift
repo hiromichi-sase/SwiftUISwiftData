@@ -123,9 +123,6 @@ struct MemosView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarBackButtonHidden(editMode.isEditing)
                 .toolbar {
-                    ToolbarItemGroup(placement: .topBarLeading) {
-                        toolbarItemTopBarLeading
-                    }
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
                     }
@@ -146,6 +143,8 @@ struct MemosView: View {
                             break
                     }
                 }
+            bottomBar
+                .padding(.bottom, 8)
         }
     }
 
@@ -243,6 +242,86 @@ struct MemosView: View {
         }
     }
 
+    private var bottomBar: some View {
+        HStack {
+            Spacer()
+                .frame(width: 24)
+            if editMode.isEditing {
+                Menu {
+                    Button("Delete", systemImage: "trash", role: .destructive) {
+                        if selectedMemos.filter({ $0.protected }).isEmpty {
+                            currentAlert = .delete
+                        }
+                        else {
+                            currentAlert = .containsProtectedMemo
+                        }
+                    }
+                    Divider()
+                    Button("Unprotect", systemImage: "lock.open.fill") {
+                        currentAlert = .unprotect
+                    }
+                    Button("Protect", systemImage: "lock.fill") {
+                        currentAlert = .protect
+                    }
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 22))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                .disabled(selection.isEmpty)
+                Spacer()
+                Menu {
+                    Button("Deselect All", systemImage: "circle") {
+                        selection.removeAll()
+                    }
+                    .disabled(selection.isEmpty)
+                    Button("Select All", systemImage: "checkmark.circle") {
+                        selection = Set(viewModel.memos.map { $0.id })
+                    }
+                    .disabled(selection.count == viewModel.memos.count)
+                } label: {
+                    Image(systemName: "circle.grid.2x2.topleft.checkmark.filled")
+                        .font(.system(size: 22))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+            }
+            else {
+                Button {
+                    isSearching = true
+                    DispatchQueue.main.async {
+                        inputViewFocus = true
+                    }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 22))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                .disabled(viewModel.memos.isEmpty || isSearching)
+                .keyboardShortcut("s", modifiers: [.command])
+                Spacer()
+                Button {
+                    showingAddMemo = true
+                } label: {
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 22))
+                        .frame(width: 34, height: 34)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                .disabled(isSearching)
+                .keyboardShortcut("n", modifiers: [.command])
+            }
+            Spacer()
+                .frame(width: 24)
+        }
+    }
+
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
         var title = "Memos ("
@@ -260,10 +339,17 @@ struct MemosView: View {
         return title
     }
 
-    /// ツールバーの左側のアイテムを編集モードの状態に応じて動的に生成するビュー。
+    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
-    private var toolbarItemTopBarLeading: some View {
-        if editMode == .inactive {
+    private var toolbarItemTopBarTrailing: some View {
+        if editMode.isEditing {
+            Button("Done", systemImage: "checkmark") {
+                selection.removeAll()
+                editMode = .inactive
+            }
+            .keyboardShortcut(.cancelAction)
+        }
+        else {
             if !viewModel.memos.isEmpty {
                 Button("Edit", systemImage: "pencil") {
                     selectedMemo = nil
@@ -271,63 +357,6 @@ struct MemosView: View {
                 }
                 .disabled(isSearching)
                 .keyboardShortcut("e", modifiers: [.command])
-            }
-        }
-        else {
-            Button("Done", systemImage: "checkmark") {
-                selection.removeAll()
-                editMode = .inactive
-            }
-            .keyboardShortcut(.cancelAction)
-        }
-    }
-
-    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー。
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
-        if editMode == .inactive {
-            Button("Search", systemImage: "magnifyingglass") {
-                isSearching = true
-                DispatchQueue.main.async {
-                    inputViewFocus = true
-                }
-            }
-            .disabled(viewModel.memos.isEmpty || isSearching)
-            .keyboardShortcut("s", modifiers: [.command])
-            Button("Add", systemImage: "plus.circle") {
-                showingAddMemo = true
-            }
-            .disabled(isSearching)
-            .keyboardShortcut("n", modifiers: [.command])
-        }
-        else {
-            Menu("Action", systemImage: "square.and.arrow.up") {
-                Button("Protect", systemImage: "lock.fill") {
-                    currentAlert = .protect
-                }
-                Button("Unprotect", systemImage: "lock.open.fill") {
-                    currentAlert = .unprotect
-                }
-                Divider()
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    if selectedMemos.filter({ $0.protected }).isEmpty {
-                        currentAlert = .delete
-                    }
-                    else {
-                        currentAlert = .containsProtectedMemo
-                    }
-                }
-            }
-            .disabled(selection.isEmpty)
-            Menu("Select", systemImage: "circle.grid.2x2.topleft.checkmark.filled") {
-                Button("Select All", systemImage: "checkmark.circle") {
-                    selection = Set(viewModel.memos.map { $0.id })
-                }
-                .disabled(selection.count == viewModel.memos.count)
-                Button("Deselect All", systemImage: "circle") {
-                    selection.removeAll()
-                }
-                .disabled(selection.isEmpty)
             }
         }
     }
