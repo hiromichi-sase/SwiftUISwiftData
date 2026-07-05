@@ -49,6 +49,9 @@ struct SettingsView: View {
     @State
     private var divideKeywordsBySpaceToStore: Bool = false
 
+    /// トーストメッセージの状態変数。
+    @State
+    private var toastMessage = ""
     @State
     private var showResetAlert = false
     /// ビューを閉じるための環境変数。
@@ -94,6 +97,7 @@ struct SettingsView: View {
             .alert(isPresented: $showResetAlert) {
                 resetAlert
             }
+            .toast(message: $toastMessage)
         }
     }
 
@@ -211,6 +215,7 @@ struct SettingsView: View {
                 showInfo = viewModel.getShowInfo()
                 divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
                 updateStore()
+                toastMessage = "Successfully reset!"
             },
             secondaryButton: .cancel()
         )
@@ -234,6 +239,7 @@ struct SettingsView: View {
             viewModel.setShowInfo(showInfo)
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             updateStore()
+            toastMessage = "Successfully saved!"
         }
         .disabled(!settingsUpdated)
         .keyboardShortcut("s", modifiers: [.command])
