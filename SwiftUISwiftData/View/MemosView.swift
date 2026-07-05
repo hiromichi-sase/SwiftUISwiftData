@@ -247,7 +247,7 @@ struct MemosView: View {
             Spacer()
                 .frame(width: 24)
             if editMode.isEditing {
-                Menu {
+                GlassMenu(imageSystemName: "square.and.arrow.up") {
                     Button("Delete", systemImage: "trash", role: .destructive) {
                         if selectedMemos.filter({ $0.protected }).isEmpty {
                             currentAlert = .delete
@@ -263,16 +263,10 @@ struct MemosView: View {
                     Button("Protect", systemImage: "lock.fill") {
                         currentAlert = .protect
                     }
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 22))
-                        .frame(width: 34, height: 34)
                 }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glass)
                 .disabled(selection.isEmpty)
                 Spacer()
-                Menu {
+                GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
                     Button("Deselect All", systemImage: "circle") {
                         selection.removeAll()
                     }
@@ -281,13 +275,7 @@ struct MemosView: View {
                         selection = Set(viewModel.memos.map { $0.id })
                     }
                     .disabled(selection.count == viewModel.memos.count)
-                } label: {
-                    Image(systemName: "circle.grid.2x2.topleft.checkmark.filled")
-                        .font(.system(size: 22))
-                        .frame(width: 34, height: 34)
                 }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glass)
             }
             else {
                 GlassButton(imageSystemName: "magnifyingglass") {
