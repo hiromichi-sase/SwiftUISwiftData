@@ -39,6 +39,11 @@ struct InputView: View {
 
     var body: some View {
         HStack(spacing: 0.0) {
+            GlassButton(imageSystemName: "xmark.circle") {
+                cancelButtonTapped?()
+            }
+            .padding(.leading, -5)
+            .keyboardShortcut(".", modifiers: [.command])
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
                     .fill(textFieldBackground)
@@ -60,13 +65,6 @@ struct InputView: View {
                         .frame(width: 8)
                 }
             }
-            .padding(.trailing, 7)
-            GlassButton(imageSystemName: "xmark.circle") {
-                cancelButtonTapped?()
-            }
-            .padding(.leading, 0)
-            .padding(.trailing, -5)
-            .keyboardShortcut(".", modifiers: [.command])
         }
     }
 }
