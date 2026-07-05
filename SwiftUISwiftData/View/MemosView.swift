@@ -86,7 +86,7 @@ struct MemosView: View {
                     text: $searchText,
                     focus: _inputViewFocus,
                     placeholder: "Input keywords to search by title",
-                    textFieldBackground: Color(uiColor: .tertiarySystemBackground),
+                    textFieldBackground: Color(uiColor: .secondarySystemBackground),
                     submitLabel: .done,
                     icon: .search,
                     cancelButtonTapped: {
