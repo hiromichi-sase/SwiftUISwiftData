@@ -68,8 +68,6 @@ struct EditMemoView: View {
         _title = State(initialValue: memo?.title ?? "")
         _content = State(initialValue: memo?.content ?? "")
         _titleToStore = State(initialValue: memo?.title ?? "")
-        _toastMessage = State(initialValue: "")
-        _error = State(initialValue: nil)
     }
 
     var body: some View {

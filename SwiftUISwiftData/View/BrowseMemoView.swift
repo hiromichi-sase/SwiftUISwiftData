@@ -38,7 +38,6 @@ struct BrowseMemoView: View {
     init(memo: Memo, openEditMemoView: Bool = false) {
         self.memo = memo
         _openEditMemoView = State(initialValue: openEditMemoView)
-        _toastMessage = State(initialValue: "")
     }
 
     var body: some View {

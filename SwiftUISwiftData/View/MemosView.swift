@@ -76,8 +76,6 @@ struct MemosView: View {
         selectedMemo: Binding<Memo?>,
         openEditMemoView: Binding<Bool>,
     ) {
-        _toastMessage = State(initialValue: "")
-        _error = State(initialValue: nil)
         _editMode = editMode
         _selectedMemo = selectedMemo
         _openEditMemoView = openEditMemoView
