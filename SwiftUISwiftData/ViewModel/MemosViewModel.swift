@@ -6,6 +6,7 @@
 //
 
 internal import Combine
+import Foundation
 import SwiftData
 
 /// MemosViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
@@ -21,6 +22,7 @@ final class MemosViewModel: ObservableObject {
     ///
     /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
+    private var cancellables = Set<AnyCancellable>()
 
     init(
         memoRepository: MemoRepository,
@@ -29,17 +31,22 @@ final class MemosViewModel: ObservableObject {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
         fetchMemos()
+        setupNotification()
     }
 
-    /// The model context used for performing SwiftData operations, accessed from the memoRepository.
-    var modelContext: ModelContext {
-        memoRepository.modelContext
+    private func setupNotification() {
+        NotificationCenter.default
+            .publisher(for: ModelContext.willSave)
+            .sink { [weak self] _ in
+                Task { self?.fetchMemos() }
+            }
+            .store(in: &cancellables)
     }
 
     var searchWords: [String] = []
 
     /// Fetches memos from the memoRepository and updates the published memos array.
-    func fetchMemos() {
+    private func fetchMemos() {
         memos = memoRepository.memos()
     }
 

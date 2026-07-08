@@ -62,13 +62,6 @@ struct MemosView: View {
     private var isSearching: Bool = false
     @FocusState
     private var inputViewFocus: Bool
-    /// モデルコンテキストの保存前に通知を受け取るためのパブリ ッシャー。
-    ///
-    /// これを使用して、メモが更新されたときにビューを更新することができる。
-    private var willSavePublisher: NotificationCenter.Publisher {
-        NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: viewModel.modelContext)
-    }
 
     /// イニシャライザ。
     init(
@@ -101,11 +94,6 @@ struct MemosView: View {
             list
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
-                }
-                .onReceive(willSavePublisher) { _ in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        viewModel.fetchMemos()
-                    }
                 }
                 .alert(item: $currentAlert) { alertType in
                     switch alertType {

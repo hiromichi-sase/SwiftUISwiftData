@@ -19,7 +19,6 @@ struct MemosViewModelTests {
 
         try await dependency.memoRepository.add(memo1)
         try await dependency.memoRepository.add(memo2)
-        await dependency.testTarget.fetchMemos()
 
         await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
         var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
