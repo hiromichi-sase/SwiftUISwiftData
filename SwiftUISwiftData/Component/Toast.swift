@@ -16,6 +16,8 @@ struct Toast: ViewModifier {
     /// When this string is empty, the toast will not be shown.
     @Binding
     var message: String
+    @State
+    private var dismissTask: Task<Void, Never>?
 
     /// Defines the content and behavior of the view modifier.
     ///
@@ -27,6 +29,15 @@ struct Toast: ViewModifier {
             .overlay(alignment: .top) {
                 toastView
                     .padding(.top, 10)
+            }
+            .onChange(of: message) { _, newValue in
+                scheduleAutoDismissIfNeeded(for: newValue)
+            }
+            .onAppear {
+                scheduleAutoDismissIfNeeded(for: message)
+            }
+            .onDisappear {
+                cancelDismissTask()
             }
     }
 
@@ -50,17 +61,29 @@ struct Toast: ViewModifier {
                         RoundedRectangle(cornerRadius: 10)
                     }
                     .onTapGesture {
+                        cancelDismissTask()
                         message = ""
-                    }
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            message = ""
-                        }
                     }
             }
         }
         .animation(.linear(duration: 1.0), value: message)
         .transition(.opacity)
+    }
+
+    private func scheduleAutoDismissIfNeeded(for newValue: String) {
+        cancelDismissTask()
+        guard !newValue.isEmpty else { return }
+        dismissTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            if !Task.isCancelled {
+                message = ""
+            }
+        }
+    }
+
+    private func cancelDismissTask() {
+        dismissTask?.cancel()
+        dismissTask = nil
     }
 }
 
