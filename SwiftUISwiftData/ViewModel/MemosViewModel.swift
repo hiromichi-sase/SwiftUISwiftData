@@ -43,7 +43,7 @@ final class MemosViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    var searchWords: [String] = []
+    private(set) var searchWords: [String] = []
 
     /// Fetches memos from the memoRepository and updates the published memos array.
     private func fetchMemos() {
