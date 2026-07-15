@@ -1,5 +1,5 @@
 //
-//  ActiveRow.swift
+//  MemoInactiveRow.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/23.
@@ -7,25 +7,29 @@
 
 import SwiftUI
 
-struct ActiveRow: View {
+struct MemoInactiveRow: View {
     let memo: Memo
     let titleLineLimit: Int
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
+    let searchWords: [String]
 
     var body: some View {
         VStack(spacing: .zero) {
             HStack {
-                RowText(
+                MemoRowText(
                     memo: memo,
                     titleLineLimit: titleLineLimit,
                     titleFontSize: titleFontSize,
-                    titleLineSpacing: titleLineSpacing
+                    titleLineSpacing: titleLineSpacing,
+                    searchWords: searchWords
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
                 if memo.protected {
                     Image(systemName: "lock.fill")
+                        .padding(.trailing)
                 }
             }
             if showInfo {
@@ -33,7 +37,8 @@ struct ActiveRow: View {
                     InfoText.countView(content: memo.content)
                     InfoText.dateView(for: memo)
                 }
-                .padding(.top)
+                .padding(.bottom)
+                .padding(.horizontal)
             }
         }
     }
