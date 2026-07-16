@@ -64,7 +64,7 @@ struct EditTagView: View {
             VStack(spacing: 4) {
                 TextField("Input Title", text: $title)
                     .focused($textFieldFocus)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 20)
                 ColorPicker(
                     "Select Color",
                     selection: $color,
@@ -75,6 +75,7 @@ struct EditTagView: View {
                 }
                 Text("\(color.hexString().color().hexString())")
                     .frame(maxWidth: .infinity)
+                    .frame(height: 30.0)
                     .foregroundStyle(color.hexString().color().appropriateTextColor)
                     .background(color.hexString().color())
                 Spacer()
