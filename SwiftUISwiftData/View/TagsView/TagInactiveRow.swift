@@ -13,7 +13,6 @@ struct TagInactiveRow: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
-    let searchWords: [String]
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -22,7 +21,6 @@ struct TagInactiveRow: View {
                 titleLineLimit: titleLineLimit,
                 titleFontSize: titleFontSize,
                 titleLineSpacing: titleLineSpacing,
-                searchWords: searchWords
             )
             .frame(maxWidth: .infinity, alignment: .leading)
             if showInfo {
