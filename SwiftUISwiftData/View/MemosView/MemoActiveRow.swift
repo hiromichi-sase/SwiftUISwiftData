@@ -32,7 +32,7 @@ struct MemoActiveRow: View {
             }
             .padding(.bottom)
             TagListView(
-                items: memo.tags,
+                items: memo.tags.sorted { $0.order < $1.order },
                 content: { tag in
                     TagView(tag: tag)
                 },
