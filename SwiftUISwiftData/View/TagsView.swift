@@ -111,7 +111,7 @@ struct TagsView: View {
             Spacer()
                 .frame(width: 24)
             if editMode.isEditing {
-                Button("Delete", systemImage: "trash", role: .destructive) {
+                GlassButton(imageSystemName: "trash") {
                     currentAlert = .delete
                 }
                 .disabled(selection.isEmpty)

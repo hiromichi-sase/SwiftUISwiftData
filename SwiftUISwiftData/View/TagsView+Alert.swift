@@ -10,7 +10,7 @@ import SwiftUI
 extension TagsView {
     var deleteAlert: Alert {
         .init(
-            title: Text("Delete \(editMode.isEditing ? "selected tags" : "this tag")?"),
+            title: Text("Delete selected tags?"),
             primaryButton: .destructive(Text("Delete")) {
                 guard !selectedTags.isEmpty else { return }
                 deleteTags(selectedTags)
