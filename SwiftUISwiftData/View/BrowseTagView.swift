@@ -38,9 +38,10 @@ struct BrowseTagView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 4) {
                 Spacer()
-                    .frame(height: 0)
+                    .frame(height: .zero)
                 Text(tag.color)
                     .frame(maxWidth: .infinity)
+                    .frame(height: 30.0)
                     .foregroundStyle(tag.color.color().appropriateTextColor)
                     .background(tag.color.color())
                 Spacer()
