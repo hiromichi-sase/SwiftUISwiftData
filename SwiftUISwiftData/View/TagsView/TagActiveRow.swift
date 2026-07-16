@@ -16,13 +16,19 @@ struct TagActiveRow: View {
 
     var body: some View {
         VStack(spacing: .zero) {
-            TagRowText(
-                tag: tag,
-                titleLineLimit: titleLineLimit,
-                titleFontSize: titleFontSize,
-                titleLineSpacing: titleLineSpacing
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                TagRowText(
+                    tag: tag,
+                    titleLineLimit: titleLineLimit,
+                    titleFontSize: titleFontSize,
+                    titleLineSpacing: titleLineSpacing
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(tag.color)
+                    .frame(width: 80)
+                    .foregroundStyle(tag.color.color().appropriateTextColor)
+                    .background(tag.color.color())
+            }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
                     InfoText.dateView(for: tag)

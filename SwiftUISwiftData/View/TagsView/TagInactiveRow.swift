@@ -16,15 +16,25 @@ struct TagInactiveRow: View {
 
     var body: some View {
         VStack(spacing: .zero) {
-            TagRowText(
-                tag: tag,
-                titleLineLimit: titleLineLimit,
-                titleFontSize: titleFontSize,
-                titleLineSpacing: titleLineSpacing,
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                TagRowText(
+                    tag: tag,
+                    titleLineLimit: titleLineLimit,
+                    titleFontSize: titleFontSize,
+                    titleLineSpacing: titleLineSpacing,
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                Text(tag.color)
+                    .frame(width: 80)
+                    .foregroundStyle(tag.color.color().appropriateTextColor)
+                    .background(tag.color.color())
+                    .padding(.trailing)
+            }
             if showInfo {
                 InfoText.dateView(for: tag)
+                    .padding(.bottom)
+                    .padding(.horizontal)
             }
         }
     }
