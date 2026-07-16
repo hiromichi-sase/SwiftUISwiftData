@@ -35,7 +35,7 @@ struct EditTagView: View {
     @State
     private var colorString: String
     @State
-    private var color = Color(red: .zero, green: .zero, blue: .zero)
+    private var color: Color
     /// トーストメッセージの状態変数。
     @State
     private var toastMessage = ""
@@ -56,6 +56,7 @@ struct EditTagView: View {
         self.tag = tag
         _title = State(initialValue: tag?.title ?? "")
         _colorString = State(initialValue: tag?.color ?? "")
+        _color = State(initialValue: tag?.color.color() ?? Color(red: .zero, green: .zero, blue: .zero))
     }
 
     var body: some View {
@@ -95,7 +96,7 @@ struct EditTagView: View {
                         errorAlert
                 }
             }
-            .navigationTitle("Edit Tag")
+            .navigationTitle(tag?.title ?? "Add Tag")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {

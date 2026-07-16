@@ -22,10 +22,10 @@ struct TagsView: View {
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// 編集モードの状態を管理する状態変数。
-    @State
-    var editMode: EditMode = .inactive
+    @Binding
+    var editMode: EditMode
     /// 選択されたタグのIDを保持する状態変数。
-    @State
+    @Binding
     var selectedTag: Tag?
     /// 複数選択されたタグのIDを保持する状態変数。
     @State

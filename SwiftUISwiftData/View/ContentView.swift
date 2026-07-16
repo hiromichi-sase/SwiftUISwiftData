@@ -23,6 +23,10 @@ struct ContentView: View {
     var memosViewEditMode: EditMode = .inactive
     @State
     var selectedMemo: Memo?
+    @State
+    var tagsViewEditMode: EditMode = .inactive
+    @State
+    var selectedTag: Tag?
     /// メモの内容を編集するビューを開くかどうかのフラグ。
     @State
     var openEditMemoView: Bool = false
@@ -39,7 +43,10 @@ struct ContentView: View {
                         openEditMemoView: $openEditMemoView
                     )
                 case .tagsView:
-                    TagsView()
+                    TagsView(
+                        editMode: $tagsViewEditMode,
+                        selectedTag: $selectedTag
+                    )
                 case .settingsView:
                     SettingsView()
                 default:
@@ -59,6 +66,18 @@ struct ContentView: View {
                         }
                         else {
                             Text("No memos selected")
+                        }
+                    }
+                case .tagsView:
+                    if tagsViewEditMode.isEditing {
+                        Text("Select tags to edit or delete")
+                    }
+                    else {
+                        if let selectedTag {
+                            BrowseTagView(tag: selectedTag)
+                        }
+                        else {
+                            Text("No tags selected")
                         }
                     }
                 case .settingsView:
