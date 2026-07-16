@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension Array where Element == Memo {
+extension Array {
     mutating func move(from: [Int], to: Int) {
         let source = IndexSet(from)
         move(fromOffsets: source, toOffset: to)
