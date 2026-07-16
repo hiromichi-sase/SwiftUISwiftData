@@ -16,7 +16,8 @@ struct EditMemoViewModelTests {
         let dependency = Dependency()
         let addedTitle = "Added Title"
         let addedContent = "Added Content"
-        let memo = Memo(title: addedTitle, content: addedContent)
+        let addedTags = [Tag(title: "Added Tag", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)]
+        let memo = Memo(title: addedTitle, content: addedContent, tags: addedTags)
         try await dependency.testTarget.add(memo)
 
         guard let newMemo = await dependency.memoRepository.memos().first else {
@@ -26,6 +27,7 @@ struct EditMemoViewModelTests {
         await #expect(dependency.memoRepository.memos().count == 1)
         #expect(newMemo.title == addedTitle)
         #expect(newMemo.content == addedContent)
+        #expect(newMemo.tags == addedTags)
         #expect(newMemo.createdAt == newMemo.updatedAt)
         #expect(newMemo.order == 1)
         dependency.removeUserDefaults()
@@ -39,7 +41,8 @@ struct EditMemoViewModelTests {
 
         let updatedTitle = "Updated Title"
         let updatedContent = "Updated Content"
-        try await dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent)
+        let updateTags = [Tag(title: "Updated Tag 1", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)]
+        try await dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent, tags: updateTags)
 
         guard let newMemo = await dependency.memoRepository.memos().first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
@@ -47,6 +50,7 @@ struct EditMemoViewModelTests {
 
         #expect(newMemo.title == updatedTitle)
         #expect(newMemo.content == updatedContent)
+        #expect(newMemo.tags == updateTags)
         #expect(newMemo.createdAt < newMemo.updatedAt)
         dependency.removeUserDefaults()
     }

@@ -45,9 +45,10 @@ final class EditMemoViewModel: ObservableObject {
     ///   - memo: The Memo object that needs to be updated in the memoRepository.
     ///   - title: The title that needs to be updated.
     ///   - content: The content that needs to be updated.
+    ///   - tags: The tags that needs to be updated.
     /// - throws: An error.
-    func update(_ memo: Memo, title: String, content: String) throws {
-        try memoRepository.update(memo, title: title, content: content)
+    func update(_ memo: Memo, title: String, content: String, tags: [Tag]) throws {
+        try memoRepository.update(memo, title: title, content: content, tags: tags)
     }
 
     func getContentFontSize() -> Float {

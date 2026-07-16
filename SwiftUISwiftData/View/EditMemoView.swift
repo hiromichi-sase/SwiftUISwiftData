@@ -57,6 +57,10 @@ struct EditMemoView: View {
     private var currentAlert: AlertType?
     @FocusState
     private var inputViewFocus: Bool
+    @State
+    private var showSelectTagView = false
+    @State
+    private var tags: [Tag]
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -68,6 +72,7 @@ struct EditMemoView: View {
         _title = State(initialValue: memo?.title ?? "")
         _content = State(initialValue: memo?.content ?? "")
         _titleToStore = State(initialValue: memo?.title ?? "")
+        tags = memo?.tags ?? []
     }
 
     var body: some View {
@@ -131,6 +136,10 @@ struct EditMemoView: View {
                 }
             }
             .toast(message: $toastMessage)
+            .sheet(isPresented: $showSelectTagView) {
+                SelectTagView(selectedTags: $tags)
+                    .interactiveDismissDisabled(true)
+            }
         }
     }
 
@@ -186,6 +195,9 @@ struct EditMemoView: View {
             }
         }
         .disabled(showTitleView)
+        Button("Tag", systemImage: "tag") {
+            showSelectTagView = true
+        }
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
@@ -205,9 +217,10 @@ struct EditMemoView: View {
             if let memo {
                 let oldTitle = memo.title
                 let oldContent = memo.content
+                let oldTags = memo.tags
 
                 do {
-                    try viewModel.update(memo, title: title, content: content)
+                    try viewModel.update(memo, title: title, content: content, tags: tags)
                     toastMessage = "Successfully saved!"
                 }
                 catch {
@@ -216,11 +229,12 @@ struct EditMemoView: View {
 
                     memo.title = oldTitle
                     memo.content = oldContent
+                    memo.tags = oldTags
                     print("Failed to update memo: \(error)")
                 }
             }
             else {
-                let memo = Memo(title: title, content: content)
+                let memo = Memo(title: title, content: content, tags: tags)
 
                 do {
                     try viewModel.add(memo)
@@ -243,10 +257,10 @@ struct EditMemoView: View {
     /// 既存のメモがある場合はタイトルまたは内容が変更されたかどうかを確認し、既存のメモがない場合はタイトルまたは内容が空でないかどうかを確認する。
     private var memoUpdated: Bool {
         if let memo {
-            memo.title != titleToStore || memo.content != content
+            memo.title != titleToStore || memo.content != content || memo.tags != tags
         }
         else {
-            !titleToStore.isEmpty || !content.isEmpty
+            !titleToStore.isEmpty || !content.isEmpty || !tags.isEmpty
         }
     }
 }
