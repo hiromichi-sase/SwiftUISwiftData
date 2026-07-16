@@ -85,7 +85,9 @@ final class MemoRepository {
                 content: memo.content,
                 createdAt: now,
                 updatedAt: now,
-                order: memo.order + 1
+                order: memo.order + 1,
+                protected: memo.protected,
+                tags: memo.tags
             )
             modelContext.insert(memo)
             reorder()
