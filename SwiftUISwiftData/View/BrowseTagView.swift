@@ -52,6 +52,7 @@ struct BrowseTagView: View {
             .padding([.horizontal, .bottom], 16)
             .sheet(isPresented: $showingEditTag) {
                 EditTagView(tag: tag)
+                    .interactiveDismissDisabled(true)
             }
             .navigationTitle(tag.title)
             .navigationBarTitleDisplayMode(.inline)

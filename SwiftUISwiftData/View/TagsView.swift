@@ -69,6 +69,7 @@ struct TagsView: View {
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $showingAddTag) {
                     EditTagView()
+                        .interactiveDismissDisabled(true)
                 }
                 .toast(message: $toastMessage)
             bottomBar
