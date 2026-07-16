@@ -64,6 +64,20 @@ struct InfoText {
             Spacer()
         }
     }
+
+    static func dateView(for tag: Tag) -> some View {
+        HStack(spacing: .zero) {
+            Text("Created at: \(tag.createdAt.formatted(date: .complete, time: .standard))")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
+                .frame(width: 8.0)
+            Text("Updated at: \(tag.updatedAt.formatted(date: .complete, time: .standard))")
+                .font(.system(size: 8.0))
+                .multilineTextAlignment(.leading)
+            Spacer()
+        }
+    }
 }
 
 #Preview("countView_no_content") {
@@ -88,7 +102,12 @@ struct InfoText {
     }
 }
 
-#Preview("dateView") {
+#Preview("dateView_Memo") {
     let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
     InfoText.dateView(for: memo)
+}
+
+#Preview("dateView_Tag") {
+    let tag = Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
+    InfoText.dateView(for: tag)
 }
