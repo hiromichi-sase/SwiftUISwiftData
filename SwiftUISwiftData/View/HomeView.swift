@@ -14,6 +14,7 @@ struct HomeView: View {
 
     enum Section: CaseIterable, Identifiable {
         case memosView
+        case tagsView
         case settingsView
         var id: Section { self }
 
@@ -21,6 +22,8 @@ struct HomeView: View {
             switch self {
                 case .memosView:
                     return "Memos"
+                case .tagsView:
+                    return "Tags"
                 case .settingsView:
                     return "Settings"
             }
@@ -30,6 +33,8 @@ struct HomeView: View {
             switch self {
                 case .memosView:
                     "long.text.page.and.pencil"
+                case .tagsView:
+                    "tag"
                 case .settingsView:
                     "gearshape"
             }

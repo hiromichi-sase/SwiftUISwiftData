@@ -38,6 +38,8 @@ struct ContentView: View {
                         selectedMemo: $selectedMemo,
                         openEditMemoView: $openEditMemoView
                     )
+                case .tagsView:
+                    TagsView()
                 case .settingsView:
                     SettingsView()
                 default:
