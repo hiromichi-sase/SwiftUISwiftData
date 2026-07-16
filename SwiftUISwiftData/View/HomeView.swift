@@ -21,11 +21,11 @@ struct HomeView: View {
         var title: String {
             switch self {
                 case .memosView:
-                    return "Memos"
+                    "Memos"
                 case .tagsView:
-                    return "Tags"
+                    "Tags"
                 case .settingsView:
-                    return "Settings"
+                    "Settings"
             }
         }
 
