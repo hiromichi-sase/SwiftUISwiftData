@@ -27,6 +27,8 @@ struct BrowseMemoView: View {
     /// トーストメッセージの状態変数。
     @State
     private var toastMessage = ""
+    @State
+    private var tagListViewHeight: CGFloat = .zero
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -53,6 +55,16 @@ struct BrowseMemoView: View {
                 )
                 .border(.clear)
                 .disabled(memo.content.isEmpty)
+                TagListView(
+                    items: memo.tags,
+                    content: { tag in
+                        TagView(tag: tag)
+                    },
+                    viewHeight: { height in
+                        tagListViewHeight = height
+                    }
+                )
+                .frame(height: tagListViewHeight)
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)

@@ -14,6 +14,8 @@ struct MemoInactiveRow: View {
     let titleLineSpacing: Float
     let showInfo: Bool
     let searchWords: [String]
+    @State
+    private var tagListViewHeight: CGFloat = .zero
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -32,6 +34,23 @@ struct MemoInactiveRow: View {
                         .padding(.trailing)
                 }
             }
+            HStack {
+                Spacer()
+                    .frame(width: 16)
+                TagListView(
+                    items: memo.tags,
+                    content: { tag in
+                        TagView(tag: tag)
+                    },
+                    viewHeight: { height in
+                        tagListViewHeight = height
+                    }
+                )
+                .frame(height: tagListViewHeight)
+                Spacer()
+                    .frame(width: 16)
+            }
+            .padding(.bottom)
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
                     InfoText.countView(content: memo.content)

@@ -13,6 +13,8 @@ struct MemoActiveRow: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
+    @State
+    private var tagListViewHeight: CGFloat = .zero
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -28,6 +30,17 @@ struct MemoActiveRow: View {
                     Image(systemName: "lock.fill")
                 }
             }
+            .padding(.bottom)
+            TagListView(
+                items: memo.tags,
+                content: { tag in
+                    TagView(tag: tag)
+                },
+                viewHeight: { height in
+                    tagListViewHeight = height
+                }
+            )
+            .frame(height: tagListViewHeight)
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
                     InfoText.countView(content: memo.content)
