@@ -75,6 +75,8 @@ struct ContentView: View {
                     else {
                         if let selectedTag {
                             BrowseTagView(tag: selectedTag)
+                                .modelContext(viewModel.modelContext)
+                                .id(selectedTag.id)
                         }
                         else {
                             Text("No tags selected")
