@@ -91,7 +91,7 @@ final class TagRepository {
     func moveTag(from source: [Int], to destination: Int) throws {
         try modelContext.transaction {
             let tags = tags()
-            var orderedTags = tags.sorted(by: { $0.order < $1.order })
+            var orderedTags = tags.sortedByOrder
             orderedTags.move(from: source, to: destination)
 
             for (index, tag) in orderedTags.enumerated() {

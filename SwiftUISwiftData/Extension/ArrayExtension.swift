@@ -13,3 +13,9 @@ extension Array {
         move(fromOffsets: source, toOffset: to)
     }
 }
+
+extension Array where Element == Tag {
+    var sortedByOrder: [Tag] {
+        sorted { $0.order < $1.order }
+    }
+}

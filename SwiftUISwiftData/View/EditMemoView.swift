@@ -257,7 +257,7 @@ struct EditMemoView: View {
     /// 既存のメモがある場合はタイトルまたは内容が変更されたかどうかを確認し、既存のメモがない場合はタイトルまたは内容が空でないかどうかを確認する。
     private var memoUpdated: Bool {
         if let memo {
-            memo.title != titleToStore || memo.content != content || memo.tags != tags
+            memo.title != titleToStore || memo.content != content || memo.tags.sortedByOrder != tags.sortedByOrder
         }
         else {
             !titleToStore.isEmpty || !content.isEmpty || !tags.isEmpty

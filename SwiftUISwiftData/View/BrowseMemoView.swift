@@ -56,7 +56,7 @@ struct BrowseMemoView: View {
                 .disabled(memo.content.isEmpty)
                 if !memo.tags.isEmpty {
                     TagListView(
-                        items: memo.tags.sorted { $0.order < $1.order },
+                        items: memo.tags.sortedByOrder,
                         content: { tag in
                             TagView(tag: tag)
                         },
