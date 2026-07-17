@@ -92,11 +92,16 @@ struct TagsView: View {
                     }
                 }
                 else {
-                    List(selection: $selectedTag) {
-                        ForEach(viewModel.tags) { tag in
-                            inactiveRow(for: tag)
-                                .id(tag.id)
-                                .tag(tag.id)
+                    if viewModel.tags.isEmpty {
+                        EmptyListView(message: "No Tags")
+                    }
+                    else {
+                        List(selection: $selectedTag) {
+                            ForEach(viewModel.tags) { tag in
+                                inactiveRow(for: tag)
+                                    .id(tag.id)
+                                    .tag(tag.id)
+                            }
                         }
                     }
                 }
