@@ -62,9 +62,16 @@ struct EditTagView: View {
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 4) {
-                TextField("Input Title", text: $title)
-                    .focused($textFieldFocus)
-                    .padding(.bottom, 20)
+                CustomTextField(
+                    text: $title,
+                    focus: _textFieldFocus,
+                    placeholder: "Input Title",
+                    background: Color(uiColor: .secondarySystemBackground),
+                    submitLabel: .done,
+                    icon: .none,
+                    submitButtonTapped: nil
+                )
+                .padding(.bottom, 20)
                 ColorPicker(
                     "Select Color",
                     selection: $color,

@@ -8,20 +8,6 @@
 import SwiftUI
 
 struct InputView: View {
-    enum Icon {
-        case search
-        case none
-
-        var systemName: String {
-            switch self {
-                case .search:
-                    "magnifyingglass"
-                case .none:
-                    ""
-            }
-        }
-    }
-
     @Binding
     var text: String
     @FocusState
@@ -33,7 +19,7 @@ struct InputView: View {
     @State
     var submitLabel: SubmitLabel = .done
     @State
-    var icon: Icon = .none
+    var icon: CustomTextField.Icon = .none
     var submitButtonTapped: (() -> Void)?
     var cancelButtonTapped: (() -> Void)?
 
@@ -44,27 +30,15 @@ struct InputView: View {
             }
             .padding(.leading, -5)
             .keyboardShortcut(".", modifiers: [.command])
-            ZStack {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(textFieldBackground)
-                    .frame(height: 48)
-                HStack(spacing: 6) {
-                    Spacer()
-                        .frame(width: 12)
-                    if !icon.systemName.isEmpty {
-                        Image(systemName: icon.systemName)
-                            .foregroundColor(.gray)
-                    }
-                    TextField(placeholder, text: $text)
-                        .focused($focus)
-                        .submitLabel(submitLabel)
-                        .onSubmit {
-                            submitButtonTapped?()
-                        }
-                    Spacer()
-                        .frame(width: 8)
-                }
-            }
+            CustomTextField(
+                text: $text,
+                focus: _focus,
+                placeholder: placeholder,
+                background: textFieldBackground,
+                submitLabel: submitLabel,
+                icon: icon,
+                submitButtonTapped: submitButtonTapped
+            )
         }
     }
 }
