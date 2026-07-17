@@ -18,7 +18,7 @@ struct MemoInactiveRow: View {
     private var tagListViewHeight: CGFloat = .zero
 
     var body: some View {
-        VStack(spacing: .zero) {
+        VStack(spacing: 8.0) {
             HStack {
                 MemoRowText(
                     memo: memo,
@@ -28,15 +28,14 @@ struct MemoInactiveRow: View {
                     searchWords: searchWords
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+                .padding(.top)
+                .padding(.horizontal)
                 if memo.protected {
                     Image(systemName: "lock.fill")
                         .padding(.trailing)
                 }
             }
-            HStack {
-                Spacer()
-                    .frame(width: 16)
+            if !memo.tags.isEmpty {
                 TagListView(
                     items: memo.tags.sorted { $0.order < $1.order },
                     content: { tag in
@@ -47,18 +46,17 @@ struct MemoInactiveRow: View {
                     }
                 )
                 .frame(height: tagListViewHeight)
-                Spacer()
-                    .frame(width: 16)
+                .padding(.horizontal, 8.0)
             }
-            .padding(.bottom)
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
                     InfoText.countView(content: memo.content)
                     InfoText.dateView(for: memo)
                 }
-                .padding(.bottom)
                 .padding(.horizontal)
             }
+            Spacer()
+                .frame(height: 8.0)
         }
     }
 }

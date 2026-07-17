@@ -53,18 +53,19 @@ struct BrowseMemoView: View {
                     contentFontSize: viewModel.getContentFontSize(),
                     contentLineSpacing: viewModel.getContentLineSpacing()
                 )
-                .border(.clear)
                 .disabled(memo.content.isEmpty)
-                TagListView(
-                    items: memo.tags.sorted { $0.order < $1.order },
-                    content: { tag in
-                        TagView(tag: tag)
-                    },
-                    viewHeight: { height in
-                        tagListViewHeight = height
-                    }
-                )
-                .frame(height: tagListViewHeight)
+                if !memo.tags.isEmpty {
+                    TagListView(
+                        items: memo.tags.sorted { $0.order < $1.order },
+                        content: { tag in
+                            TagView(tag: tag)
+                        },
+                        viewHeight: { height in
+                            tagListViewHeight = height
+                        }
+                    )
+                    .frame(height: tagListViewHeight)
+                }
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)
