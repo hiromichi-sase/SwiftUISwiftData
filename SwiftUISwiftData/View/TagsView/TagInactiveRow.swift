@@ -24,7 +24,8 @@ struct TagInactiveRow: View {
                     titleLineSpacing: titleLineSpacing,
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+                .padding(.vertical, 16.5)
+                .padding(.horizontal)
                 Text(tag.color)
                     .frame(width: 80)
                     .foregroundStyle(tag.color.color().appropriateTextColor)
