@@ -1,5 +1,5 @@
 //
-//  RowText.swift
+//  MemoRowText.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/23.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RowText: View {
+struct MemoRowText: View {
     let memo: Memo
     let titleLineLimit: Int
     let titleFontSize: Float

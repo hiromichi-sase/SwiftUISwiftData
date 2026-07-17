@@ -58,11 +58,13 @@ final class MemoRepository {
     ///   - memo: The Memo object that needs to be updated in the model context.
     ///   - title: The title that needs to be updated.
     ///   - content: The content that needs to be updated.
+    ///   - tags: The tags that needs to be updated.
     /// - throws: An error.
-    func update(_ memo: Memo, title: String, content: String) throws {
+    func update(_ memo: Memo, title: String, content: String, tags: [Tag]) throws {
         try modelContext.transaction {
             memo.title = title
             memo.content = content
+            memo.tags = tags
             memo.updatedAt = Date()
         }
     }
@@ -83,7 +85,9 @@ final class MemoRepository {
                 content: memo.content,
                 createdAt: now,
                 updatedAt: now,
-                order: memo.order + 1
+                order: memo.order + 1,
+                protected: memo.protected,
+                tags: memo.tags
             )
             modelContext.insert(memo)
             reorder()

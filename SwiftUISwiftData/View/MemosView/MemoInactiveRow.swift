@@ -1,5 +1,5 @@
 //
-//  InactiveRow.swift
+//  MemoInactiveRow.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/23.
@@ -7,18 +7,20 @@
 
 import SwiftUI
 
-struct InactiveRow: View {
+struct MemoInactiveRow: View {
     let memo: Memo
     let titleLineLimit: Int
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
     let searchWords: [String]
+    @State
+    private var tagListViewHeight: CGFloat = .zero
 
     var body: some View {
-        VStack(spacing: .zero) {
+        VStack(spacing: 8.0) {
             HStack {
-                RowText(
+                MemoRowText(
                     memo: memo,
                     titleLineLimit: titleLineLimit,
                     titleFontSize: titleFontSize,
@@ -26,20 +28,35 @@ struct InactiveRow: View {
                     searchWords: searchWords
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+                .padding(.top)
+                .padding(.horizontal)
                 if memo.protected {
                     Image(systemName: "lock.fill")
                         .padding(.trailing)
                 }
+            }
+            if !memo.tags.isEmpty {
+                TagListView(
+                    items: memo.tags.sortedByOrder,
+                    content: { tag in
+                        TagView(tag: tag)
+                    },
+                    viewHeight: { height in
+                        tagListViewHeight = height
+                    }
+                )
+                .frame(height: tagListViewHeight)
+                .padding(.horizontal, 8.0)
             }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
                     InfoText.countView(content: memo.content)
                     InfoText.dateView(for: memo)
                 }
-                .padding(.bottom)
                 .padding(.horizontal)
             }
+            Spacer()
+                .frame(height: 8.0)
         }
     }
 }
