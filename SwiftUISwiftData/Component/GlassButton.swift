@@ -24,3 +24,7 @@ struct GlassButton: View {
         .buttonStyle(.glass)
     }
 }
+
+#Preview {
+    GlassButton(imageSystemName: "tag")
+}

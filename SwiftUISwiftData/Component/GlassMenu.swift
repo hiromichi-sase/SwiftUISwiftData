@@ -25,3 +25,10 @@ struct GlassMenu<Content: View>: View {
         .buttonStyle(.glass)
     }
 }
+
+#Preview {
+    GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
+        Button("Deselect All", systemImage: "circle") { }
+        Button("Select All", systemImage: "checkmark.circle") { }
+    }
+}
