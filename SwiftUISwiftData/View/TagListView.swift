@@ -66,3 +66,17 @@ struct TagListView<Data: Collection, Content: View>: View where Data.Element: Ha
         }
     }
 }
+
+#Preview {
+    TagListView(
+        items: [
+            Tag(title: "Sample Title 1", color: "#000000"),
+            Tag(title: "Sample Title 2", color: "#000000"),
+            Tag(title: "Sample Title 3", color: "#000000"),
+        ],
+        content: { tag in
+            TagView(tag: tag)
+        },
+        viewHeight: { _ in }
+    )
+}

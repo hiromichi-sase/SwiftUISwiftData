@@ -25,3 +25,7 @@ struct TagView: View {
             )
     }
 }
+
+#Preview {
+    TagView(tag: Tag(title: "Sample Title", color: "#000000"))
+}

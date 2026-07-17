@@ -21,3 +21,12 @@ struct TagRowText: View {
             .lineSpacing(CGFloat(titleLineSpacing))
     }
 }
+
+#Preview {
+    TagRowText(
+        tag: Tag(title: "Sample Title", color: "#000000"),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0
+    )
+}

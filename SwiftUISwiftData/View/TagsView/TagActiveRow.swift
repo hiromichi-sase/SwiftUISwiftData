@@ -38,3 +38,13 @@ struct TagActiveRow: View {
         }
     }
 }
+
+#Preview {
+    TagActiveRow(
+        tag: Tag(title: "Sample Title", color: "#000000"),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false
+    )
+}
