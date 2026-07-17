@@ -29,6 +29,7 @@ struct TagActiveRow: View {
                     .frame(width: showColorString ? 90 : 30)
                     .foregroundStyle(tag.color.color().appropriateTextColor)
                     .background(tag.color.color())
+                    .border(tag.color.color().appropriateTextColor)
             }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
