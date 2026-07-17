@@ -155,15 +155,20 @@ struct MemosView: View {
                     }
                 }
                 else {
-                    if filteredMemos.isEmpty {
-                        EmptyListView(message: "No memos found")
+                    if viewModel.memos.isEmpty {
+                        EmptyListView(message: "No memos")
                     }
                     else {
-                        List(selection: $selectedMemo) {
-                            ForEach(filteredMemos) { memo in
-                                inactiveRow(for: memo)
-                                    .id(memo.id)
-                                    .tag(memo.id)
+                        if filteredMemos.isEmpty {
+                            EmptyListView(message: "No memos found")
+                        }
+                        else {
+                            List(selection: $selectedMemo) {
+                                ForEach(filteredMemos) { memo in
+                                    inactiveRow(for: memo)
+                                        .id(memo.id)
+                                        .tag(memo.id)
+                                }
                             }
                         }
                     }
