@@ -74,7 +74,8 @@ struct SelectTagView: View {
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showInfo: false
+                showInfo: false,
+                showColorString: false,
             )
         }
         .foregroundStyle(.primary)
