@@ -198,7 +198,7 @@ struct EditTagView: View {
                 }
             }
         }
-        .disabled(!tagUpdated)
+        .disabled(!tagUpdated || title.isEmpty)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
