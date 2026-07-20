@@ -31,9 +31,6 @@ struct EditMemoView: View {
     /// タイトルと内容の状態変数。
     @State
     private var title: String
-    /// 保存前のタイトルを保持する状態変数。
-    @State
-    private var titleToStore: String = ""
     /// 内容の状態変数。
     @State
     private var content: String
@@ -71,7 +68,6 @@ struct EditMemoView: View {
         self.memo = memo
         _title = State(initialValue: memo?.title ?? "")
         _content = State(initialValue: memo?.content ?? "")
-        _titleToStore = State(initialValue: memo?.title ?? "")
         tags = memo?.tags ?? []
     }
 
@@ -87,12 +83,11 @@ struct EditMemoView: View {
                         submitLabel: .done,
                         icon: .none,
                         submitButtonTapped: {
-                            titleToStore = title
                             showTitleView = false
                         },
                         cancelButtonTapped: {
                             showTitleView = false
-                            title = titleToStore
+                            title = memo?.title ?? ""
                         }
                     )
                     .padding(.bottom, 4)
@@ -124,7 +119,7 @@ struct EditMemoView: View {
                         errorAlert
                 }
             }
-            .navigationTitle(titleToStore)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
@@ -257,10 +252,10 @@ struct EditMemoView: View {
     /// 既存のメモがある場合はタイトルまたは内容が変更されたかどうかを確認し、既存のメモがない場合はタイトルまたは内容が空でないかどうかを確認する。
     private var memoUpdated: Bool {
         if let memo {
-            memo.title != titleToStore || memo.content != content || memo.tags.sortedByOrder != tags.sortedByOrder
+            memo.title != title || memo.content != content || memo.tags.sortedByOrder != tags.sortedByOrder
         }
         else {
-            !titleToStore.isEmpty || !content.isEmpty || !tags.isEmpty
+            !title.isEmpty || !content.isEmpty || !tags.isEmpty
         }
     }
 }
