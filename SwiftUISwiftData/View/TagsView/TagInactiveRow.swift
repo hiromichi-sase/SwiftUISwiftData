@@ -41,12 +41,42 @@ struct TagInactiveRow: View {
     }
 }
 
-#Preview {
+#Preview("white_showColorString_true") {
     TagInactiveRow(
-        tag: Tag(title: "Sample Title", color: "#000000"),
+        tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
-        showInfo: false
+        showInfo: true,
+    )
+}
+
+#Preview("white_showColorString_false") {
+    TagInactiveRow(
+        tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false,
+    )
+}
+
+#Preview("black_showColorString_true") {
+    TagInactiveRow(
+        tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: true,
+    )
+}
+
+#Preview("black_showColorString_false") {
+    TagInactiveRow(
+        tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false,
     )
 }

@@ -84,9 +84,16 @@ struct BrowseTagView: View {
     }
 }
 
-#Preview {
+#Preview("white") {
     NavigationStack {
-        let tag = Tag(title: "Sample Title", color: "#00FF00", createdAt: Date(), updatedAt: Date(), order: .zero)
+        let tag = Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date(), order: .zero)
+        BrowseTagView(tag: tag)
+    }
+}
+
+#Preview("black") {
+    NavigationStack {
+        let tag = Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
         BrowseTagView(tag: tag)
     }
 }
