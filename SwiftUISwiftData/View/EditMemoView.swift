@@ -20,6 +20,7 @@ struct EditMemoView: View {
     @ObservedObject
     var viewModel = EditMemoViewModel(
         memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。
@@ -193,6 +194,7 @@ struct EditMemoView: View {
         Button("Tag", systemImage: "tag") {
             showSelectTagView = true
         }
+        .disabled(viewModel.tags.isEmpty)
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。

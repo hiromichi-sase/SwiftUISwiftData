@@ -20,13 +20,18 @@ final class EditMemoViewModel: ObservableObject {
     ///
     /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
+    /// An array of Tag objects that are published to update the UI when changes occur.
+    @Published
+    private(set) var tags: [Tag] = []
 
     init(
         memoRepository: MemoRepository,
+        tagRepository: TagRepository,
         userDefaultsRepository: UserDefaultsRepository
     ) {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
+        tags = tagRepository.tags()
     }
 
     /// Adds a new memo to the memoRepository.

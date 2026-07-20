@@ -90,12 +90,14 @@ extension EditMemoViewModelTests {
     struct Dependency {
         let testTarget: EditMemoViewModel
         let memoRepository: MemoRepository
+        let tagRepository: TagRepository
         private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
         init() {
             memoRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
+            tagRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             guard let userDefaults = UserDefaults(suiteName: EditMemoViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")
             }
@@ -103,6 +105,7 @@ extension EditMemoViewModelTests {
             userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 memoRepository: memoRepository,
+                tagRepository: tagRepository,
                 userDefaultsRepository: userDefaultsRepository
             )
         }
