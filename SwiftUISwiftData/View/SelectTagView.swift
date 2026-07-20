@@ -69,13 +69,11 @@ struct SelectTagView: View {
                 selection.insert(tag.id)
             }
         } label: {
-            TagActiveRow(
+            SelectTagActiveRow(
                 tag: tag,
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showInfo: false,
-                showColorString: false,
             )
         }
         .foregroundStyle(.primary)

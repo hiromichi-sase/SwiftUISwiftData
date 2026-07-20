@@ -13,7 +13,6 @@ struct TagActiveRow: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
-    let showColorString: Bool
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -25,8 +24,8 @@ struct TagActiveRow: View {
                     titleLineSpacing: titleLineSpacing
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                Text(showColorString ? tag.color : "")
-                    .frame(width: showColorString ? 90 : 30)
+                Text(tag.color)
+                    .frame(width: 90)
                     .foregroundStyle(tag.color.color().appropriateTextColor)
                     .background(tag.color.color())
                     .border(tag.color.color().appropriateTextColor)
@@ -41,24 +40,42 @@ struct TagActiveRow: View {
     }
 }
 
-#Preview("showColorString_true") {
+#Preview("white_showColorString_true") {
     TagActiveRow(
-        tag: Tag(title: "Sample Title", color: "#000000"),
+        tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
-        showInfo: false,
-        showColorString: true
+        showInfo: true,
     )
 }
 
-#Preview("showColorString_false") {
+#Preview("white_showColorString_false") {
     TagActiveRow(
-        tag: Tag(title: "Sample Title", color: "#000000"),
+        tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
         showInfo: false,
-        showColorString: false
+    )
+}
+
+#Preview("black_showColorString_true") {
+    TagActiveRow(
+        tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: true,
+    )
+}
+
+#Preview("black_showColorString_false") {
+    TagActiveRow(
+        tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
+        titleLineLimit: 1,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false,
     )
 }

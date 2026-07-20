@@ -230,7 +230,6 @@ struct TagsView: View {
                 titleFontSize: viewModel.getTitleFontSize(),
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
                 showInfo: viewModel.getShowInfo(),
-                showColorString: true,
             )
         }
         .foregroundStyle(.primary)
