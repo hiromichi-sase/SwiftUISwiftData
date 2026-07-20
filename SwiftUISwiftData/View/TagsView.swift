@@ -36,6 +36,9 @@ struct TagsView: View {
     /// 新しいタグを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
     private var showingAddTag = false
+    /// タグの内容を編集するビューを開くかどうかのフラグ。
+    @Binding
+    private var openEditTagView: Bool
     /// トーストメッセージの状態変数。
     @State
     var toastMessage = ""
@@ -43,6 +46,17 @@ struct TagsView: View {
     var error: Error?
     @State
     var currentAlert: AlertType?
+
+    /// イニシャライザ。
+    init(
+        editMode: Binding<EditMode>,
+        selectedTag: Binding<Tag?>,
+        openEditTagView: Binding<Bool>,
+    ) {
+        _editMode = editMode
+        _selectedTag = selectedTag
+        _openEditTagView = openEditTagView
+    }
 
     var body: some View {
         VStack(spacing: 8.0) {
@@ -108,6 +122,9 @@ struct TagsView: View {
             }
             .onAppear {
                 scrollViewProxy = proxy
+            }
+            .onDisappear {
+                openEditTagView = false
             }
         }
     }
@@ -256,6 +273,12 @@ struct TagsView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             selectedTag = tag
+        }
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") {
+                openEditTagView = true
+                selectedTag = tag
+            }
         }
         .listRowInsets(.init())
         .moveDisabled(true)
