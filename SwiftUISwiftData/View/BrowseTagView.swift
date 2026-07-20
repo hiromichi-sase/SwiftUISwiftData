@@ -46,7 +46,7 @@ struct BrowseTagView: View {
                 Spacer()
                     .frame(height: .zero)
                 TagColorView(
-                    tag: tag,
+                    colorString: tag.color,
                     showColorString: true
                 )
                 Spacer()

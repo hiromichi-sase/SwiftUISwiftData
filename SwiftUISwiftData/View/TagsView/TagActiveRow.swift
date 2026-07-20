@@ -25,7 +25,7 @@ struct TagActiveRow: View {
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
                 TagColorView(
-                    tag: tag,
+                    colorString: tag.color,
                     showColorString: true
                 )
             }

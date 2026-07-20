@@ -27,7 +27,7 @@ struct TagInactiveRow: View {
                 .padding(.vertical, 16.5)
                 .padding(.horizontal)
                 TagColorView(
-                    tag: tag,
+                    colorString: tag.color,
                     showColorString: true
                 )
                 .padding(.trailing)

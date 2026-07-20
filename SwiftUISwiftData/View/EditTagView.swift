@@ -89,7 +89,7 @@ struct EditTagView: View {
                     .frame(width: 164)
                     Spacer()
                     TagColorView(
-                        tag: Tag(title: "", color: colorString),
+                        colorString: colorString,
                         showColorString: true
                     )
                 }
