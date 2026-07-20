@@ -73,18 +73,26 @@ struct EditTagView: View {
                     submitButtonTapped: nil
                 )
                 .padding(.bottom, 20)
-                ColorPicker(
-                    "Select Color",
-                    selection: $color,
-                    supportsOpacity: false
-                )
-                .onChange(of: color) {
-                    colorString = color.hexString()
+                HStack {
+                    ColorPicker(
+                        selection: $color,
+                        supportsOpacity: false
+                    ) {
+                        HStack {
+                            Text("Select Color")
+                            Image(systemName: "paintpalette")
+                        }
+                    }
+                    .onChange(of: color) {
+                        colorString = color.hexString()
+                    }
+                    .frame(width: 164)
+                    Spacer()
+                    TagColorView(
+                        tag: Tag(title: "", color: colorString),
+                        showColorString: true
+                    )
                 }
-                TagColorView(
-                    tag: Tag(title: "", color: colorString),
-                    showColorString: true
-                )
                 Spacer()
                 if viewModel.getShowInfo(), let tag {
                     InfoText.dateView(for: tag)
