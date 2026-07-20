@@ -80,11 +80,10 @@ struct EditTagView: View {
                 .onChange(of: color) {
                     colorString = color.hexString()
                 }
-                Text("\(color.hexString().color().hexString())")
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 30.0)
-                    .foregroundStyle(color.hexString().color().appropriateTextColor)
-                    .background(color.hexString().color())
+                TagColorView(
+                    tag: tag ?? Tag(title: "", color: color.hexString()),
+                    showColorString: true
+                )
                 Spacer()
                 if viewModel.getShowInfo(), let tag {
                     InfoText.dateView(for: tag)

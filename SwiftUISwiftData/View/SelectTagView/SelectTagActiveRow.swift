@@ -23,10 +23,10 @@ struct SelectTagActiveRow: View {
                     titleLineSpacing: titleLineSpacing
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                Rectangle()
-                    .frame(width: 50, height: 20)
-                    .foregroundStyle(tag.color.color())
-                    .border(tag.color.color().appropriateTextColor)
+                TagColorView(
+                    tag: tag,
+                    showColorString: false
+                )
             }
         }
     }

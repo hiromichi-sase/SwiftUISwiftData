@@ -24,11 +24,10 @@ struct TagActiveRow: View {
                     titleLineSpacing: titleLineSpacing
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
-                Text(tag.color)
-                    .frame(width: 90)
-                    .foregroundStyle(tag.color.color().appropriateTextColor)
-                    .background(tag.color.color())
-                    .border(tag.color.color().appropriateTextColor)
+                TagColorView(
+                    tag: tag,
+                    showColorString: true
+                )
             }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {

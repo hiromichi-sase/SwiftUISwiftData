@@ -26,11 +26,11 @@ struct TagInactiveRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 16.5)
                 .padding(.horizontal)
-                Text(tag.color)
-                    .frame(width: 80)
-                    .foregroundStyle(tag.color.color().appropriateTextColor)
-                    .background(tag.color.color())
-                    .padding(.trailing)
+                TagColorView(
+                    tag: tag,
+                    showColorString: true
+                )
+                .padding(.trailing)
             }
             if showInfo {
                 InfoText.dateView(for: tag)
