@@ -24,6 +24,9 @@ struct TagsView: View {
     /// 編集モードの状態を管理する状態変数。
     @Binding
     var editMode: EditMode
+    /// 削除するタグを保持する状態変数。
+    @State
+    var tagToDelete: Tag?
     /// 選択されたタグのIDを保持する状態変数。
     @Binding
     var selectedTag: Tag?
@@ -278,6 +281,10 @@ struct TagsView: View {
             Button("Edit", systemImage: "pencil") {
                 openEditTagView = true
                 selectedTag = tag
+            }
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                tagToDelete = tag
+                currentAlert = .delete
             }
         }
         .listRowInsets(.init())
