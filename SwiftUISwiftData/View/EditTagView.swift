@@ -55,8 +55,9 @@ struct EditTagView: View {
     init(tag: Tag? = nil) {
         self.tag = tag
         _title = State(initialValue: tag?.title ?? "")
-        _colorString = State(initialValue: tag?.color ?? "")
-        _color = State(initialValue: tag?.color.color() ?? Color(red: .zero, green: .zero, blue: .zero))
+        let defalutColor = Color(red: .zero, green: .zero, blue: .zero)
+        _colorString = State(initialValue: tag?.color ?? defalutColor.hexString())
+        _color = State(initialValue: tag?.color.color() ?? defalutColor)
     }
 
     var body: some View {
@@ -81,7 +82,7 @@ struct EditTagView: View {
                     colorString = color.hexString()
                 }
                 TagColorView(
-                    tag: tag ?? Tag(title: "", color: color.hexString()),
+                    tag: Tag(title: "", color: colorString),
                     showColorString: true
                 )
                 Spacer()
