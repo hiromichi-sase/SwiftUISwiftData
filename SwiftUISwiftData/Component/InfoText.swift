@@ -53,12 +53,12 @@ struct InfoText {
 
     static func dateView(for memo: Memo) -> some View {
         HStack(spacing: .zero) {
-            Text("Created at: \(memo.createdAt.formatted(date: .complete, time: .standard))")
+            Text("Created at: \(memo.createdAt.dateString)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
             Spacer()
                 .frame(width: 8.0)
-            Text("Updated at: \(memo.updatedAt.formatted(date: .complete, time: .standard))")
+            Text("Updated at: \(memo.updatedAt.dateString)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
             Spacer()
@@ -67,12 +67,12 @@ struct InfoText {
 
     static func dateView(for tag: Tag) -> some View {
         HStack(spacing: .zero) {
-            Text("Created at: \(tag.createdAt.formatted(date: .complete, time: .standard))")
+            Text("Created at: \(tag.createdAt.dateString)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
             Spacer()
                 .frame(width: 8.0)
-            Text("Updated at: \(tag.updatedAt.formatted(date: .complete, time: .standard))")
+            Text("Updated at: \(tag.updatedAt.dateString)")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
             Spacer()
