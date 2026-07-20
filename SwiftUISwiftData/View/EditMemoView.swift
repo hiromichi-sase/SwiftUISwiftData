@@ -213,7 +213,7 @@ struct EditMemoView: View {
         }
         .disabled(showTitleView)
         .keyboardShortcut("t", modifiers: [.command])
-        Button("Save", systemImage: "square.and.pencil") {
+        Button("Save", systemImage: "checkmark.circle.fill") {
             if let memo {
                 let oldTitle = memo.title
                 let oldContent = memo.content

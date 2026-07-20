@@ -96,7 +96,7 @@ struct SelectTagView: View {
 
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        Button("Save", systemImage: "square.and.pencil") {
+        Button("Save", systemImage: "checkmark") {
             selectedTags = viewModel.tags.filter { selection.contains($0.id) }
             dismiss()
         }

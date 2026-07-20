@@ -156,7 +156,7 @@ struct EditTagView: View {
     /// タイトルが空でない場合はリネームのボタンを表示し、常に保存のボタンを表示する。保存のボタンは変更がある場合のみ有効になる。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        Button("Save", systemImage: "square.and.pencil") {
+        Button("Save", systemImage: "checkmark.circle.fill") {
             if let tag {
                 let oldTitle = tag.title
                 let oldColor = tag.color

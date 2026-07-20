@@ -229,7 +229,7 @@ struct SettingsView: View {
         }
         .disabled(!viewModel.settingsChanged)
         .keyboardShortcut("r", modifiers: [.command])
-        Button("Save", systemImage: "checkmark") {
+        Button("Save", systemImage: "checkmark.circle.fill") {
             viewModel.setHasLink(hasLink)
             viewModel.setContentFontSize(contentFontSize)
             viewModel.setContentLineSpacing(contentLineSpacing)
