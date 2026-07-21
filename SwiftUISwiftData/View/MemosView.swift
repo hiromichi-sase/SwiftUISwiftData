@@ -18,8 +18,6 @@ struct MemosView: View {
         var id: AlertType { self }
     }
 
-    @Environment(\.scenePhase)
-    private var scenePhase
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = MemosViewModel(
@@ -60,8 +58,8 @@ struct MemosView: View {
     var searchText: String = ""
     @State
     private var isSearching: Bool = false
-    @FocusState
-    private var inputViewFocus: Bool
+    @State
+    private var openFilterMemosView = false
 
     /// イニシャライザ。
     init(
@@ -76,21 +74,6 @@ struct MemosView: View {
 
     var body: some View {
         VStack(spacing: 8.0) {
-            if isSearching {
-                InputView(
-                    text: $searchText,
-                    focus: _inputViewFocus,
-                    placeholder: "Input keywords to search by title",
-                    textFieldBackground: Color(uiColor: .secondarySystemBackground),
-                    submitLabel: .done,
-                    icon: .search,
-                    cancelButtonTapped: {
-                        isSearching = false
-                        searchText = ""
-                    }
-                )
-                .padding(.horizontal)
-            }
             list
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     onChange(oldMemos: oldMemos, newMemos: newMemos)
@@ -118,6 +101,13 @@ struct MemosView: View {
                     }
                 }
                 .environment(\.editMode, $editMode)
+                .sheet(isPresented: $openFilterMemosView) {
+                    FilterMemosView(
+                        isFiltering: $isSearching,
+                        title: $searchText
+                    )
+                    .interactiveDismissDisabled(true)
+                }
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
                 }
@@ -125,18 +115,8 @@ struct MemosView: View {
                     openEditMemoView = false
                 }
                 .toast(message: $toastMessage)
-                .onChange(of: scenePhase) {
-                    switch scenePhase {
-                        case .inactive:
-                            inputViewFocus = false
-                        default:
-                            break
-                    }
-                }
-            if !isSearching {
-                bottomBar
-                    .padding(.bottom, 8)
-            }
+            bottomBar
+                .padding(.bottom, 8)
         }
     }
 
@@ -216,13 +196,10 @@ struct MemosView: View {
                 }
             }
             else {
-                GlassButton(imageSystemName: "magnifyingglass") {
-                    isSearching = true
-                    DispatchQueue.main.async {
-                        inputViewFocus = true
-                    }
+                GlassButton(imageSystemName: "line.3.horizontal.decrease.circle") {
+                    openFilterMemosView = true
                 }
-                .disabled(viewModel.memos.isEmpty || isSearching)
+                .disabled(viewModel.memos.isEmpty)
                 .keyboardShortcut("s", modifiers: [.command])
                 Spacer()
                 GlassButton(imageSystemName: "plus.circle") {
