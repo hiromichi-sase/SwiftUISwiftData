@@ -194,7 +194,7 @@ struct EditMemoView: View {
         Button("Tag", systemImage: "tag") {
             showSelectTagView = true
         }
-        .disabled(viewModel.tags.isEmpty)
+        .disabled(showTitleView || viewModel.tags.isEmpty)
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
