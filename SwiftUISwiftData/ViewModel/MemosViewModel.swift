@@ -51,7 +51,7 @@ final class MemosViewModel: ObservableObject {
     }
 
     func filteredMemos(by searchText: String, and tags: [Tag]) -> [Memo] {
-        guard !searchText.isEmpty else {
+        guard !searchText.isEmpty || !tags.isEmpty else {
             searchWords = []
             return memos
         }
@@ -62,10 +62,13 @@ final class MemosViewModel: ObservableObject {
         else {
             searchWords = [searchText]
         }
-        var conditions: [(Memo) -> Bool] = []
 
+        var conditions: [(Memo) -> Bool] = []
         for word in searchWords {
             conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        }
+        for tag in tags {
+            conditions.append { $0.tags.contains(tag) }
         }
 
         return memos.filter { memo in
