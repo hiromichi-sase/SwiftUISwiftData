@@ -191,10 +191,18 @@ struct EditMemoView: View {
             }
         }
         .disabled(showTitleView)
-        Button("Tag", systemImage: "tag") {
-            showSelectTagView = true
+        if tags.isEmpty {
+            Button("Tag", systemImage: "tag") {
+                showSelectTagView = true
+            }
+            .disabled(showTitleView || viewModel.tags.isEmpty)
         }
-        .disabled(showTitleView || viewModel.tags.isEmpty)
+        else {
+            Button("Tag", systemImage: "tag.fill") {
+                showSelectTagView = true
+            }
+            .disabled(showTitleView || viewModel.tags.isEmpty)
+        }
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
