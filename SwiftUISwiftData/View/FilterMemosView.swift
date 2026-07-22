@@ -53,7 +53,7 @@ struct FilterMemosView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 4) {
+            VStack(alignment: .leading) {
                 CustomTextField(
                     text: $titleToStore,
                     focus: _textFieldFocus,
@@ -63,10 +63,14 @@ struct FilterMemosView: View {
                     icon: .none,
                     submitButtonTapped: nil
                 )
-                Button {
-                    showSelectTagView = true
-                } label: {
+                .padding(.bottom, 20)
+                HStack {
                     Text("Select Tag")
+                    Button {
+                        showSelectTagView = true
+                    } label: {
+                        Image(systemName: selectedTags.isEmpty ? "tag" : "tag.fill")
+                    }
                 }
                 Spacer()
             }
