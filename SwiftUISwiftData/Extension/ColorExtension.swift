@@ -33,4 +33,16 @@ extension Color {
 
         return ((((redInt * 299) + (greenInt * 587) + (blueInt * 114)) / 1000) < 125) ? .white : .black
     }
+
+    func tagBorderColor(colorScheme: ColorScheme) -> Color {
+        if colorScheme == .light, appropriateTextColor == .black {
+            .black
+        }
+        else if colorScheme == .dark, appropriateTextColor == .white {
+            .white
+        }
+        else {
+            self
+        }
+    }
 }

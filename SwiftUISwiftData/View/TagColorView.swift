@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TagColorView: View {
+    @Environment(\.colorScheme)
+    private var colorScheme
     var colorString: String
     var showColorString: Bool
 
@@ -17,13 +19,13 @@ struct TagColorView: View {
                 .frame(width: 90)
                 .foregroundStyle(colorString.color().appropriateTextColor)
                 .background(colorString.color())
-                .border(colorString.color().appropriateTextColor)
+                .border(colorString.color().tagBorderColor(colorScheme: colorScheme))
         }
         else {
             Rectangle()
                 .frame(width: 50, height: 20)
                 .foregroundStyle(colorString.color())
-                .border(colorString.color().appropriateTextColor)
+                .border(colorString.color().tagBorderColor(colorScheme: colorScheme))
         }
     }
 }

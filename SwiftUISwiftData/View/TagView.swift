@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TagView: View {
+    @Environment(\.colorScheme)
+    private var colorScheme
     var tag: Tag
 
     var body: some View {
@@ -21,7 +23,7 @@ struct TagView: View {
             .cornerRadius(16)
             .overlay(
                 Capsule()
-                    .stroke(tag.color.color().appropriateTextColor, lineWidth: 1)
+                    .stroke(tag.color.color().tagBorderColor(colorScheme: colorScheme), lineWidth: 1)
             )
     }
 }
