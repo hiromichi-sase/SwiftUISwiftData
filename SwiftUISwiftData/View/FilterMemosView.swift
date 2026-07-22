@@ -65,12 +65,13 @@ struct FilterMemosView: View {
                 )
                 .padding(.bottom, 20)
                 HStack {
-                    Text("Select Tag")
+                    Text(viewModel.tags.isEmpty ? "No Tags" : "Select Tags")
                     Button {
                         showSelectTagView = true
                     } label: {
                         Image(systemName: selectedTags.isEmpty ? "tag" : "tag.fill")
                     }
+                    .disabled(viewModel.tags.isEmpty)
                 }
                 Spacer()
             }
