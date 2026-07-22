@@ -29,20 +29,25 @@ struct FilterMemosView: View {
     private var title: String
     @State
     private var titleToStore: String
+    @Binding
+    private var tagsForFiltering: [Tag]
     @State
-    var selectedTags: [Tag] = []
+    private var selectedTags: [Tag] = []
     @FocusState
     private var textFieldFocus: Bool
     @State
     private var currentAlert: AlertType?
+    @State
+    private var showSelectTagView = false
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
 
-    init(isFiltering: Binding<Bool>, title: Binding<String>) {
+    init(isFiltering: Binding<Bool>, title: Binding<String>, tagsForFiltering: Binding<[Tag]>) {
         _isFiltering = isFiltering
         _title = title
         _titleToStore = State(initialValue: title.wrappedValue)
+        _tagsForFiltering = tagsForFiltering
     }
 
     var body: some View {
@@ -57,6 +62,11 @@ struct FilterMemosView: View {
                     icon: .none,
                     submitButtonTapped: nil
                 )
+                Button {
+                    showSelectTagView = true
+                } label: {
+                    Text("Select Tag")
+                }
                 Spacer()
             }
             .padding(.top, .zero)
@@ -82,6 +92,9 @@ struct FilterMemosView: View {
                     toolbarItemTopBarTrailing
                 }
             }
+            .navigationDestination(isPresented: $showSelectTagView) {
+                SelectTagView(selectedTags: $selectedTags)
+            }
         }
     }
 
@@ -97,14 +110,15 @@ struct FilterMemosView: View {
         Button("Reset", systemImage: "xmark.circle.fill") {
             currentAlert = .reset
         }
-        .disabled(title.isEmpty)
+        .disabled(title.isEmpty && tagsForFiltering.isEmpty)
         .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark") {
             isFiltering = true
             title = titleToStore
+            tagsForFiltering = selectedTags
             dismiss()
         }
-        .disabled(title == titleToStore)
+        .disabled(title == titleToStore && tagsForFiltering.sortedByOrder == selectedTags.sortedByOrder)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
@@ -114,6 +128,7 @@ struct FilterMemosView: View {
             primaryButton: .destructive(Text("Close")) {
                 isFiltering = false
                 title = ""
+                tagsForFiltering = []
                 dismiss()
             },
             secondaryButton: .cancel()
@@ -125,7 +140,8 @@ struct FilterMemosView: View {
     NavigationStack {
         FilterMemosView(
             isFiltering: .constant(false),
-            title: .constant("")
+            title: .constant(""),
+            tagsForFiltering: .constant([])
         )
     }
 }

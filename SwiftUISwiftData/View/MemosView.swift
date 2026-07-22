@@ -57,6 +57,8 @@ struct MemosView: View {
     @State
     var searchText: String = ""
     @State
+    var tagsForFiltering: [Tag] = []
+    @State
     private var isSearching: Bool = false
     @State
     private var openFilterMemosView = false
@@ -104,7 +106,8 @@ struct MemosView: View {
                 .sheet(isPresented: $openFilterMemosView) {
                     FilterMemosView(
                         isFiltering: $isSearching,
-                        title: $searchText
+                        title: $searchText,
+                        tagsForFiltering: $tagsForFiltering,
                     )
                     .interactiveDismissDisabled(true)
                 }

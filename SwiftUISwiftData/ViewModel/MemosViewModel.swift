@@ -50,7 +50,7 @@ final class MemosViewModel: ObservableObject {
         memos = memoRepository.memos()
     }
 
-    func filteredMemos(by searchText: String) -> [Memo] {
+    func filteredMemos(by searchText: String, and tags: [Tag]) -> [Memo] {
         guard !searchText.isEmpty else {
             searchWords = []
             return memos

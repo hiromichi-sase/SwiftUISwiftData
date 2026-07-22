@@ -14,7 +14,10 @@ extension MemosView {
     }
 
     var filteredMemos: [Memo] {
-        viewModel.filteredMemos(by: searchText)
+        viewModel.filteredMemos(
+            by: searchText,
+            and: tagsForFiltering,
+        )
     }
 
     func duplicateMemo(_ memo: Memo) {
