@@ -105,9 +105,14 @@ struct SelectTagView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Save", systemImage: "checkmark") {
-            selectedTags = viewModel.tags.filter { selection.contains($0.id) }
+            selectedTags = tagsForSelection
             dismiss()
         }
+        .disabled(selectedTags == tagsForSelection)
         .keyboardShortcut("s", modifiers: [.command])
+    }
+
+    private var tagsForSelection: [Tag] {
+        viewModel.tags.filter { selection.contains($0.id) }
     }
 }
