@@ -48,6 +48,7 @@ struct FilterMemosView: View {
         _title = title
         _titleToStore = State(initialValue: title.wrappedValue)
         _tagsForFiltering = tagsForFiltering
+        _selectedTags = State(initialValue: tagsForFiltering.wrappedValue)
     }
 
     var body: some View {
