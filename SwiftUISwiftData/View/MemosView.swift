@@ -199,11 +199,20 @@ struct MemosView: View {
                 }
             }
             else {
-                GlassButton(imageSystemName: "line.3.horizontal.decrease.circle") {
-                    openFilterMemosView = true
+                if isSearching {
+                    GlassButton(imageSystemName: "line.3.horizontal.decrease.circle.fill") {
+                        openFilterMemosView = true
+                    }
+                    .disabled(viewModel.memos.isEmpty)
+                    .keyboardShortcut("s", modifiers: [.command])
                 }
-                .disabled(viewModel.memos.isEmpty)
-                .keyboardShortcut("s", modifiers: [.command])
+                else {
+                    GlassButton(imageSystemName: "line.3.horizontal.decrease.circle") {
+                        openFilterMemosView = true
+                    }
+                    .disabled(viewModel.memos.isEmpty)
+                    .keyboardShortcut("s", modifiers: [.command])
+                }
                 Spacer()
                 GlassButton(imageSystemName: "plus.circle") {
                     showingAddMemo = true
