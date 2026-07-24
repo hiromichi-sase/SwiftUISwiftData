@@ -348,7 +348,8 @@ struct MemosView: View {
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
             showInfo: viewModel.getShowInfo(),
-            searchWords: viewModel.searchWords
+            searchWords: viewModel.searchWords,
+            tagsForFiltering: tagsForFiltering,
         )
         .contentShape(Rectangle())
         .onTapGesture {
