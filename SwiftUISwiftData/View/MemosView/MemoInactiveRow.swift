@@ -46,7 +46,7 @@ struct MemoInactiveRow: View {
                     }
                 )
                 .frame(height: tagListViewHeight)
-                .padding(.horizontal, 8.0)
+                .padding(.horizontal, 13.0)
             }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {
