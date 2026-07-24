@@ -65,31 +65,36 @@ struct FilterMemosView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(alignment: .leading) {
-                CustomTextField(
-                    text: $titleToStore,
-                    focus: _textFieldFocus,
-                    placeholder: "Input keywords to search by title",
-                    background: Color(uiColor: .secondarySystemBackground),
-                    submitLabel: .done,
-                    icon: .none,
-                    submitButtonTapped: nil
-                )
-                .padding(.bottom, 8)
-                Toggle(isOn: $divideKeywordsBySpaceToStore) {
-                    Text("Divide Keywords By Space")
-                }
-                .padding(.bottom, 20)
-                HStack {
-                    Text(viewModel.tags.isEmpty ? "No Tags" : "Select Tags")
-                    Button {
-                        showSelectTagView = true
-                    } label: {
-                        Image(systemName: selectedTags.isEmpty ? "tag" : "tag.fill")
+            ScrollView {
+                VStack(alignment: .leading) {
+                    CustomTextField(
+                        text: $titleToStore,
+                        focus: _textFieldFocus,
+                        placeholder: "Input keywords to search by title",
+                        background: Color(uiColor: .secondarySystemBackground),
+                        submitLabel: .done,
+                        icon: .none,
+                        submitButtonTapped: nil
+                    )
+                    .padding(.bottom, 8)
+                    Toggle(isOn: $divideKeywordsBySpaceToStore) {
+                        Text("Divide Keywords By Space")
                     }
-                    .disabled(viewModel.tags.isEmpty)
+                    .frame(width: 280)
+                    .padding(.bottom, 8)
+                    HStack(spacing: 12) {
+                        Text(viewModel.tags.isEmpty ? "No Tags" : "Select Tags")
+                        Button {
+                            showSelectTagView = true
+                        } label: {
+                            Image(systemName: selectedTags.isEmpty ? "tag" : "tag.fill")
+                                .font(.system(size: 24))
+                                .tint(.primary)
+                        }
+                        .disabled(viewModel.tags.isEmpty)
+                    }
+                    Spacer()
                 }
-                Spacer()
             }
             .padding(.top, .zero)
             .padding(.horizontal)
