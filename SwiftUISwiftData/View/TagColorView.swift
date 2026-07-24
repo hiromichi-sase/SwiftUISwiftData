@@ -14,19 +14,20 @@ struct TagColorView: View {
     var showColorString: Bool
 
     var body: some View {
-        if showColorString {
-            Text(colorString)
-                .frame(width: 90)
-                .foregroundStyle(colorString.color().appropriateTextColor)
-                .background(colorString.color())
-                .border(colorString.color().tagBorderColor(colorScheme: colorScheme))
+        if colorString.color().needsBorder(colorScheme: colorScheme) {
+            commonView()
+                .border(colorString.color().appropriateTextColor)
         }
         else {
-            Rectangle()
-                .frame(width: 50, height: 20)
-                .foregroundStyle(colorString.color())
-                .border(colorString.color().tagBorderColor(colorScheme: colorScheme))
+            commonView()
         }
+    }
+
+    private func commonView() -> some View {
+        Text(showColorString ? colorString : "")
+            .frame(width: showColorString ? 90 : 50)
+            .foregroundStyle(colorString.color().appropriateTextColor)
+            .background(colorString.color())
     }
 }
 

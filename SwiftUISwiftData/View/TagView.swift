@@ -33,8 +33,20 @@ struct TagView: View {
             .cornerRadius(16)
             .overlay(
                 Capsule()
-                    .stroke(tag.color.color().tagBorderColor(colorScheme: colorScheme), lineWidth: 1)
+                    .stroke(
+                        borderColor,
+                        lineWidth: 1,
+                    )
             )
+    }
+
+    private var borderColor: Color {
+        if tag.color.color().needsBorder(colorScheme: colorScheme) {
+            tag.color.color().appropriateTextColor
+        }
+        else {
+            tag.color.color()
+        }
     }
 }
 
