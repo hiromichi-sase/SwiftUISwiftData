@@ -149,15 +149,15 @@ struct FilterMemosView: View {
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             dismiss()
         }
-        .disabled(!conditionChanged)
+        .disabled(saveButtonDisabled)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
-    private var conditionChanged: Bool {
-        guard title == titleToStore else { return true }
-        guard tagsForFiltering.sortedByOrder == selectedTags.sortedByOrder else { return true }
-        guard divideKeywordsBySpace == divideKeywordsBySpaceToStore else { return true }
-        return false
+    private var saveButtonDisabled: Bool {
+        if tagsForFiltering.sortedByOrder != selectedTags.sortedByOrder { return false }
+        if title != titleToStore { return false }
+        if title.isEmpty { return true }
+        return divideKeywordsBySpace == divideKeywordsBySpaceToStore
     }
 
     private var resetAlert: Alert {
