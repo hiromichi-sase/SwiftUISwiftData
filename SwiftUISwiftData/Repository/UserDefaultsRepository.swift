@@ -113,10 +113,7 @@ final class UserDefaultsRepository {
                     }
                     changedCount += getShowInfo() != value ? 1 : .zero
                 case .divideKeywordsBySpace:
-                    guard let value = value as? Bool else {
-                        fatalError("Failed to get Bool value")
-                    }
-                    changedCount += getDivideKeywordsBySpace() != value ? 1 : .zero
+                    break
             }
         }
         return changedCount > .zero
@@ -152,8 +149,12 @@ final class UserDefaultsRepository {
     }
 
     func reset(suiteName: String? = nil) {
+        let divideKeywordsBySpace = getDivideKeywordsBySpace()
+
         guard let name = suiteName ?? Bundle.main.bundleIdentifier else { return }
         userDefaults.removePersistentDomain(forName: name)
+
+        setDivideKeywordsBySpace(divideKeywordsBySpace)
     }
 
     func getHasLink() -> Bool {
