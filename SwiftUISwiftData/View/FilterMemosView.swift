@@ -18,6 +18,7 @@ struct FilterMemosView: View {
     @ObservedObject
     var viewModel = FilterMemosViewModel(
         tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
@@ -39,16 +40,27 @@ struct FilterMemosView: View {
     private var currentAlert: AlertType?
     @State
     private var showSelectTagView = false
+    @Binding
+    private var divideKeywordsBySpace: Bool
+    @State
+    private var divideKeywordsBySpaceToStore: Bool
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
 
-    init(isFiltering: Binding<Bool>, title: Binding<String>, tagsForFiltering: Binding<[Tag]>) {
+    init(
+        isFiltering: Binding<Bool>,
+        title: Binding<String>,
+        tagsForFiltering: Binding<[Tag]>,
+        divideKeywordsBySpace: Binding<Bool>,
+    ) {
         _isFiltering = isFiltering
         _title = title
         _titleToStore = State(initialValue: title.wrappedValue)
         _tagsForFiltering = tagsForFiltering
         _selectedTags = State(initialValue: tagsForFiltering.wrappedValue)
+        _divideKeywordsBySpace = divideKeywordsBySpace
+        _divideKeywordsBySpaceToStore = State(initialValue: divideKeywordsBySpace.wrappedValue)
     }
 
     var body: some View {
@@ -63,6 +75,10 @@ struct FilterMemosView: View {
                     icon: .none,
                     submitButtonTapped: nil
                 )
+                .padding(.bottom, 8)
+                Toggle(isOn: $divideKeywordsBySpaceToStore) {
+                    Text("Divide Keywords By Space")
+                }
                 .padding(.bottom, 20)
                 HStack {
                     Text(viewModel.tags.isEmpty ? "No Tags" : "Select Tags")
@@ -78,8 +94,10 @@ struct FilterMemosView: View {
             .padding(.top, .zero)
             .padding(.horizontal)
             .padding(.bottom, 8)
-            .onAppear {
+            .onLoad {
                 textFieldFocus = true
+                divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
+                divideKeywordsBySpaceToStore = divideKeywordsBySpace
             }
             .alert(item: $currentAlert) { alertType in
                 switch alertType {
@@ -122,10 +140,19 @@ struct FilterMemosView: View {
             isFiltering = true
             title = titleToStore
             tagsForFiltering = selectedTags
+            divideKeywordsBySpace = divideKeywordsBySpaceToStore
+            viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             dismiss()
         }
-        .disabled(title == titleToStore && tagsForFiltering.sortedByOrder == selectedTags.sortedByOrder)
+        .disabled(!conditionChanged)
         .keyboardShortcut("s", modifiers: [.command])
+    }
+
+    private var conditionChanged: Bool {
+        guard title == titleToStore else { return true }
+        guard tagsForFiltering.sortedByOrder == selectedTags.sortedByOrder else { return true }
+        guard divideKeywordsBySpace == divideKeywordsBySpaceToStore else { return true }
+        return false
     }
 
     private var resetAlert: Alert {
@@ -147,7 +174,8 @@ struct FilterMemosView: View {
         FilterMemosView(
             isFiltering: .constant(false),
             title: .constant(""),
-            tagsForFiltering: .constant([])
+            tagsForFiltering: .constant([]),
+            divideKeywordsBySpace: .constant(false)
         )
     }
 }

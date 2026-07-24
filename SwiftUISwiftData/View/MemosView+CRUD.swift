@@ -17,6 +17,7 @@ extension MemosView {
         viewModel.filteredMemos(
             by: searchText,
             and: tagsForFiltering,
+            and: divideKeywordsBySpace,
         )
     }
 

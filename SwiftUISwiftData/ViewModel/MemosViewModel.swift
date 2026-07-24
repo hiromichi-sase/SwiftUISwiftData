@@ -50,13 +50,17 @@ final class MemosViewModel: ObservableObject {
         memos = memoRepository.memos()
     }
 
-    func filteredMemos(by searchText: String, and tags: [Tag]) -> [Memo] {
+    func filteredMemos(
+        by searchText: String,
+        and tags: [Tag],
+        and divideKeywordsBySpace: Bool,
+    ) -> [Memo] {
         guard !searchText.isEmpty || !tags.isEmpty else {
             searchWords = []
             return memos
         }
 
-        if userDefaultsRepository.getDivideKeywordsBySpace() {
+        if divideKeywordsBySpace {
             searchWords = searchText.split(separator: " ").map { String($0) }
         }
         else {

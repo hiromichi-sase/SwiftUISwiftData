@@ -21,12 +21,18 @@ struct MemosViewModelTests {
         try await dependency.memoRepository.add(memo1)
         try await dependency.memoRepository.add(memo2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
-        var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1", and: [tag1])
+        var filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "Title 1",
+            and: [tag1],
+            and: true,
+        )
         #expect(filteredMemos.count == 2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
-        filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1", and: [tag1])
+        filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "Title 1",
+            and: [tag1],
+            and: false,
+        )
         #expect(filteredMemos.count == 2)
 
         dependency.removeUserDefaults()
@@ -42,12 +48,18 @@ struct MemosViewModelTests {
         try await dependency.memoRepository.add(memo1)
         try await dependency.memoRepository.add(memo2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
-        var filteredMemos = await dependency.testTarget.filteredMemos(by: "", and: [])
+        var filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "",
+            and: [],
+            and: true,
+        )
         #expect(filteredMemos.count == 2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
-        filteredMemos = await dependency.testTarget.filteredMemos(by: "", and: [])
+        filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "",
+            and: [],
+            and: false,
+        )
         #expect(filteredMemos.count == 2)
 
         dependency.removeUserDefaults()
