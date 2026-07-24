@@ -29,8 +29,6 @@ struct SettingsView: View {
     private var titleLineSpacing: Float = .zero
     @State
     private var showInfo: Bool = false
-    @State
-    private var divideKeywordsBySpace: Bool = false
 
     @State
     private var hasLinkToStore: Bool = false
@@ -46,8 +44,6 @@ struct SettingsView: View {
     private var titleLineSpacingToStore: Float = .zero
     @State
     private var showInfoToStore: Bool = false
-    @State
-    private var divideKeywordsBySpaceToStore: Bool = false
 
     /// トーストメッセージの状態変数。
     @State
@@ -66,7 +62,6 @@ struct SettingsView: View {
         _titleFontSize = State(initialValue: viewModel.getTitleFontSize())
         _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfo = State(initialValue: viewModel.getShowInfo())
-        _divideKeywordsBySpace = State(initialValue: viewModel.getDivideKeywordsBySpace())
 
         _hasLinkToStore = State(initialValue: viewModel.getHasLink())
         _contentFontSizeToStore = State(initialValue: viewModel.getContentFontSize())
@@ -75,7 +70,6 @@ struct SettingsView: View {
         _titleFontSizeToStore = State(initialValue: viewModel.getTitleFontSize())
         _titleLineSpacingToStore = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfoToStore = State(initialValue: viewModel.getShowInfo())
-        _divideKeywordsBySpaceToStore = State(initialValue: viewModel.getDivideKeywordsBySpace())
     }
 
     var body: some View {
@@ -85,7 +79,6 @@ struct SettingsView: View {
                 contentSection
                 titleSection
                 infoSection
-                searchSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -189,18 +182,6 @@ struct SettingsView: View {
         }
     }
 
-    private var searchSection: some View {
-        Section("Search") {
-            VStack(alignment: .leading) {
-                Text("Divide Keywords By Space")
-                    .font(.system(size: 12.0))
-                Toggle(isOn: $divideKeywordsBySpace) {
-                    Text(divideKeywordsBySpace ? "ON" : "OFF")
-                }
-            }
-        }
-    }
-
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset all settings?"),
@@ -213,7 +194,6 @@ struct SettingsView: View {
                 titleFontSize = viewModel.getTitleFontSize()
                 titleLineSpacing = viewModel.getTitleLineSpacing()
                 showInfo = viewModel.getShowInfo()
-                divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
                 updateStore()
                 toastMessage = "Successfully reset!"
             },
@@ -237,7 +217,6 @@ struct SettingsView: View {
             viewModel.setTitleFontSize(titleFontSize)
             viewModel.setTitleLineSpacing(titleLineSpacing)
             viewModel.setShowInfo(showInfo)
-            viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             updateStore()
             toastMessage = "Successfully saved!"
         }
@@ -254,7 +233,6 @@ struct SettingsView: View {
         guard titleFontSizeToStore == titleFontSize else { return true }
         guard titleLineSpacingToStore == titleLineSpacing else { return true }
         guard showInfoToStore == showInfo else { return true }
-        guard divideKeywordsBySpaceToStore == divideKeywordsBySpace else { return true }
         return false
     }
 
@@ -266,7 +244,6 @@ struct SettingsView: View {
         titleFontSizeToStore = titleFontSize
         titleLineSpacingToStore = titleLineSpacing
         showInfoToStore = showInfo
-        divideKeywordsBySpaceToStore = divideKeywordsBySpace
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
