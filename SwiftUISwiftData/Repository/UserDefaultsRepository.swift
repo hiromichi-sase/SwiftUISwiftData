@@ -74,49 +74,48 @@ final class UserDefaultsRepository {
     }
 
     var settingsChanged: Bool {
-        var changedCount = Int.zero
         for (key, value) in defaultValues {
             switch key {
                 case .hasLink:
                     guard let value = value as? Bool else {
                         fatalError("Failed to get Bool value")
                     }
-                    changedCount += getHasLink() != value ? 1 : .zero
+                    if getHasLink() != value { return true }
                 case .contentFontSize:
                     guard let value = value as? Float else {
                         fatalError("Failed to get Float value")
                     }
-                    changedCount += getContentFontSize() != value ? 1 : .zero
+                    if getContentFontSize() != value { return true }
                 case .contentLineSpacing:
                     guard let value = value as? Float else {
                         fatalError("Failed to get Float value")
                     }
-                    changedCount += getContentLineSpacing() != value ? 1 : .zero
+                    if getContentLineSpacing() != value { return true }
                 case .titleLineLimit:
                     guard let value = value as? Int else {
                         fatalError("Failed to get Int value")
                     }
-                    changedCount += getTitleLineLimit() != value ? 1 : .zero
+                    if getTitleLineLimit() != value { return true }
                 case .titleFontSize:
                     guard let value = value as? Float else {
                         fatalError("Failed to get Float value")
                     }
-                    changedCount += getTitleFontSize() != value ? 1 : .zero
+                    if getTitleFontSize() != value { return true }
                 case .titleLineSpacing:
                     guard let value = value as? Float else {
                         fatalError("Failed to get Float value")
                     }
-                    changedCount += getTitleLineSpacing() != value ? 1 : .zero
+                    if getTitleLineSpacing() != value { return true }
                 case .showInfo:
                     guard let value = value as? Bool else {
                         fatalError("Failed to get Bool value")
                     }
-                    changedCount += getShowInfo() != value ? 1 : .zero
+                    if getShowInfo() != value { return true }
                 case .divideKeywordsBySpace:
                     break
             }
         }
-        return changedCount > .zero
+        return false
     }
 
     private func range<T: Equatable>(for key: UserDefaultsRepository.Key) -> ClosedRange<T> {
