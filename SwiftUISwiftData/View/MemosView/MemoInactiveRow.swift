@@ -14,6 +14,7 @@ struct MemoInactiveRow: View {
     let titleLineSpacing: Float
     let showInfo: Bool
     let searchWords: [String]
+    let tagsForFiltering: [Tag]
     @State
     private var tagListViewHeight: CGFloat = .zero
 
@@ -39,14 +40,17 @@ struct MemoInactiveRow: View {
                 TagListView(
                     items: memo.tags.sortedByOrder,
                     content: { tag in
-                        TagView(tag: tag)
+                        TagView(
+                            tag: tag,
+                            tagForFiltering: tagsForFiltering.contains(tag),
+                        )
                     },
                     viewHeight: { height in
                         tagListViewHeight = height
                     }
                 )
                 .frame(height: tagListViewHeight)
-                .padding(.horizontal, 8.0)
+                .padding(.horizontal, 13.0)
             }
             if showInfo {
                 VStack(alignment: .leading, spacing: .zero) {

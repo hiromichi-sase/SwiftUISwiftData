@@ -14,19 +14,53 @@ struct MemosViewModelTests {
     @Test
     func filteredMemos() async throws {
         let dependency = Dependency()
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
+        let tag1 = Tag(title: "Test Tag 1", color: "#000000")
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1])
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1])
 
         try await dependency.memoRepository.add(memo1)
         try await dependency.memoRepository.add(memo2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(true)
-        var filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
+        var filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "Title 1",
+            and: [tag1],
+            and: true,
+        )
         #expect(filteredMemos.count == 2)
 
-        await dependency.userDefaultsRepository.setDivideKeywordsBySpace(false)
-        filteredMemos = await dependency.testTarget.filteredMemos(by: "Title 1")
-        #expect(filteredMemos.count == 1)
+        filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "Title 1",
+            and: [tag1],
+            and: false,
+        )
+        #expect(filteredMemos.count == 2)
+
+        dependency.removeUserDefaults()
+    }
+
+    @Test
+    func filteredMemos_noFilter() async throws {
+        let dependency = Dependency()
+        let tag1 = Tag(title: "Test Tag 1", color: "#000000")
+        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1])
+        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1])
+
+        try await dependency.memoRepository.add(memo1)
+        try await dependency.memoRepository.add(memo2)
+
+        var filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "",
+            and: [],
+            and: true,
+        )
+        #expect(filteredMemos.count == 2)
+
+        filteredMemos = await dependency.testTarget.filteredMemos(
+            by: "",
+            and: [],
+            and: false,
+        )
+        #expect(filteredMemos.count == 2)
 
         dependency.removeUserDefaults()
     }

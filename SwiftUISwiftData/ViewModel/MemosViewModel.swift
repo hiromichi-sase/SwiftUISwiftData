@@ -50,22 +50,29 @@ final class MemosViewModel: ObservableObject {
         memos = memoRepository.memos()
     }
 
-    func filteredMemos(by searchText: String) -> [Memo] {
-        guard !searchText.isEmpty else {
+    func filteredMemos(
+        by searchText: String,
+        and tags: [Tag],
+        and divideKeywordsBySpace: Bool,
+    ) -> [Memo] {
+        guard !searchText.isEmpty || !tags.isEmpty else {
             searchWords = []
             return memos
         }
 
-        if userDefaultsRepository.getDivideKeywordsBySpace() {
+        if divideKeywordsBySpace {
             searchWords = searchText.split(separator: " ").map { String($0) }
         }
         else {
             searchWords = [searchText]
         }
-        var conditions: [(Memo) -> Bool] = []
 
+        var conditions: [(Memo) -> Bool] = []
         for word in searchWords {
             conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        }
+        for tag in tags {
+            conditions.append { $0.tags.contains(tag) }
         }
 
         return memos.filter { memo in

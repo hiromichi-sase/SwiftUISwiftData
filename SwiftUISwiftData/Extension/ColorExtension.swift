@@ -33,4 +33,16 @@ extension Color {
 
         return ((((redInt * 299) + (greenInt * 587) + (blueInt * 114)) / 1000) < 125) ? .white : .black
     }
+
+    func needsBorder(colorScheme: ColorScheme) -> Bool {
+        if colorScheme == .light, appropriateTextColor == .black {
+            true
+        }
+        else if colorScheme == .dark, appropriateTextColor == .white {
+            true
+        }
+        else {
+            false
+        }
+    }
 }

@@ -15,6 +15,9 @@ struct SelectTagView: View {
         tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
+
+    @Environment(\.isPresented)
+    private var isPresented
     /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
@@ -26,6 +29,8 @@ struct SelectTagView: View {
     /// 複数選択されたタグのIDを保持する状態変数。
     @State
     private var selection: Set<UUID> = []
+    @State
+    private var isPresentedModally = false
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -56,6 +61,7 @@ struct SelectTagView: View {
                 if selection.isEmpty {
                     selection = Set(selectedTags.map { $0.id })
                 }
+                isPresentedModally = _isPresented.wrappedValue
             }
         }
     }
@@ -89,17 +95,24 @@ struct SelectTagView: View {
     /// 変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
-        Button("Close", systemImage: "xmark") {
-            dismiss()
+        if isPresentedModally {
+            Button("Close", systemImage: "xmark") {
+                dismiss()
+            }
         }
     }
 
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Save", systemImage: "checkmark") {
-            selectedTags = viewModel.tags.filter { selection.contains($0.id) }
+            selectedTags = tagsForSelection
             dismiss()
         }
+        .disabled(selectedTags == tagsForSelection)
         .keyboardShortcut("s", modifiers: [.command])
+    }
+
+    private var tagsForSelection: [Tag] {
+        viewModel.tags.filter { selection.contains($0.id) }
     }
 }

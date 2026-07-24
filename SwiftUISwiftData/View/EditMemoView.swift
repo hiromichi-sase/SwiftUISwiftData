@@ -32,6 +32,8 @@ struct EditMemoView: View {
     /// タイトルと内容の状態変数。
     @State
     private var title: String
+    @State
+    private var titleToStore: String
     /// 内容の状態変数。
     @State
     private var content: String
@@ -68,6 +70,7 @@ struct EditMemoView: View {
     init(memo: Memo? = nil) {
         self.memo = memo
         _title = State(initialValue: memo?.title ?? "")
+        _titleToStore = State(initialValue: memo?.title ?? "")
         _content = State(initialValue: memo?.content ?? "")
         tags = memo?.tags ?? []
     }
@@ -77,7 +80,7 @@ struct EditMemoView: View {
             VStack(spacing: 4) {
                 if showTitleView {
                     InputView(
-                        text: $title,
+                        text: $titleToStore,
                         focus: _inputViewFocus,
                         placeholder: "Input title",
                         textFieldBackground: Color(uiColor: .secondarySystemBackground),
@@ -85,10 +88,11 @@ struct EditMemoView: View {
                         icon: .none,
                         submitButtonTapped: {
                             showTitleView = false
+                            title = titleToStore
                         },
                         cancelButtonTapped: {
                             showTitleView = false
-                            title = memo?.title ?? ""
+                            titleToStore = title
                         }
                     )
                     .padding(.bottom, 4)
@@ -191,10 +195,18 @@ struct EditMemoView: View {
             }
         }
         .disabled(showTitleView)
-        Button("Tag", systemImage: "tag") {
-            showSelectTagView = true
+        if tags.isEmpty {
+            Button("Tag", systemImage: "tag") {
+                showSelectTagView = true
+            }
+            .disabled(showTitleView || viewModel.tags.isEmpty)
         }
-        .disabled(showTitleView || viewModel.tags.isEmpty)
+        else {
+            Button("Tag", systemImage: "tag.fill") {
+                showSelectTagView = true
+            }
+            .disabled(showTitleView || viewModel.tags.isEmpty)
+        }
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
