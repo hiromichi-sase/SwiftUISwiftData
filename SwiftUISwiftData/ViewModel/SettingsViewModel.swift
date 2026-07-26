@@ -107,4 +107,32 @@ final class SettingsViewModel: ObservableObject {
     func setShowInfo(_ value: Bool) {
         userDefaultsRepository.setShowInfo(value)
     }
+
+    func hasLinkChanged(_ hasLink: Bool) -> Bool {
+        userDefaultsRepository.hasLinkChanged(hasLink)
+    }
+
+    func contentFontSizeChanged(_ contentFontSize: Float) -> Bool {
+        userDefaultsRepository.contentFontSizeChanged(contentFontSize)
+    }
+
+    func contentLineSpacingChanged(_ contentLineSpacing: Float) -> Bool {
+        userDefaultsRepository.contentLineSpacingChanged(contentLineSpacing)
+    }
+
+    func titleLineLimitChanged(_ titleLineLimit: Int) -> Bool {
+        userDefaultsRepository.titleLineLimitChanged(titleLineLimit)
+    }
+
+    func titleFontSizeChanged(_ titleFontSize: Float) -> Bool {
+        userDefaultsRepository.titleFontSizeChanged(titleFontSize)
+    }
+
+    func titleLineSpacingChanged(_ titleLineSpacing: Float) -> Bool {
+        userDefaultsRepository.titleLineSpacingChanged(titleLineSpacing)
+    }
+
+    func showInfoChanged(_ showInfo: Bool) -> Bool {
+        userDefaultsRepository.showInfoChanged(showInfo)
+    }
 }

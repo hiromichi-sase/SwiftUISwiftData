@@ -101,6 +101,7 @@ struct SettingsView: View {
                     .font(.system(size: 12.0))
                 Toggle(isOn: $hasLink) {
                     Text(hasLink ? "ON" : "OFF")
+                        .fontWeight(viewModel.hasLinkChanged(hasLink) ? .bold : .regular)
                 }
             }
         }
@@ -117,6 +118,7 @@ struct SettingsView: View {
                     step: 0.5
                 ) {
                     Text("\(contentFontSize, specifier: "%.1f")")
+                        .fontWeight(viewModel.contentFontSizeChanged(contentFontSize) ? .bold : .regular)
                 }
             }
             VStack(alignment: .leading) {
@@ -128,6 +130,7 @@ struct SettingsView: View {
                     step: 0.5
                 ) {
                     Text("\(contentLineSpacing, specifier: "%.1f")")
+                        .fontWeight(viewModel.contentLineSpacingChanged(contentLineSpacing) ? .bold : .regular)
                 }
             }
         }
@@ -143,6 +146,7 @@ struct SettingsView: View {
                     in: viewModel.titleLineLimitRange,
                 ) {
                     Text("\(titleLineLimit)")
+                        .fontWeight(viewModel.titleLineLimitChanged(titleLineLimit) ? .bold : .regular)
                 }
             }
             VStack(alignment: .leading) {
@@ -154,6 +158,7 @@ struct SettingsView: View {
                     step: 0.5
                 ) {
                     Text("\(titleFontSize, specifier: "%.1f")")
+                        .fontWeight(viewModel.titleFontSizeChanged(titleFontSize) ? .bold : .regular)
                 }
             }
             VStack(alignment: .leading) {
@@ -165,6 +170,7 @@ struct SettingsView: View {
                     step: 0.5
                 ) {
                     Text("\(titleLineSpacing, specifier: "%.1f")")
+                        .fontWeight(viewModel.titleLineSpacingChanged(titleLineSpacing) ? .bold : .regular)
                 }
             }
         }
@@ -177,6 +183,7 @@ struct SettingsView: View {
                     .font(.system(size: 12.0))
                 Toggle(isOn: $showInfo) {
                     Text(showInfo ? "ON" : "OFF")
+                        .fontWeight(viewModel.showInfoChanged(showInfo) ? .bold : .regular)
                 }
             }
         }

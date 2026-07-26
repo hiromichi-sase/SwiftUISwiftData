@@ -74,47 +74,13 @@ final class UserDefaultsRepository {
     }
 
     var settingsChanged: Bool {
-        for (key, value) in defaultValues {
-            switch key {
-                case .hasLink:
-                    guard let value = value as? Bool else {
-                        fatalError("Failed to get Bool value")
-                    }
-                    if getHasLink() != value { return true }
-                case .contentFontSize:
-                    guard let value = value as? Float else {
-                        fatalError("Failed to get Float value")
-                    }
-                    if getContentFontSize() != value { return true }
-                case .contentLineSpacing:
-                    guard let value = value as? Float else {
-                        fatalError("Failed to get Float value")
-                    }
-                    if getContentLineSpacing() != value { return true }
-                case .titleLineLimit:
-                    guard let value = value as? Int else {
-                        fatalError("Failed to get Int value")
-                    }
-                    if getTitleLineLimit() != value { return true }
-                case .titleFontSize:
-                    guard let value = value as? Float else {
-                        fatalError("Failed to get Float value")
-                    }
-                    if getTitleFontSize() != value { return true }
-                case .titleLineSpacing:
-                    guard let value = value as? Float else {
-                        fatalError("Failed to get Float value")
-                    }
-                    if getTitleLineSpacing() != value { return true }
-                case .showInfo:
-                    guard let value = value as? Bool else {
-                        fatalError("Failed to get Bool value")
-                    }
-                    if getShowInfo() != value { return true }
-                case .divideKeywordsBySpace:
-                    break
-            }
-        }
+        guard !hasLinkChanged(getHasLink()) else { return true }
+        guard !contentFontSizeChanged(getContentFontSize()) else { return true }
+        guard !contentLineSpacingChanged(getContentLineSpacing()) else { return true }
+        guard !titleLineLimitChanged(getTitleLineLimit()) else { return true }
+        guard !titleFontSizeChanged(getTitleFontSize()) else { return true }
+        guard !titleLineSpacingChanged(getTitleLineSpacing()) else { return true }
+        guard !showInfoChanged(getShowInfo()) else { return true }
         return false
     }
 
@@ -226,5 +192,54 @@ final class UserDefaultsRepository {
     func setDivideKeywordsBySpace(_ value: Bool) {
         guard getDivideKeywordsBySpace() != value else { return }
         userDefaults.set(value, forKey: Key.divideKeywordsBySpace.rawValue)
+    }
+
+    func hasLinkChanged(_ hasLink: Bool) -> Bool {
+        guard let value = Key.hasLink.defaultValue as? Bool else {
+            fatalError("hasLink has no defaultValue")
+        }
+        return value != hasLink
+    }
+
+    func contentFontSizeChanged(_ contentFontSize: Float) -> Bool {
+        guard let value = Key.contentFontSize.defaultValue as? Float else {
+            fatalError("contentFontSize has no defaultValue")
+        }
+        return value != contentFontSize
+    }
+
+    func contentLineSpacingChanged(_ contentLineSpacing: Float) -> Bool {
+        guard let value = Key.contentLineSpacing.defaultValue as? Float else {
+            fatalError("contentLineSpacing has no defaultValue")
+        }
+        return value != contentLineSpacing
+    }
+
+    func titleLineLimitChanged(_ titleLineLimit: Int) -> Bool {
+        guard let value = Key.titleLineLimit.defaultValue as? Int else {
+            fatalError("titleLineLimit has no defaultValue")
+        }
+        return value != titleLineLimit
+    }
+
+    func titleFontSizeChanged(_ titleFontSize: Float) -> Bool {
+        guard let value = Key.titleFontSize.defaultValue as? Float else {
+            fatalError("titleFontSize has no defaultValue")
+        }
+        return value != titleFontSize
+    }
+
+    func titleLineSpacingChanged(_ titleLineSpacing: Float) -> Bool {
+        guard let value = Key.titleLineSpacing.defaultValue as? Float else {
+            fatalError("titleLineSpacing has no defaultValue")
+        }
+        return value != titleLineSpacing
+    }
+
+    func showInfoChanged(_ showInfo: Bool) -> Bool {
+        guard let value = Key.showInfo.defaultValue as? Bool else {
+            fatalError("showInfo has no defaultValue")
+        }
+        return value != showInfo
     }
 }

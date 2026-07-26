@@ -19,6 +19,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Bool = true
+        let changed = dependency.testTarget.hasLinkChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setHasLink(defaultValue)
         #expect(dependency.testTarget.getHasLink() == defaultValue)
     }
@@ -31,6 +34,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Float = 16.0
+        let changed = dependency.testTarget.contentFontSizeChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setContentFontSize(defaultValue)
         #expect(dependency.testTarget.getContentFontSize() == defaultValue)
 
@@ -47,6 +53,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Float = .zero
+        let changed = dependency.testTarget.contentLineSpacingChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setContentLineSpacing(defaultValue)
         #expect(dependency.testTarget.getContentLineSpacing() == defaultValue)
 
@@ -63,6 +72,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Int = 3
+        let changed = dependency.testTarget.titleLineLimitChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setTitleLineLimit(defaultValue)
         #expect(dependency.testTarget.getTitleLineLimit() == defaultValue)
 
@@ -79,6 +91,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Float = 16.0
+        let changed = dependency.testTarget.titleFontSizeChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setTitleFontSize(defaultValue)
         #expect(dependency.testTarget.getTitleFontSize() == defaultValue)
 
@@ -95,6 +110,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Float = .zero
+        let changed = dependency.testTarget.titleLineSpacingChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setTitleLineSpacing(defaultValue)
         #expect(dependency.testTarget.getTitleLineSpacing() == defaultValue)
 
@@ -111,6 +129,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Bool = false
+        let changed = dependency.testTarget.showInfoChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setShowInfo(defaultValue)
         #expect(dependency.testTarget.getShowInfo() == defaultValue)
     }
