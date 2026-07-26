@@ -33,9 +33,9 @@ struct TagView: View {
             .cornerRadius(16)
             .overlay(
                 Capsule()
-                    .stroke(
+                    .strokeBorder(
                         borderColor,
-                        lineWidth: 1,
+                        lineWidth: tagForFiltering ? 2 : 1,
                     )
             )
     }
