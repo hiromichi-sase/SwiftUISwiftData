@@ -320,7 +320,7 @@ struct MemosView: View {
                 selection.insert(memo.id)
             }
         } label: {
-            MemoActiveRow(
+            MemoRow(
                 memo: memo,
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
@@ -329,7 +329,6 @@ struct MemosView: View {
             )
         }
         .foregroundStyle(.primary)
-        .padding()
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
@@ -342,7 +341,7 @@ struct MemosView: View {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        MemoInactiveRow(
+        MemoRow(
             memo: memo,
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
