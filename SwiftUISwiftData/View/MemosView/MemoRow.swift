@@ -89,7 +89,10 @@ struct MemoRow: View {
             order: .zero,
             protected: false,
             tags: [
-                Tag(title: "Sample Tag 1", color: "#000000"),
+                Tag(
+                    title: "Sample Tag 1",
+                    color: "#000000"
+                )
             ]
         ),
         titleLineLimit: 0,
@@ -109,7 +112,10 @@ struct MemoRow: View {
             order: .zero,
             protected: false,
             tags: [
-                Tag(title: "Sample Tag 1", color: "#FFFFFF"),
+                Tag(
+                    title: "Sample Tag 1",
+                    color: "#FFFFFF"
+                )
             ]
         ),
         titleLineLimit: 0,
@@ -118,7 +124,10 @@ struct MemoRow: View {
         showInfo: false,
         searchWords: ["Sample"],
         tagsForFiltering: [
-            Tag(title: "Sample Tag 1", color: "#FFFFFF"),
+            Tag(
+                title: "Sample Tag 1",
+                color: "#FFFFFF"
+            )
         ],
     )
 }
