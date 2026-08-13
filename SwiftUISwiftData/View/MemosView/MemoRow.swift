@@ -1,5 +1,5 @@
 //
-//  MemoActiveRow.swift
+//  MemoRow.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/06/23.
@@ -7,14 +7,34 @@
 
 import SwiftUI
 
-struct MemoActiveRow: View {
+struct MemoRow: View {
     let memo: Memo
     let titleLineLimit: Int
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
+    let searchWords: [String]
+    let tagsForFiltering: [Tag]
     @State
     private var tagListViewHeight: CGFloat = .zero
+
+    init(
+        memo: Memo,
+        titleLineLimit: Int,
+        titleFontSize: Float,
+        titleLineSpacing: Float,
+        showInfo: Bool,
+        searchWords: [String] = [],
+        tagsForFiltering: [Tag] = [],
+    ) {
+        self.memo = memo
+        self.titleLineLimit = titleLineLimit
+        self.titleFontSize = titleFontSize
+        self.titleLineSpacing = titleLineSpacing
+        self.showInfo = showInfo
+        self.searchWords = searchWords
+        self.tagsForFiltering = tagsForFiltering
+    }
 
     var body: some View {
         HStack(spacing: 8.0) {
@@ -24,7 +44,8 @@ struct MemoActiveRow: View {
                         memo: memo,
                         titleLineLimit: titleLineLimit,
                         titleFontSize: titleFontSize,
-                        titleLineSpacing: titleLineSpacing
+                        titleLineSpacing: titleLineSpacing,
+                        searchWords: searchWords
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -32,7 +53,10 @@ struct MemoActiveRow: View {
                     TagListView(
                         items: memo.tags.sortedByOrder,
                         content: { tag in
-                            TagView(tag: tag)
+                            TagView(
+                                tag: tag,
+                                tagForFiltering: tagsForFiltering.contains(tag),
+                            )
                         },
                         viewHeight: { height in
                             tagListViewHeight = height
