@@ -1,5 +1,5 @@
 //
-//  TagActiveRow.swift
+//  TagRow.swift
 //  SwiftUISwiftData
 //
 //  Created by Hiromichi Sase on 2026/07/16.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TagActiveRow: View {
+struct TagRow: View {
     let tag: Tag
     let titleLineLimit: Int
     let titleFontSize: Float
@@ -15,13 +15,13 @@ struct TagActiveRow: View {
     let showInfo: Bool
 
     var body: some View {
-        VStack(spacing: .zero) {
+        VStack(spacing: 8.0) {
             HStack {
                 TagRowText(
                     tag: tag,
                     titleLineLimit: titleLineLimit,
                     titleFontSize: titleFontSize,
-                    titleLineSpacing: titleLineSpacing
+                    titleLineSpacing: titleLineSpacing,
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
                 TagColorView(
@@ -30,17 +30,15 @@ struct TagActiveRow: View {
                 )
             }
             if showInfo {
-                VStack(alignment: .leading, spacing: .zero) {
-                    InfoText.dateView(for: tag)
-                }
-                .padding(.top)
+                InfoText.dateView(for: tag)
             }
         }
+        .padding()
     }
 }
 
 #Preview("white_showColorString_true") {
-    TagActiveRow(
+    TagRow(
         tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
@@ -50,7 +48,7 @@ struct TagActiveRow: View {
 }
 
 #Preview("white_showColorString_false") {
-    TagActiveRow(
+    TagRow(
         tag: Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
@@ -60,7 +58,7 @@ struct TagActiveRow: View {
 }
 
 #Preview("black_showColorString_true") {
-    TagActiveRow(
+    TagRow(
         tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,
@@ -70,7 +68,7 @@ struct TagActiveRow: View {
 }
 
 #Preview("black_showColorString_false") {
-    TagActiveRow(
+    TagRow(
         tag: Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date()),
         titleLineLimit: 1,
         titleFontSize: 16.0,

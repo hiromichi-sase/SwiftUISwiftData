@@ -244,7 +244,7 @@ struct TagsView: View {
                 selection.insert(tag.id)
             }
         } label: {
-            TagActiveRow(
+            TagRow(
                 tag: tag,
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
@@ -253,7 +253,6 @@ struct TagsView: View {
             )
         }
         .foregroundStyle(.primary)
-        .padding()
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
@@ -266,7 +265,7 @@ struct TagsView: View {
     /// - Parameter tag: 表示するタグ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for tag: Tag) -> some View {
-        TagInactiveRow(
+        TagRow(
             tag: tag,
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
