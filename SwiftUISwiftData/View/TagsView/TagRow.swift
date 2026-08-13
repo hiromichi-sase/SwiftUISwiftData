@@ -12,7 +12,24 @@ struct TagRow: View {
     let titleLineLimit: Int
     let titleFontSize: Float
     let titleLineSpacing: Float
+    let showColorString: Bool
     let showInfo: Bool
+
+    init(
+        tag: Tag,
+        titleLineLimit: Int,
+        titleFontSize: Float,
+        titleLineSpacing: Float,
+        showColorString: Bool,
+        showInfo: Bool = false,
+    ) {
+        self.tag = tag
+        self.titleLineLimit = titleLineLimit
+        self.titleFontSize = titleFontSize
+        self.titleLineSpacing = titleLineSpacing
+        self.showColorString = showColorString
+        self.showInfo = showInfo
+    }
 
     var body: some View {
         VStack(spacing: 8.0) {
@@ -26,7 +43,7 @@ struct TagRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 TagColorView(
                     colorString: tag.color,
-                    showColorString: true
+                    showColorString: showColorString
                 )
             }
             if showInfo {
@@ -43,6 +60,7 @@ struct TagRow: View {
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
+        showColorString: true,
         showInfo: true,
     )
 }
@@ -53,6 +71,7 @@ struct TagRow: View {
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
+        showColorString: true,
         showInfo: false,
     )
 }
@@ -63,6 +82,7 @@ struct TagRow: View {
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
+        showColorString: true,
         showInfo: true,
     )
 }
@@ -73,6 +93,7 @@ struct TagRow: View {
         titleLineLimit: 1,
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
+        showColorString: true,
         showInfo: false,
     )
 }

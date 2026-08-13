@@ -249,6 +249,7 @@ struct TagsView: View {
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
+                showColorString: true,
                 showInfo: viewModel.getShowInfo(),
             )
         }
@@ -270,6 +271,7 @@ struct TagsView: View {
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showColorString: true,
             showInfo: viewModel.getShowInfo(),
         )
         .contentShape(Rectangle())

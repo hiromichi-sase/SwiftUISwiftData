@@ -75,15 +75,15 @@ struct SelectTagView: View {
                 selection.insert(tag.id)
             }
         } label: {
-            SelectTagActiveRow(
+            TagRow(
                 tag: tag,
                 titleLineLimit: viewModel.getTitleLineLimit(),
                 titleFontSize: viewModel.getTitleFontSize(),
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
+                showColorString: false,
             )
         }
         .foregroundStyle(.primary)
-        .padding()
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
