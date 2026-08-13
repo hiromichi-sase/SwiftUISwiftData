@@ -78,3 +78,47 @@ struct MemoRow: View {
         .padding()
     }
 }
+
+#Preview("active") {
+    MemoRow(
+        memo: Memo(
+            title: "Sample Title",
+            content: "Sample Content",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero,
+            protected: false,
+            tags: [
+                Tag(title: "Sample Tag 1", color: "#000000"),
+            ]
+        ),
+        titleLineLimit: 0,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false,
+    )
+}
+
+#Preview("inactive") {
+    MemoRow(
+        memo: Memo(
+            title: "Sample Title",
+            content: "Sample Content",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero,
+            protected: false,
+            tags: [
+                Tag(title: "Sample Tag 1", color: "#FFFFFF"),
+            ]
+        ),
+        titleLineLimit: 0,
+        titleFontSize: 16.0,
+        titleLineSpacing: 0.0,
+        showInfo: false,
+        searchWords: ["Sample"],
+        tagsForFiltering: [
+            Tag(title: "Sample Tag 1", color: "#FFFFFF"),
+        ],
+    )
+}
