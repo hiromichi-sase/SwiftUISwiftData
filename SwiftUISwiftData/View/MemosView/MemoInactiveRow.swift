@@ -19,48 +19,44 @@ struct MemoInactiveRow: View {
     private var tagListViewHeight: CGFloat = .zero
 
     var body: some View {
-        VStack(spacing: 8.0) {
-            HStack {
-                MemoRowText(
-                    memo: memo,
-                    titleLineLimit: titleLineLimit,
-                    titleFontSize: titleFontSize,
-                    titleLineSpacing: titleLineSpacing,
-                    searchWords: searchWords
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top)
-                .padding(.horizontal)
-                if memo.protected {
-                    Image(systemName: "lock.fill")
-                        .padding(.trailing)
+        HStack(spacing: 8.0) {
+            VStack(spacing: 8.0) {
+                HStack {
+                    MemoRowText(
+                        memo: memo,
+                        titleLineLimit: titleLineLimit,
+                        titleFontSize: titleFontSize,
+                        titleLineSpacing: titleLineSpacing,
+                        searchWords: searchWords
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            }
-            if !memo.tags.isEmpty {
-                TagListView(
-                    items: memo.tags.sortedByOrder,
-                    content: { tag in
-                        TagView(
-                            tag: tag,
-                            tagForFiltering: tagsForFiltering.contains(tag),
-                        )
-                    },
-                    viewHeight: { height in
-                        tagListViewHeight = height
+                if !memo.tags.isEmpty {
+                    TagListView(
+                        items: memo.tags.sortedByOrder,
+                        content: { tag in
+                            TagView(
+                                tag: tag,
+                                tagForFiltering: tagsForFiltering.contains(tag),
+                            )
+                        },
+                        viewHeight: { height in
+                            tagListViewHeight = height
+                        }
+                    )
+                    .frame(height: tagListViewHeight)
+                }
+                if showInfo {
+                    VStack(alignment: .leading, spacing: .zero) {
+                        InfoText.countView(content: memo.content)
+                        InfoText.dateView(for: memo)
                     }
-                )
-                .frame(height: tagListViewHeight)
-                .padding(.horizontal, 13.0)
-            }
-            if showInfo {
-                VStack(alignment: .leading, spacing: .zero) {
-                    InfoText.countView(content: memo.content)
-                    InfoText.dateView(for: memo)
                 }
-                .padding(.horizontal)
             }
-            Spacer()
-                .frame(height: 8.0)
+            if memo.protected {
+                Image(systemName: "lock.fill")
+            }
         }
+        .padding()
     }
 }

@@ -329,7 +329,6 @@ struct MemosView: View {
             )
         }
         .foregroundStyle(.primary)
-        .padding()
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
