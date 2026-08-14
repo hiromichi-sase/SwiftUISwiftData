@@ -301,6 +301,12 @@ struct MemosView: View {
                         }
                     }
                 }
+                else if newMemos.isEmpty {
+                    selectedMemo = nil
+                    isSearching = false
+                    searchText = ""
+                    tagsForFiltering = []
+                }
             default:
                 break
         }
