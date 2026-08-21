@@ -102,8 +102,13 @@ struct BrowseMemoView: View {
     private var toolbarItemTopBarTrailing: some View {
         if !memo.title.isEmpty {
             Button("Copy", systemImage: "doc.on.doc") {
-                UIPasteboard.general.string = memo.title
-                toastMessage = "Successfully copied!"
+                if UIPasteboard.general.string == memo.title {
+                    toastMessage = "Already copied."
+                }
+                else {
+                    UIPasteboard.general.string = memo.title
+                    toastMessage = "Successfully copied!"
+                }
             }
             .keyboardShortcut("c", modifiers: [.command, .shift])
         }

@@ -84,8 +84,13 @@ struct BrowseTagView: View {
     private var toolbarItemTopBarTrailing: some View {
         if !tag.title.isEmpty {
             Button("Copy", systemImage: "doc.on.doc") {
-                UIPasteboard.general.string = tag.title
-                toastMessage = "Successfully copied!"
+                if UIPasteboard.general.string == tag.title {
+                    toastMessage = "Already copied."
+                }
+                else {
+                    UIPasteboard.general.string = tag.title
+                    toastMessage = "Successfully copied!"
+                }
             }
             .keyboardShortcut("c", modifiers: [.command, .shift])
         }
