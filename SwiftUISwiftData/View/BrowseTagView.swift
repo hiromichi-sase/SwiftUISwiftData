@@ -45,10 +45,13 @@ struct BrowseTagView: View {
             VStack(spacing: 4) {
                 Spacer()
                     .frame(height: .zero)
-                TagColorView(
-                    colorString: tag.color,
-                    showColorString: true
-                )
+                HStack {
+                    TagColorView(
+                        colorString: tag.color,
+                        showColorString: true
+                    )
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
                 Spacer()
                 if viewModel.getShowInfo() {
                     InfoText.dateView(for: tag)
