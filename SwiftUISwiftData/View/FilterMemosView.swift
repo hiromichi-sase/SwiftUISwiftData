@@ -73,7 +73,6 @@ struct FilterMemosView: View {
                         placeholder: "Input keywords to search by title",
                         background: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
-                        icon: .none,
                         submitButtonTapped: nil
                     )
                     .padding(.bottom, 8)

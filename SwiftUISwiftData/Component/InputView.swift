@@ -18,8 +18,6 @@ struct InputView: View {
     var textFieldBackground: Color
     @State
     var submitLabel: SubmitLabel = .done
-    @State
-    var icon: CustomTextField.Icon = .none
     var submitButtonTapped: (() -> Void)?
     var cancelButtonTapped: (() -> Void)?
 
@@ -36,7 +34,6 @@ struct InputView: View {
                 placeholder: placeholder,
                 background: textFieldBackground,
                 submitLabel: submitLabel,
-                icon: icon,
                 submitButtonTapped: submitButtonTapped
             )
         }

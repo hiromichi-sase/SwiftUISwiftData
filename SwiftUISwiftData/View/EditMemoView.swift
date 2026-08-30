@@ -85,7 +85,6 @@ struct EditMemoView: View {
                         placeholder: "Input title",
                         textFieldBackground: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
-                        icon: .none,
                         submitButtonTapped: {
                             showTitleView = false
                             title = titleToStore

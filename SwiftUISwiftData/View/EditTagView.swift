@@ -69,7 +69,6 @@ struct EditTagView: View {
                     placeholder: "Input Title",
                     background: Color(uiColor: .secondarySystemBackground),
                     submitLabel: .done,
-                    icon: .none,
                     submitButtonTapped: nil
                 )
                 .padding(.bottom, 20)

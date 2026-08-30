@@ -8,20 +8,6 @@
 import SwiftUI
 
 struct CustomTextField: View {
-    enum Icon {
-        case search
-        case none
-
-        var systemName: String {
-            switch self {
-                case .search:
-                    "magnifyingglass"
-                case .none:
-                    ""
-            }
-        }
-    }
-
     @Binding
     var text: String
     @FocusState
@@ -32,8 +18,6 @@ struct CustomTextField: View {
     var background: Color
     @State
     var submitLabel: SubmitLabel = .done
-    @State
-    var icon: Icon = .none
     var submitButtonTapped: (() -> Void)?
 
     var body: some View {
@@ -44,10 +28,6 @@ struct CustomTextField: View {
             HStack(spacing: 6) {
                 Spacer()
                     .frame(width: 12)
-                if !icon.systemName.isEmpty {
-                    Image(systemName: icon.systemName)
-                        .foregroundColor(.gray)
-                }
                 TextField(placeholder, text: $text)
                     .focused($focus)
                     .submitLabel(submitLabel)
