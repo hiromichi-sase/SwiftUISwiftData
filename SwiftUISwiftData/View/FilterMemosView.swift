@@ -141,9 +141,9 @@ struct FilterMemosView: View {
         .disabled(!isFiltering)
         .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark") {
-            isFiltering = true
             title = titleToStore
             tagsForFiltering = selectedTags
+            isFiltering = !title.isEmpty || !tagsForFiltering.isEmpty
             divideKeywordsBySpace = divideKeywordsBySpaceToStore
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
             dismiss()
