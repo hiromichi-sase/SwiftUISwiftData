@@ -12,7 +12,7 @@ struct MemoRowText: View {
     let titleLineLimit: Int
     let titleFontSize: Float
     let titleLineSpacing: Float
-    var searchWords: [String] = []
+    var keywordsForFiltering: [String] = []
 
     var body: some View {
         Text(memo.title.isEmpty ? AttributedString(CommonString.noTitle) : attributedTitle)
@@ -25,8 +25,8 @@ struct MemoRowText: View {
     private var attributedTitle: AttributedString {
         var attributedTitle = AttributedString(memo.title)
 
-        for word in searchWords {
-            let ranges = attributedTitle.ranges(of: word, options: [.caseInsensitive, .literal])
+        for keyword in keywordsForFiltering {
+            let ranges = attributedTitle.ranges(of: keyword, options: [.caseInsensitive, .literal])
             for range in ranges {
                 attributedTitle[range].font = .system(size: CGFloat(titleFontSize), weight: .bold)
                 attributedTitle[range].backgroundColor = .quaternaryLabel

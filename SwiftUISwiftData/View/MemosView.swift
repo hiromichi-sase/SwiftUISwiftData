@@ -55,13 +55,13 @@ struct MemosView: View {
     @State
     var currentAlert: AlertType?
     @State
-    var searchText: String = ""
+    var keywordsForFiltering: String = ""
     @State
     var tagsForFiltering: [Tag] = []
     @State
     var divideKeywordsBySpace: Bool = false
     @State
-    private var isSearching: Bool = false
+    private var isFiltering: Bool = false
     @State
     private var openFilterMemosView = false
 
@@ -98,7 +98,7 @@ struct MemosView: View {
                 }
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(editMode.isEditing || isSearching)
+                .navigationBarBackButtonHidden(editMode.isEditing || isFiltering)
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
@@ -107,8 +107,8 @@ struct MemosView: View {
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $openFilterMemosView) {
                     FilterMemosView(
-                        isFiltering: $isSearching,
-                        title: $searchText,
+                        isFiltering: $isFiltering,
+                        title: $keywordsForFiltering,
                         tagsForFiltering: $tagsForFiltering,
                         divideKeywordsBySpace: $divideKeywordsBySpace,
                     )
@@ -202,7 +202,7 @@ struct MemosView: View {
                 }
             }
             else {
-                if isSearching {
+                if isFiltering {
                     GlassButton(imageSystemName: "line.3.horizontal.decrease.circle.fill") {
                         openFilterMemosView = true
                     }
@@ -220,7 +220,7 @@ struct MemosView: View {
                 GlassButton(imageSystemName: "plus.circle") {
                     showingAddMemo = true
                 }
-                .disabled(isSearching)
+                .disabled(isFiltering)
                 .keyboardShortcut("n", modifiers: [.command])
             }
             Spacer()
@@ -235,7 +235,7 @@ struct MemosView: View {
             title = title + "\(selection.count)/\(viewModel.memos.count))"
         }
         else {
-            if isSearching {
+            if isFiltering {
                 title = title + "\(filteredMemos.count)/\(viewModel.memos.count))"
             }
             else {
@@ -261,7 +261,7 @@ struct MemosView: View {
                     selectedMemo = nil
                     editMode = .active
                 }
-                .disabled(isSearching)
+                .disabled(isFiltering)
                 .keyboardShortcut("e", modifiers: [.command])
             }
         }
@@ -303,8 +303,8 @@ struct MemosView: View {
                 }
                 else if newMemos.isEmpty {
                     selectedMemo = nil
-                    isSearching = false
-                    searchText = ""
+                    isFiltering = false
+                    keywordsForFiltering = ""
                     tagsForFiltering = []
                 }
             default:
@@ -353,7 +353,7 @@ struct MemosView: View {
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
             showInfo: viewModel.getShowInfo(),
-            searchWords: viewModel.searchWords,
+            keywordsForFiltering: viewModel.keywordsForFiltering,
             tagsForFiltering: tagsForFiltering,
         )
         .contentShape(Rectangle())

@@ -13,7 +13,7 @@ struct MemoRow: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
     let showInfo: Bool
-    let searchWords: [String]
+    let keywordsForFiltering: [String]
     let tagsForFiltering: [Tag]
     @State
     private var tagListViewHeight: CGFloat = .zero
@@ -24,7 +24,7 @@ struct MemoRow: View {
         titleFontSize: Float,
         titleLineSpacing: Float,
         showInfo: Bool,
-        searchWords: [String] = [],
+        keywordsForFiltering: [String] = [],
         tagsForFiltering: [Tag] = [],
     ) {
         self.memo = memo
@@ -32,7 +32,7 @@ struct MemoRow: View {
         self.titleFontSize = titleFontSize
         self.titleLineSpacing = titleLineSpacing
         self.showInfo = showInfo
-        self.searchWords = searchWords
+        self.keywordsForFiltering = keywordsForFiltering
         self.tagsForFiltering = tagsForFiltering
     }
 
@@ -45,7 +45,7 @@ struct MemoRow: View {
                         titleLineLimit: titleLineLimit,
                         titleFontSize: titleFontSize,
                         titleLineSpacing: titleLineSpacing,
-                        searchWords: searchWords
+                        keywordsForFiltering: keywordsForFiltering
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -122,7 +122,7 @@ struct MemoRow: View {
         titleFontSize: 16.0,
         titleLineSpacing: 0.0,
         showInfo: false,
-        searchWords: ["Sample"],
+        keywordsForFiltering: ["Sample"],
         tagsForFiltering: [
             Tag(
                 title: "Sample Tag 1",

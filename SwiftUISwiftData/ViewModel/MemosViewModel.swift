@@ -43,7 +43,7 @@ final class MemosViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private(set) var searchWords: [String] = []
+    private(set) var keywordsForFiltering: [String] = []
 
     /// Fetches memos from the memoRepository and updates the published memos array.
     private func fetchMemos() {
@@ -51,25 +51,25 @@ final class MemosViewModel: ObservableObject {
     }
 
     func filteredMemos(
-        by searchText: String,
+        by keywords: String,
         and tags: [Tag],
         and divideKeywordsBySpace: Bool,
     ) -> [Memo] {
-        guard !searchText.isEmpty || !tags.isEmpty else {
-            searchWords = []
+        guard !keywords.isEmpty || !tags.isEmpty else {
+            keywordsForFiltering = []
             return memos
         }
 
         if divideKeywordsBySpace {
-            searchWords = searchText.split(separator: " ").map { String($0) }
+            keywordsForFiltering = keywords.split(separator: " ").map { String($0) }
         }
         else {
-            searchWords = [searchText]
+            keywordsForFiltering = [keywords]
         }
 
         var conditions: [(Memo) -> Bool] = []
-        for word in searchWords {
-            conditions.append { $0.title.lowercased().contains(word.lowercased()) }
+        for keyword in keywordsForFiltering {
+            conditions.append { $0.title.lowercased().contains(keyword.lowercased()) }
         }
         for tag in tags {
             conditions.append { $0.tags.contains(tag) }
