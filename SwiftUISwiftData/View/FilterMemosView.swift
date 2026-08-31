@@ -138,7 +138,7 @@ struct FilterMemosView: View {
         Button("Reset", systemImage: "xmark.circle.fill") {
             currentAlert = .reset
         }
-        .disabled(title.isEmpty && tagsForFiltering.isEmpty)
+        .disabled(!isFiltering)
         .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark") {
             isFiltering = true
