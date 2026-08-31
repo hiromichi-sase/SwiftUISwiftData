@@ -48,7 +48,7 @@ struct InputView: View {
     InputView(
         text: Binding(projectedValue: .constant("a b c")),
         focus: _focus,
-        placeholder: "Input search text",
+        placeholder: "Input Keywords",
         textFieldBackground: Color(uiColor: .secondarySystemBackground)
     )
     .onAppear {

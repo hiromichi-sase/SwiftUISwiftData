@@ -49,7 +49,7 @@ struct CustomTextField: View {
     CustomTextField(
         text: Binding(projectedValue: .constant("a b c")),
         focus: _focus,
-        placeholder: "Input search text",
+        placeholder: "Input Keywords",
         background: Color(uiColor: .secondarySystemBackground)
     )
     .onAppear {

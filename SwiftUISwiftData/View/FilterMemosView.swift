@@ -70,7 +70,7 @@ struct FilterMemosView: View {
                     CustomTextField(
                         text: $titleToStore,
                         focus: _textFieldFocus,
-                        placeholder: "Input keywords to search by title",
+                        placeholder: "Input keywords to filter by title",
                         background: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
                         submitButtonTapped: nil
