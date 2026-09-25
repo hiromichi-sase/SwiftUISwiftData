@@ -108,6 +108,14 @@ final class SettingsViewModel: ObservableObject {
         userDefaultsRepository.setShowInfo(value)
     }
 
+    func getDivideKeywordsBySpace() -> Bool {
+        userDefaultsRepository.getDivideKeywordsBySpace()
+    }
+
+    func setDivideKeywordsBySpace(_ value: Bool) {
+        userDefaultsRepository.setDivideKeywordsBySpace(value)
+    }
+
     func hasLinkChanged(_ hasLink: Bool) -> Bool {
         userDefaultsRepository.hasLinkChanged(hasLink)
     }
@@ -134,5 +142,9 @@ final class SettingsViewModel: ObservableObject {
 
     func showInfoChanged(_ showInfo: Bool) -> Bool {
         userDefaultsRepository.showInfoChanged(showInfo)
+    }
+
+    func divideKeywordsBySpaceChanged(_ divideKeywordsBySpace: Bool) -> Bool {
+        userDefaultsRepository.showDivideKeywordsBySpaceChanged(divideKeywordsBySpace)
     }
 }

@@ -53,14 +53,13 @@ final class MemosViewModel: ObservableObject {
     func filteredMemos(
         by keywords: String,
         and tags: [Tag],
-        and divideKeywordsBySpace: Bool,
     ) -> [Memo] {
         guard !keywords.isEmpty || !tags.isEmpty else {
             keywordsForFiltering = []
             return memos
         }
 
-        if divideKeywordsBySpace {
+        if userDefaultsRepository.getDivideKeywordsBySpace() {
             keywordsForFiltering = keywords.split(separator: " ").map { String($0) }
         }
         else {

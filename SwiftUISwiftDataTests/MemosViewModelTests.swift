@@ -24,14 +24,12 @@ struct MemosViewModelTests {
         var filteredMemos = await dependency.testTarget.filteredMemos(
             by: "Title 1",
             and: [tag1],
-            and: true,
         )
         #expect(filteredMemos.count == 2)
 
         filteredMemos = await dependency.testTarget.filteredMemos(
             by: "Title 1",
             and: [tag1],
-            and: false,
         )
         #expect(filteredMemos.count == 2)
 
@@ -51,14 +49,12 @@ struct MemosViewModelTests {
         var filteredMemos = await dependency.testTarget.filteredMemos(
             by: "",
             and: [],
-            and: true,
         )
         #expect(filteredMemos.count == 2)
 
         filteredMemos = await dependency.testTarget.filteredMemos(
             by: "",
             and: [],
-            and: false,
         )
         #expect(filteredMemos.count == 2)
 

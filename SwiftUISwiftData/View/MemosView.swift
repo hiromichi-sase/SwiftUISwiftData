@@ -59,8 +59,6 @@ struct MemosView: View {
     @State
     var tagsForFiltering: [Tag] = []
     @State
-    var divideKeywordsBySpace: Bool = false
-    @State
     private var isFiltering: Bool = false
     @State
     private var openFilterMemosView = false
@@ -110,7 +108,6 @@ struct MemosView: View {
                         isFiltering: $isFiltering,
                         title: $keywordsForFiltering,
                         tagsForFiltering: $tagsForFiltering,
-                        divideKeywordsBySpace: $divideKeywordsBySpace,
                     )
                     .interactiveDismissDisabled(true)
                 }

@@ -81,6 +81,7 @@ final class UserDefaultsRepository {
         guard !titleFontSizeChanged(getTitleFontSize()) else { return true }
         guard !titleLineSpacingChanged(getTitleLineSpacing()) else { return true }
         guard !showInfoChanged(getShowInfo()) else { return true }
+        guard !showDivideKeywordsBySpaceChanged(getDivideKeywordsBySpace()) else { return true }
         return false
     }
 
@@ -114,12 +115,8 @@ final class UserDefaultsRepository {
     }
 
     func reset(suiteName: String? = nil) {
-        let divideKeywordsBySpace = getDivideKeywordsBySpace()
-
         guard let name = suiteName ?? Bundle.main.bundleIdentifier else { return }
         userDefaults.removePersistentDomain(forName: name)
-
-        setDivideKeywordsBySpace(divideKeywordsBySpace)
     }
 
     func getHasLink() -> Bool {
@@ -241,5 +238,12 @@ final class UserDefaultsRepository {
             fatalError("showInfo has no defaultValue")
         }
         return value != showInfo
+    }
+
+    func showDivideKeywordsBySpaceChanged(_ showDivideKeywordsBySpace: Bool) -> Bool {
+        guard let value = Key.divideKeywordsBySpace.defaultValue as? Bool else {
+            fatalError("divideKeywordsBySpace has no defaultValue")
+        }
+        return value != showDivideKeywordsBySpace
     }
 }
