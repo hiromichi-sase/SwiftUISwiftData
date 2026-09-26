@@ -46,6 +46,7 @@ struct EditTagView: View {
     private var error: Error?
     @State
     private var currentAlert: AlertType?
+    private let defalutColor = Color.black
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -55,7 +56,6 @@ struct EditTagView: View {
     init(tag: Tag? = nil) {
         self.tag = tag
         _title = State(initialValue: tag?.title ?? "")
-        let defalutColor = Color(red: .zero, green: .zero, blue: .zero)
         _colorString = State(initialValue: tag?.color ?? defalutColor.hexString())
         _color = State(initialValue: tag?.color.color() ?? defalutColor)
     }
@@ -209,7 +209,7 @@ struct EditTagView: View {
             tag.title != title || tag.color != colorString
         }
         else {
-            !title.isEmpty || !colorString.isEmpty
+            !title.isEmpty || colorString != defalutColor.hexString()
         }
     }
 }
