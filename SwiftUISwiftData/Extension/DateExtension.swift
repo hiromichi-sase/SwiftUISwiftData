@@ -13,7 +13,7 @@ extension Date {
         formatter.dateFormat = "E"
         let weekday = formatter.string(from: self)
         let date = formatted(date: .numeric, time: .omitted)
-        let time = formatted(date: .omitted, time: .standard)
+        let time = formatted(date: .omitted, time: .shortened)
         return "\(weekday) \(date) \(time)"
     }
 }
