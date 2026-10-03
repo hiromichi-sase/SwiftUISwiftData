@@ -53,4 +53,8 @@ final class EditTagViewModel: ObservableObject {
     func getShowInfo() -> Bool {
         userDefaultsRepository.getShowInfo()
     }
+
+    func getDefaultTagColor() -> String {
+        userDefaultsRepository.getDefaultTagColor()
+    }
 }
