@@ -144,6 +144,9 @@ struct SettingsViewModelTests {
         }
 
         let defaultValue: Bool = false
+        let changed = dependency.testTarget.divideKeywordsBySpaceChanged(defaultValue)
+        #expect(!changed)
+
         dependency.testTarget.setDivideKeywordsBySpace(defaultValue)
         #expect(dependency.testTarget.getDivideKeywordsBySpace() == defaultValue)
     }
