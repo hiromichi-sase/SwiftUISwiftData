@@ -145,7 +145,7 @@ struct FilterMemosView: View {
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset filtering?"),
-            primaryButton: .destructive(Text("Close")) {
+            primaryButton: .destructive(Text("Reset")) {
                 isFiltering = false
                 title = ""
                 tagsForFiltering = []
