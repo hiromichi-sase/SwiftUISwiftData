@@ -149,6 +149,21 @@ struct SettingsViewModelTests {
     }
 
     @Test
+    func defaultTagColor() {
+        let dependency = Dependency()
+        defer {
+            dependency.removeUserDefaults()
+        }
+
+        let defaultValue: String = "#000000"
+        let changed = dependency.testTarget.defaultTagColorChanged(defaultValue)
+        #expect(!changed)
+
+        dependency.testTarget.setDefaultTagColor(defaultValue)
+        #expect(dependency.testTarget.getDefaultTagColor() == defaultValue)
+    }
+
+    @Test
     func reset() {
         let dependency = Dependency()
         defer {
@@ -163,6 +178,7 @@ struct SettingsViewModelTests {
         dependency.testTarget.setTitleLineSpacing(5.0)
         dependency.testTarget.setShowInfo(true)
         dependency.testTarget.setDivideKeywordsBySpace(true)
+        dependency.testTarget.setDefaultTagColor("#FF0000")
         #expect(dependency.testTarget.settingsChanged)
 
         dependency.testTarget.reset()

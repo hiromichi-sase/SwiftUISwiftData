@@ -31,6 +31,8 @@ struct SettingsView: View {
     private var showInfo: Bool = false
     @State
     private var divideKeywordsBySpace: Bool = false
+    @State
+    private var defaultTagColor: String = ""
 
     @State
     private var hasLinkToStore: Bool = false
@@ -48,6 +50,11 @@ struct SettingsView: View {
     private var showInfoToStore: Bool = false
     @State
     private var divideKeywordsBySpaceToStore: Bool = false
+    @State
+    private var defaultTagColorToStore: String = ""
+
+    @State
+    private var color: Color = .clear
 
     /// トーストメッセージの状態変数。
     @State
@@ -67,6 +74,7 @@ struct SettingsView: View {
         _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfo = State(initialValue: viewModel.getShowInfo())
         _divideKeywordsBySpace = State(initialValue: viewModel.getDivideKeywordsBySpace())
+        _defaultTagColor = State(initialValue: viewModel.getDefaultTagColor())
 
         _hasLinkToStore = State(initialValue: viewModel.getHasLink())
         _contentFontSizeToStore = State(initialValue: viewModel.getContentFontSize())
@@ -76,6 +84,7 @@ struct SettingsView: View {
         _titleLineSpacingToStore = State(initialValue: viewModel.getTitleLineSpacing())
         _showInfoToStore = State(initialValue: viewModel.getShowInfo())
         _divideKeywordsBySpaceToStore = State(initialValue: viewModel.getDivideKeywordsBySpace())
+        _defaultTagColorToStore = State(initialValue: viewModel.getDefaultTagColor())
     }
 
     var body: some View {
@@ -86,6 +95,10 @@ struct SettingsView: View {
                 titleSection
                 infoSection
                 searchSection
+                colorSection
+            }
+            .onLoad {
+                color = defaultTagColor.color()
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -209,6 +222,30 @@ struct SettingsView: View {
         }
     }
 
+    private var colorSection: some View {
+        Section("Color") {
+            VStack(alignment: .leading) {
+                ColorPicker(
+                    selection: $color,
+                    supportsOpacity: false
+                ) {
+                    HStack {
+                        Text("Select Color")
+                        Image(systemName: "paintpalette")
+                    }
+                }
+                .onChange(of: color) {
+                    defaultTagColor = color.hexString()
+                }
+                Spacer()
+                TagColorView(
+                    colorString: defaultTagColor,
+                    showColorString: true
+                )
+            }
+        }
+    }
+
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset all settings?"),
@@ -222,6 +259,7 @@ struct SettingsView: View {
                 titleLineSpacing = viewModel.getTitleLineSpacing()
                 showInfo = viewModel.getShowInfo()
                 divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
+                defaultTagColor = viewModel.getDefaultTagColor()
                 updateStore()
                 toastMessage = "Successfully reset!"
             },
@@ -246,6 +284,7 @@ struct SettingsView: View {
             viewModel.setTitleLineSpacing(titleLineSpacing)
             viewModel.setShowInfo(showInfo)
             viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
+            viewModel.setDefaultTagColor(defaultTagColor)
             updateStore()
             toastMessage = "Successfully saved!"
         }
@@ -263,6 +302,7 @@ struct SettingsView: View {
         guard titleLineSpacingToStore == titleLineSpacing else { return true }
         guard showInfoToStore == showInfo else { return true }
         guard divideKeywordsBySpaceToStore == divideKeywordsBySpace else { return true }
+        guard defaultTagColorToStore == defaultTagColor else { return true }
         return false
     }
 
@@ -275,6 +315,7 @@ struct SettingsView: View {
         titleLineSpacingToStore = titleLineSpacing
         showInfoToStore = showInfo
         divideKeywordsBySpaceToStore = divideKeywordsBySpace
+        defaultTagColorToStore = defaultTagColor
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {

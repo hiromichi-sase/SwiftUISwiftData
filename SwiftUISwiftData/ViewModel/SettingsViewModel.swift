@@ -116,6 +116,14 @@ final class SettingsViewModel: ObservableObject {
         userDefaultsRepository.setDivideKeywordsBySpace(value)
     }
 
+    func getDefaultTagColor() -> String {
+        userDefaultsRepository.getDefaultTagColor()
+    }
+
+    func setDefaultTagColor(_ value: String) {
+        userDefaultsRepository.setDefaultTagColor(value)
+    }
+
     func hasLinkChanged(_ hasLink: Bool) -> Bool {
         userDefaultsRepository.hasLinkChanged(hasLink)
     }
@@ -146,5 +154,9 @@ final class SettingsViewModel: ObservableObject {
 
     func divideKeywordsBySpaceChanged(_ divideKeywordsBySpace: Bool) -> Bool {
         userDefaultsRepository.showDivideKeywordsBySpaceChanged(divideKeywordsBySpace)
+    }
+
+    func defaultTagColorChanged(_ defaultTagColor: String) -> Bool {
+        userDefaultsRepository.showDefaultTagColorChanged(defaultTagColor)
     }
 }

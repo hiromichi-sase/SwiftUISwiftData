@@ -33,9 +33,9 @@ struct EditTagView: View {
     private var title: String
     /// 色の状態変数。
     @State
-    private var colorString: String
+    private var colorString: String = ""
     @State
-    private var color: Color
+    private var color: Color = .clear
     /// トーストメッセージの状態変数。
     @State
     private var toastMessage = ""
@@ -46,7 +46,6 @@ struct EditTagView: View {
     private var error: Error?
     @State
     private var currentAlert: AlertType?
-    private let defalutColor = Color.black
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -56,8 +55,8 @@ struct EditTagView: View {
     init(tag: Tag? = nil) {
         self.tag = tag
         _title = State(initialValue: tag?.title ?? "")
-        _colorString = State(initialValue: tag?.color ?? defalutColor.hexString())
-        _color = State(initialValue: tag?.color.color() ?? defalutColor)
+        _colorString = State(initialValue: tag?.color ?? viewModel.getDefaultTagColor())
+        _color = State(initialValue: tag?.color.color() ?? viewModel.getDefaultTagColor().color())
     }
 
     var body: some View {
@@ -209,7 +208,7 @@ struct EditTagView: View {
             tag.title != title || tag.color != colorString
         }
         else {
-            !title.isEmpty || colorString != defalutColor.hexString()
+            !title.isEmpty || colorString != viewModel.getDefaultTagColor()
         }
     }
 }

@@ -17,6 +17,7 @@ final class UserDefaultsRepository {
         case titleLineSpacing
         case showInfo
         case divideKeywordsBySpace
+        case defaultTagColor
 
         var defaultValue: Any? {
             switch self {
@@ -28,6 +29,7 @@ final class UserDefaultsRepository {
                 case .titleLineSpacing: Float.zero
                 case .showInfo: false
                 case .divideKeywordsBySpace: false
+                case .defaultTagColor: "#000000"
             }
         }
 
@@ -41,6 +43,7 @@ final class UserDefaultsRepository {
                 case .titleLineSpacing: Float(10.0)
                 case .showInfo: nil
                 case .divideKeywordsBySpace: nil
+                case .defaultTagColor: nil
             }
         }
 
@@ -54,6 +57,7 @@ final class UserDefaultsRepository {
                 case .titleLineSpacing: Float.zero
                 case .showInfo: nil
                 case .divideKeywordsBySpace: nil
+                case .defaultTagColor: nil
             }
         }
     }
@@ -82,6 +86,7 @@ final class UserDefaultsRepository {
         guard !titleLineSpacingChanged(getTitleLineSpacing()) else { return true }
         guard !showInfoChanged(getShowInfo()) else { return true }
         guard !showDivideKeywordsBySpaceChanged(getDivideKeywordsBySpace()) else { return true }
+        guard !showDefaultTagColorChanged(getDefaultTagColor()) else { return true }
         return false
     }
 
@@ -191,6 +196,18 @@ final class UserDefaultsRepository {
         userDefaults.set(value, forKey: Key.divideKeywordsBySpace.rawValue)
     }
 
+    func getDefaultTagColor() -> String {
+        guard let value = userDefaults.string(forKey: Key.defaultTagColor.rawValue) else {
+            fatalError("defaultTagColor has no defaultValue")
+        }
+        return value
+    }
+
+    func setDefaultTagColor(_ value: String) {
+        guard getDefaultTagColor() != value else { return }
+        userDefaults.set(value, forKey: Key.defaultTagColor.rawValue)
+    }
+
     func hasLinkChanged(_ hasLink: Bool) -> Bool {
         guard let value = Key.hasLink.defaultValue as? Bool else {
             fatalError("hasLink has no defaultValue")
@@ -245,5 +262,12 @@ final class UserDefaultsRepository {
             fatalError("divideKeywordsBySpace has no defaultValue")
         }
         return value != showDivideKeywordsBySpace
+    }
+
+    func showDefaultTagColorChanged(_ showDefaultTagColor: String) -> Bool {
+        guard let value = Key.defaultTagColor.defaultValue as? String else {
+            fatalError("defaultTagColor has no defaultValue")
+        }
+        return value != showDefaultTagColor
     }
 }

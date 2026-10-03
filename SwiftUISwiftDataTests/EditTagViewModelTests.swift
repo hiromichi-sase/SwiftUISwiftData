@@ -60,6 +60,16 @@ struct EditTagViewModelTests {
         #expect(dependency.testTarget.getShowInfo() == hasLink)
         dependency.removeUserDefaults()
     }
+
+    @Test
+    func getDefaultTagColor() {
+        let defaultTagColor = "#FF0000"
+        let dependency = Dependency()
+        dependency.userDefaultsRepository.setDefaultTagColor(defaultTagColor)
+
+        #expect(dependency.testTarget.getDefaultTagColor() == defaultTagColor)
+        dependency.removeUserDefaults()
+    }
 }
 
 extension EditTagViewModelTests {
