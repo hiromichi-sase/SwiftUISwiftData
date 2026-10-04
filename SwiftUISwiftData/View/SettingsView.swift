@@ -230,14 +230,14 @@ struct SettingsView: View {
                     supportsOpacity: false
                 ) {
                     HStack {
-                        Text("Select Color")
+                        Text("Default Tag Color")
+                            .font(.system(size: 12.0))
                         Image(systemName: "paintpalette")
                     }
                 }
                 .onChange(of: color) {
                     defaultTagColor = color.hexString()
                 }
-                Spacer()
                 TagColorView(
                     colorString: defaultTagColor,
                     showColorString: true
