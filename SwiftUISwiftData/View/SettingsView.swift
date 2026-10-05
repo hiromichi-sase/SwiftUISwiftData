@@ -225,23 +225,23 @@ struct SettingsView: View {
     private var colorSection: some View {
         Section("Color") {
             VStack(alignment: .leading) {
-                ColorPicker(
-                    selection: $color,
-                    supportsOpacity: false
-                ) {
-                    HStack {
-                        Text("Default Tag Color")
-                            .font(.system(size: 12.0))
-                        Image(systemName: "paintpalette")
+                Text("Default Tag Color")
+                    .font(.system(size: 12.0))
+                HStack {
+                    TagColorView(
+                        colorString: defaultTagColor,
+                        showColorString: true
+                    )
+                    Spacer()
+                    ColorPicker(
+                        "",
+                        selection: $color,
+                        supportsOpacity: false
+                    )
+                    .onChange(of: color) {
+                        defaultTagColor = color.hexString()
                     }
                 }
-                .onChange(of: color) {
-                    defaultTagColor = color.hexString()
-                }
-                TagColorView(
-                    colorString: defaultTagColor,
-                    showColorString: true
-                )
             }
         }
     }
