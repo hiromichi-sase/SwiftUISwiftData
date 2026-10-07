@@ -251,6 +251,7 @@ struct TagsView: View {
                 titleLineSpacing: viewModel.getTitleLineSpacing(),
                 showColorString: true,
                 showInfo: viewModel.getShowInfo(),
+                showTagCount: true,
             )
         }
         .foregroundStyle(.primary)
@@ -273,6 +274,7 @@ struct TagsView: View {
             titleLineSpacing: viewModel.getTitleLineSpacing(),
             showColorString: true,
             showInfo: viewModel.getShowInfo(),
+            showTagCount: true,
         )
         .contentShape(Rectangle())
         .onTapGesture {
