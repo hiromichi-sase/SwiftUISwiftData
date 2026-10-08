@@ -108,6 +108,7 @@ struct MemosView: View {
                         isFiltering: $isFiltering,
                         title: $keywordsForFiltering,
                         tagsForFiltering: $tagsForFiltering,
+                        selectedMemo: $selectedMemo
                     )
                     .interactiveDismissDisabled(true)
                 }

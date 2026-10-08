@@ -32,6 +32,8 @@ struct FilterMemosView: View {
     private var titleToStore: String
     @Binding
     private var tagsForFiltering: [Tag]
+    @Binding
+    private var selectedMemo: Memo?
     @State
     private var selectedTags: [Tag] = []
     @FocusState
@@ -48,12 +50,14 @@ struct FilterMemosView: View {
         isFiltering: Binding<Bool>,
         title: Binding<String>,
         tagsForFiltering: Binding<[Tag]>,
+        selectedMemo: Binding<Memo?>,
     ) {
         _isFiltering = isFiltering
         _title = title
         _titleToStore = State(initialValue: title.wrappedValue)
         _tagsForFiltering = tagsForFiltering
         _selectedTags = State(initialValue: tagsForFiltering.wrappedValue)
+        _selectedMemo = selectedMemo
     }
 
     var body: some View {
@@ -149,6 +153,7 @@ struct FilterMemosView: View {
                 isFiltering = false
                 title = ""
                 tagsForFiltering = []
+                selectedMemo = nil
                 dismiss()
             },
             secondaryButton: .cancel()
@@ -162,6 +167,7 @@ struct FilterMemosView: View {
             isFiltering: .constant(false),
             title: .constant(""),
             tagsForFiltering: .constant([]),
+            selectedMemo: .constant(nil),
         )
     }
 }
