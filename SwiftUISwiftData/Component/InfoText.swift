@@ -10,11 +10,11 @@ import SwiftUI
 struct InfoText {
     static func countView(content: String, textSelection: TextSelection? = nil) -> some View {
         HStack(spacing: .zero) {
-            Text("Content: \(content.count) Character\(content.count == 1 ? "" : "s")")
+            Text("Content: \(content.count.nounText(for: .character))")
                 .font(.system(size: 8.0))
                 .multilineTextAlignment(.leading)
             if !content.isEmpty {
-                Text(", \(content.components(separatedBy: .newlines).count) Line\(content.components(separatedBy: .newlines).count == 1 ? "" : "s")")
+                Text(", \(content.components(separatedBy: .newlines).count.nounText(for: .line))")
                     .font(.system(size: 8.0))
                     .multilineTextAlignment(.leading)
             }
@@ -24,10 +24,10 @@ struct InfoText {
             {
                 Spacer()
                     .frame(width: 8.0)
-                Text("Selection: \(selection.count) Character\(selection.count == 1 ? "" : "s")")
+                Text("Selection: \(selection.count.nounText(for: .character))")
                     .font(.system(size: 8.0))
                     .multilineTextAlignment(.leading)
-                Text(", \(selection.components(separatedBy: .newlines).count) Line\(selection.components(separatedBy: .newlines).count == 1 ? "" : "s")")
+                Text(", \(selection.components(separatedBy: .newlines).count.nounText(for: .line))")
                     .font(.system(size: 8.0))
                     .multilineTextAlignment(.leading)
             }

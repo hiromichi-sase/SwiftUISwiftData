@@ -50,7 +50,7 @@ struct TagRow: View {
                 )
             }
             if showTagCount, tag.memos.count > .zero {
-                Text("\(tag.memos.count) Memo\(tag.memos.count == 1 ? "" : "s")")
+                Text(tag.memos.count.nounText(for: .memo))
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12.0))
             }
