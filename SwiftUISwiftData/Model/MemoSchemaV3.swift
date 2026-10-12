@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 struct MemoSchemaV3: VersionedSchema {
-    static var versionIdentifier = Schema.Version(3, 0, 0)
+    static let versionIdentifier = Schema.Version(3, 0, 0)
     static var models: [any PersistentModel.Type] {
         [
             Memo.self,
