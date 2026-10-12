@@ -30,10 +30,13 @@ struct TagListView<Item: Hashable, Content: View>: View {
 
     var body: some View {
         GeometryReader { proxy in
+            let maxTagWidth = max(.zero, proxy.size.width - horizontalSpacing)
+
             WrappingTagList(
                 items: items,
                 horizontalSpacing: horizontalSpacing,
                 verticalSpacing: verticalSpacing,
+                maxTagWidth: maxTagWidth,
                 content: content
             )
             .frame(width: proxy.size.width, alignment: .leading)
@@ -56,6 +59,7 @@ private struct WrappingTagList<Item: Hashable, Content: View>: View {
     let items: [Item]
     let horizontalSpacing: CGFloat
     let verticalSpacing: CGFloat
+    let maxTagWidth: CGFloat
     let content: (Item) -> Content
 
     var body: some View {
@@ -65,6 +69,7 @@ private struct WrappingTagList<Item: Hashable, Content: View>: View {
         ) {
             ForEach(items, id: \.self) { item in
                 content(item)
+                    .frame(maxWidth: maxTagWidth, alignment: .leading)
             }
         }
     }

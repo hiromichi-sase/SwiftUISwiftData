@@ -29,7 +29,6 @@ struct TagView: View {
             .truncationMode(.tail)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .frame(maxWidth: 220, alignment: .leading)
             .frame(height: 32)
             .background(tag.color.color())
             .clipShape(Capsule())
