@@ -52,7 +52,7 @@ struct EditMemoView: View {
     @FocusState
     private var textFieldFocus: Bool
     @State
-    private var error: Error?
+    private var error: any Error?
     @State
     private var currentAlert: AlertType?
     @FocusState
