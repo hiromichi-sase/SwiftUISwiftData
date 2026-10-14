@@ -11,19 +11,20 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct EditTagViewModelTests {
+    @MainActor
     @Test
     func addTag() async throws {
         let dependency = Dependency()
         let addedTitle = "Added Title"
         let addedColor = "#000000"
         let tag = Tag(title: addedTitle, color: addedColor)
-        try await dependency.testTarget.add(tag)
+        try dependency.testTarget.add(tag)
 
-        guard let newTag = await dependency.tagRepository.tags().first else {
+        guard let newTag = dependency.tagRepository.tags().first else {
             throw TestError(message: "Tag was not added to the tagRepository.")
         }
 
-        await #expect(dependency.tagRepository.tags().count == 1)
+        #expect(dependency.tagRepository.tags().count == 1)
         #expect(newTag.title == addedTitle)
         #expect(newTag.color == addedColor)
         #expect(newTag.createdAt == newTag.updatedAt)
@@ -31,17 +32,18 @@ struct EditTagViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func updateTag() async throws {
         let dependency = Dependency()
         let tag = Tag(title: "Test Title", color: "Test Tag")
-        try await dependency.testTarget.add(tag)
+        try dependency.testTarget.add(tag)
 
         let updatedTitle = "Updated Title"
         let updatedColor = "#000000"
-        try await dependency.testTarget.update(tag, title: updatedTitle, color: updatedColor)
+        try dependency.testTarget.update(tag, title: updatedTitle, color: updatedColor)
 
-        guard let newTag = await dependency.tagRepository.tags().first else {
+        guard let newTag = dependency.tagRepository.tags().first else {
             throw TestError(message: "Tag was not added to the tagRepository.")
         }
 
@@ -51,6 +53,7 @@ struct EditTagViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getShowInfo() {
         let hasLink = false
@@ -61,6 +64,7 @@ struct EditTagViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getDefaultTagColor() {
         let defaultTagColor = "#FF0000"
@@ -80,6 +84,7 @@ extension EditTagViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             tagRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             guard let userDefaults = UserDefaults(suiteName: EditTagViewModelTests.Dependency.suiteName) else {

@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct TagsViewModelTests {
+    @MainActor
     @Test
     func deleteTags() async throws {
         let dependency = Dependency()
@@ -18,12 +19,12 @@ struct TagsViewModelTests {
         let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
         let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
-        try await dependency.tagRepository.add(tag1)
-        try await dependency.tagRepository.add(tag2)
-        try await dependency.tagRepository.add(tag3)
-        try await dependency.testTarget.delete([tag2])
+        try dependency.tagRepository.add(tag1)
+        try dependency.tagRepository.add(tag2)
+        try dependency.tagRepository.add(tag3)
+        try dependency.testTarget.delete([tag2])
 
-        let tags = await dependency.tagRepository.tags()
+        let tags = dependency.tagRepository.tags()
         if tags.count > 2 {
             throw TestError(message: "Expected only 2 tags after deletion, but found \(tags.count).")
         }
@@ -38,6 +39,7 @@ struct TagsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func moveTag() async throws {
         let dependency = Dependency()
@@ -45,12 +47,12 @@ struct TagsViewModelTests {
         let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
         let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
-        try await dependency.tagRepository.add(tag1)
-        try await dependency.tagRepository.add(tag2)
-        try await dependency.tagRepository.add(tag3)
-        try await dependency.testTarget.moveTag(from: [2], to: 1)
+        try dependency.tagRepository.add(tag1)
+        try dependency.tagRepository.add(tag2)
+        try dependency.tagRepository.add(tag3)
+        try dependency.testTarget.moveTag(from: [2], to: 1)
 
-        let tags = await dependency.tagRepository.tags()
+        let tags = dependency.tagRepository.tags()
         if tags.count != 3 {
             throw TestError(message: "Expected 3 tags after moving, but found \(tags.count).")
         }
@@ -69,6 +71,7 @@ struct TagsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getTitleLineLimit() {
         let titleLineLimit = 3
@@ -79,6 +82,7 @@ struct TagsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getTitleFontSize() {
         let titleFontSize = Float(16.0)
@@ -89,6 +93,7 @@ struct TagsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getTitleLineSpacing() {
         let titleLineSpacing = Float.zero
@@ -99,6 +104,7 @@ struct TagsViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getShowInfo() {
         let hasLink = false
@@ -118,6 +124,7 @@ extension TagsViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             tagRepository = TagRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             guard let userDefaults = UserDefaults(suiteName: TagsViewModelTests.Dependency.suiteName) else {

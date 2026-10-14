@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct PreviewMemoViewModelTests {
+    @MainActor
     @Test
     func getContentFontSize() {
         let contentFontSize = Float(16.0)
@@ -21,6 +22,7 @@ struct PreviewMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
@@ -39,6 +41,7 @@ extension PreviewMemoViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             guard let userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")

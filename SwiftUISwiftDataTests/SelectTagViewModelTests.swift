@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct SelectTagViewModelTests {
+    @MainActor
     @Test
     func getTitleLineLimit() {
         let titleLineLimit = 3
@@ -21,6 +22,7 @@ struct SelectTagViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getTitleFontSize() {
         let titleFontSize = Float(16.0)
@@ -31,6 +33,7 @@ struct SelectTagViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getTitleLineSpacing() {
         let titleLineSpacing = Float.zero
@@ -50,6 +53,7 @@ extension SelectTagViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             tagRepository = TagRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
             guard let userDefaults = UserDefaults(suiteName: SelectTagViewModelTests.Dependency.suiteName) else {

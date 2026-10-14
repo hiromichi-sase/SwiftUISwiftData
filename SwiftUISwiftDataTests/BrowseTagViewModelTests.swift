@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct BrowseTagViewModelTests {
+    @MainActor
     @Test
     func getShowInfo() {
         let hasLink = false
@@ -29,6 +30,7 @@ extension BrowseTagViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             guard let userDefaults = UserDefaults(suiteName: BrowseTagViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")
