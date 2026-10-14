@@ -16,7 +16,7 @@ final class AuthenticationManager {
     private var authError: NSError?
     private let reason = "This app uses Touch ID / Face ID to secure your data."
 
-    func authenticate() async throws -> (success: Bool, error: Error?) {
+    func authenticate() async throws -> (success: Bool, error: any Error?) {
         try await withCheckedThrowingContinuation { continuation in
             if context.canEvaluatePolicy(policy, error: &authError) {
                 context.evaluatePolicy(policy, localizedReason: reason) { success, error in

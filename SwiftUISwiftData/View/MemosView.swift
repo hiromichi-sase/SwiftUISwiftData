@@ -49,7 +49,7 @@ struct MemosView: View {
     @State
     var toastMessage = ""
     @State
-    var error: Error?
+    var error: any Error?
     @State
     var memoDuplicateSource: Memo?
     @State

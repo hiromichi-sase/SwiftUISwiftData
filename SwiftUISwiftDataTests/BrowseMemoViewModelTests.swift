@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct BrowseMemoViewModelTests {
+    @MainActor
     @Test
     func getHasLink() {
         let hasLink = true
@@ -21,6 +22,7 @@ struct BrowseMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getContentFontSize() {
         let contentFontSize = Float(16.0)
@@ -31,6 +33,7 @@ struct BrowseMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
@@ -41,6 +44,7 @@ struct BrowseMemoViewModelTests {
         dependency.removeUserDefaults()
     }
 
+    @MainActor
     @Test
     func getShowInfo() {
         let hasLink = false
@@ -59,6 +63,7 @@ extension BrowseMemoViewModelTests {
         let userDefaultsRepository: UserDefaultsRepository
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             guard let userDefaults = UserDefaults(suiteName: BrowseMemoViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")

@@ -10,8 +10,8 @@ import SwiftUI
 struct TagView: View {
     @Environment(\.colorScheme)
     private var colorScheme
-    var tag: Tag
-    var tagForFiltering: Bool
+    let tag: Tag
+    let tagForFiltering: Bool
 
     init(
         tag: Tag,
@@ -25,12 +25,13 @@ struct TagView: View {
         Text(tag.title)
             .fontWeight(tagForFiltering ? .bold : .regular)
             .foregroundColor(tag.color.color().appropriateTextColor)
-            .padding(8)
             .lineLimit(1)
             .truncationMode(.tail)
-            .background(tag.color.color())
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .frame(height: 32)
-            .cornerRadius(16)
+            .background(tag.color.color())
+            .clipShape(Capsule())
             .overlay(
                 Capsule()
                     .strokeBorder(

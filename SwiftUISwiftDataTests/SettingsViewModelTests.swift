@@ -11,6 +11,7 @@ import Testing
 @testable import SwiftUISwiftData
 
 struct SettingsViewModelTests {
+    @MainActor
     @Test
     func hasLink() {
         let dependency = Dependency()
@@ -26,6 +27,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.getHasLink() == defaultValue)
     }
 
+    @MainActor
     @Test
     func contentFontSize() {
         let dependency = Dependency()
@@ -45,6 +47,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.contentFontSizeRange == lowerBound ... upperBound)
     }
 
+    @MainActor
     @Test
     func contentLineSpacing() {
         let dependency = Dependency()
@@ -64,6 +67,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.contentLineSpacingRange == lowerBound ... upperBound)
     }
 
+    @MainActor
     @Test
     func titleLineLimit() {
         let dependency = Dependency()
@@ -83,6 +87,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.titleLineLimitRange == lowerBound ... upperBound)
     }
 
+    @MainActor
     @Test
     func titleFontSize() {
         let dependency = Dependency()
@@ -102,6 +107,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.titleFontSizeRange == lowerBound ... upperBound)
     }
 
+    @MainActor
     @Test
     func titleLineSpacing() {
         let dependency = Dependency()
@@ -121,6 +127,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.titleLineSpacingRange == lowerBound ... upperBound)
     }
 
+    @MainActor
     @Test
     func showInfo() {
         let dependency = Dependency()
@@ -136,6 +143,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.getShowInfo() == defaultValue)
     }
 
+    @MainActor
     @Test
     func divideKeywordsBySpace() {
         let dependency = Dependency()
@@ -151,6 +159,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.getDivideKeywordsBySpace() == defaultValue)
     }
 
+    @MainActor
     @Test
     func defaultTagColor() {
         let dependency = Dependency()
@@ -166,6 +175,7 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.getDefaultTagColor() == defaultValue)
     }
 
+    @MainActor
     @Test
     func reset() {
         let dependency = Dependency()
@@ -195,6 +205,7 @@ extension SettingsViewModelTests {
         private let userDefaults: UserDefaults
         private static let suiteName: String = "Test"
 
+        @MainActor
         init() {
             guard let userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")
