@@ -112,12 +112,26 @@ struct MemosView: View {
                     )
                     .interactiveDismissDisabled(true)
                 }
-                .fullScreenCover(isPresented: $showingAddMemo) {
-                    EditMemoView()
+                .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                    openFilterMemosView = false
+                    isFiltering = false
+                    keywordsForFiltering = ""
+                    tagsForFiltering = []
                 }
-                .onDisappear {
-                    openEditMemoView = false
+                .onChange(of: openEditMemoView) { _, isOpen in
+                    if isOpen {
+                        showingAddMemo = true
+                    }
                 }
+                .fullScreenCover(
+                    isPresented: $showingAddMemo,
+                    onDismiss: {
+                        openEditMemoView = false
+                    },
+                    content: {
+                        EditMemoView()
+                    }
+                )
                 .toast(message: $toastMessage)
             bottomBar
                 .padding(.bottom, 8)

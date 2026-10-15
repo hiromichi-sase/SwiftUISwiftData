@@ -88,6 +88,15 @@ struct TagsView: View {
                     EditTagView()
                         .interactiveDismissDisabled(true)
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                    showingAddTag = false
+                    openEditTagView = false
+                    selectedTag = nil
+                    selection.removeAll()
+                    editMode = .inactive
+                    tagToDelete = nil
+                    currentAlert = nil
+                }
                 .toast(message: $toastMessage)
             bottomBar
                 .padding(.bottom, 8)

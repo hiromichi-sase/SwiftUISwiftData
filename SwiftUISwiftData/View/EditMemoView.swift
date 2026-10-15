@@ -139,6 +139,15 @@ struct EditMemoView: View {
                 SelectTagView(selectedTags: $tags)
                     .interactiveDismissDisabled(true)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                showSelectTagView = false
+                showTitleView = false
+                currentAlert = nil
+
+                textEditorFocus = false
+                textFieldFocus = false
+                inputViewFocus = false
+            }
         }
     }
 

@@ -92,6 +92,37 @@ struct ContentView: View {
                     EmptyView()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openAddMemoFromShortcut)) { _ in
+            openNewMemoFlowFromShortcut()
+        }
+    }
+}
+
+extension ContentView {
+    func openNewMemoFlowFromShortcut() {
+        resetNavigationState()
+
+        selectedSection = .memosView
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            openEditMemoView = false
+            DispatchQueue.main.async {
+                openEditMemoView = true
+            }
+        }
+    }
+
+    func resetNavigationState() {
+        memosViewEditMode = .inactive
+        tagsViewEditMode = .inactive
+
+        selectedMemo = nil
+        selectedTag = nil
+
+        openEditMemoView = false
+        openEditTagView = false
+
+        NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
     }
 }
 
