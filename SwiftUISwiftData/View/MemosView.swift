@@ -119,19 +119,15 @@ struct MemosView: View {
                     tagsForFiltering = []
                 }
                 .onChange(of: openEditMemoView) { _, isOpen in
-                    if isOpen {
-                        showingAddMemo = true
-                    }
+                    guard isOpen else { return }
+
+                    showingAddMemo = true
+                    // openEditMemoView は「トリガー」なので1回で消費する
+                    openEditMemoView = false
                 }
-                .fullScreenCover(
-                    isPresented: $showingAddMemo,
-                    onDismiss: {
-                        openEditMemoView = false
-                    },
-                    content: {
-                        EditMemoView()
-                    }
-                )
+                .fullScreenCover(isPresented: $showingAddMemo) {
+                    EditMemoView()
+                }
                 .toast(message: $toastMessage)
             bottomBar
                 .padding(.bottom, 8)
@@ -382,8 +378,8 @@ struct MemosView: View {
             }
             else {
                 Button("Edit", systemImage: "pencil") {
-                    openEditMemoView = true
                     selectedMemo = memo
+                    openEditMemoView = true
                 }
                 Button("Duplicate", systemImage: "plus.square") {
                     duplicateMemo(memo)
