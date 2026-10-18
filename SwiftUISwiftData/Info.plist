@@ -6,5 +6,16 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.hiro.swiftuiswiftdata.addMemo</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Add Memo</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
+		</dict>
+	</array>
 </dict>
 </plist>

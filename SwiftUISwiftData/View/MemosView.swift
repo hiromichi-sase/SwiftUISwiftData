@@ -112,11 +112,21 @@ struct MemosView: View {
                     )
                     .interactiveDismissDisabled(true)
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                    openFilterMemosView = false
+                    isFiltering = false
+                    keywordsForFiltering = ""
+                    tagsForFiltering = []
+                }
+                .onChange(of: openEditMemoView) { _, isOpen in
+                    guard isOpen else { return }
+
+                    showingAddMemo = true
+                    // openEditMemoView は「トリガー」なので1回で消費する
+                    openEditMemoView = false
+                }
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
-                }
-                .onDisappear {
-                    openEditMemoView = false
                 }
                 .toast(message: $toastMessage)
             bottomBar
@@ -368,8 +378,8 @@ struct MemosView: View {
             }
             else {
                 Button("Edit", systemImage: "pencil") {
-                    openEditMemoView = true
                     selectedMemo = memo
+                    openEditMemoView = true
                 }
                 Button("Duplicate", systemImage: "plus.square") {
                     duplicateMemo(memo)
