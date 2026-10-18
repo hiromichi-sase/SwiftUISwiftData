@@ -22,11 +22,10 @@ struct InputView: View {
     var cancelButtonTapped: (() -> Void)?
 
     var body: some View {
-        HStack(spacing: 0.0) {
+        HStack(spacing: 8.0) {
             GlassButton(imageSystemName: "xmark.circle") {
                 cancelButtonTapped?()
             }
-            .padding(.leading, -5)
             .keyboardShortcut(".", modifiers: [.command])
             CustomTextField(
                 text: $text,
