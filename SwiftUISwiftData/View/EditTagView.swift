@@ -84,7 +84,7 @@ struct EditTagView: View {
                     .onChange(of: color) {
                         colorString = color.hexString()
                     }
-                    .frame(width: 164)
+                    .frame(width: 170)
                     Spacer()
                     TagColorView(
                         colorString: colorString,
