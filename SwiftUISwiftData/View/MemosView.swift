@@ -101,6 +101,9 @@ struct MemosView: View {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
                     }
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        toolbarItemBottonpBar
+                    }
                 }
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $openFilterMemosView) {
@@ -127,8 +130,6 @@ struct MemosView: View {
                     EditMemoView()
                 }
                 .toast(message: $toastMessage)
-            bottomBar
-                .padding(.bottom, 8)
         }
     }
 
@@ -170,63 +171,6 @@ struct MemosView: View {
         }
     }
 
-    private var bottomBar: some View {
-        HStack {
-            Spacer()
-                .frame(width: 24)
-            if editMode.isEditing {
-                GlassMenu(imageSystemName: "square.and.arrow.up") {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        if selectedMemos.filter({ $0.protected }).isEmpty {
-                            currentAlert = .delete
-                        }
-                        else {
-                            currentAlert = .containsProtectedMemo
-                        }
-                    }
-                    Divider()
-                    Button("Unprotect", systemImage: "lock.open.fill") {
-                        currentAlert = .unprotect
-                    }
-                    Button("Protect", systemImage: "lock.fill") {
-                        currentAlert = .protect
-                    }
-                }
-                .disabled(selection.isEmpty)
-                Spacer()
-                GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
-                    Button("Deselect All", systemImage: "circle") {
-                        selection.removeAll()
-                    }
-                    .disabled(selection.isEmpty)
-                    Button("Select All", systemImage: "checkmark.circle") {
-                        selection = Set(viewModel.memos.map(\.id))
-                    }
-                    .disabled(selection.count == viewModel.memos.count)
-                }
-            }
-            else {
-                GlassButton(
-                    imageSystemName: isFiltering
-                        ? "line.3.horizontal.decrease.circle.fill"
-                        : "line.3.horizontal.decrease.circle"
-                ) {
-                    openFilterMemosView = true
-                }
-                .disabled(viewModel.memos.isEmpty)
-                .keyboardShortcut("s", modifiers: [.command])
-                Spacer()
-                GlassButton(imageSystemName: "plus.circle") {
-                    showingAddMemo = true
-                }
-                .disabled(isFiltering)
-                .keyboardShortcut("n", modifiers: [.command])
-            }
-            Spacer()
-                .frame(width: 24)
-        }
-    }
-
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
         var title = "Memos ("
@@ -261,6 +205,65 @@ struct MemosView: View {
             }
             .disabled(isFiltering)
             .keyboardShortcut("e", modifiers: [.command])
+        }
+    }
+
+    @ViewBuilder
+    private var toolbarItemBottonpBar: some View {
+        if editMode.isEditing {
+            GlassMenu(imageSystemName: "square.and.arrow.up") {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    if selectedMemos.filter({ $0.protected }).isEmpty {
+                        currentAlert = .delete
+                    }
+                    else {
+                        currentAlert = .containsProtectedMemo
+                    }
+                }
+                Divider()
+                Button("Unprotect", systemImage: "lock.open.fill") {
+                    currentAlert = .unprotect
+                }
+                Button("Protect", systemImage: "lock.fill") {
+                    currentAlert = .protect
+                }
+            }
+            .disabled(selection.isEmpty)
+        }
+        else {
+            Button(
+                "Filter",
+                systemImage: isFiltering
+                    ? "line.3.horizontal.decrease.circle.fill"
+                    : "line.3.horizontal.decrease.circle"
+            ) {
+                openFilterMemosView = true
+            }
+            .disabled(viewModel.memos.isEmpty)
+            .keyboardShortcut("s", modifiers: [.command])
+        }
+        Spacer()
+        if editMode.isEditing {
+            GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
+                Button("Deselect All", systemImage: "circle") {
+                    selection.removeAll()
+                }
+                .disabled(selection.isEmpty)
+                Button("Select All", systemImage: "checkmark.circle") {
+                    selection = Set(viewModel.memos.map(\.id))
+                }
+                .disabled(selection.count == viewModel.memos.count)
+            }
+        }
+        else {
+            Button(
+                "Add",
+                systemImage: "plus.circle"
+            ) {
+                showingAddMemo = true
+            }
+            .disabled(isFiltering)
+            .keyboardShortcut("n", modifiers: [.command])
         }
     }
 
