@@ -120,9 +120,7 @@ struct MemosView: View {
                 }
                 .onChange(of: openEditMemoView) { _, isOpen in
                     guard isOpen else { return }
-
                     showingAddMemo = true
-                    // openEditMemoView は「トリガー」なので1回で消費する
                     openEditMemoView = false
                 }
                 .fullScreenCover(isPresented: $showingAddMemo) {
@@ -152,17 +150,15 @@ struct MemosView: View {
                     if viewModel.memos.isEmpty {
                         EmptyListView(message: "No memos")
                     }
+                    else if filteredMemos.isEmpty {
+                        EmptyListView(message: "No memos found")
+                    }
                     else {
-                        if filteredMemos.isEmpty {
-                            EmptyListView(message: "No memos found")
-                        }
-                        else {
-                            List(selection: $selectedMemo) {
-                                ForEach(filteredMemos) { memo in
-                                    inactiveRow(for: memo)
-                                        .id(memo.id)
-                                        .tag(memo.id)
-                                }
+                        List(selection: $selectedMemo) {
+                            ForEach(filteredMemos) { memo in
+                                inactiveRow(for: memo)
+                                    .id(memo.id)
+                                    .tag(memo.id)
                             }
                         }
                     }
@@ -204,26 +200,21 @@ struct MemosView: View {
                     }
                     .disabled(selection.isEmpty)
                     Button("Select All", systemImage: "checkmark.circle") {
-                        selection = Set(viewModel.memos.map { $0.id })
+                        selection = Set(viewModel.memos.map(\.id))
                     }
                     .disabled(selection.count == viewModel.memos.count)
                 }
             }
             else {
-                if isFiltering {
-                    GlassButton(imageSystemName: "line.3.horizontal.decrease.circle.fill") {
-                        openFilterMemosView = true
-                    }
-                    .disabled(viewModel.memos.isEmpty)
-                    .keyboardShortcut("s", modifiers: [.command])
+                GlassButton(
+                    imageSystemName: isFiltering
+                        ? "line.3.horizontal.decrease.circle.fill"
+                        : "line.3.horizontal.decrease.circle"
+                ) {
+                    openFilterMemosView = true
                 }
-                else {
-                    GlassButton(imageSystemName: "line.3.horizontal.decrease.circle") {
-                        openFilterMemosView = true
-                    }
-                    .disabled(viewModel.memos.isEmpty)
-                    .keyboardShortcut("s", modifiers: [.command])
-                }
+                .disabled(viewModel.memos.isEmpty)
+                .keyboardShortcut("s", modifiers: [.command])
                 Spacer()
                 GlassButton(imageSystemName: "plus.circle") {
                     showingAddMemo = true
@@ -240,14 +231,14 @@ struct MemosView: View {
     private var navigationTitle: String {
         var title = "Memos ("
         if editMode.isEditing {
-            title = title + "\(selection.count)/\(viewModel.memos.count))"
+            title += "\(selection.count)/\(viewModel.memos.count))"
         }
         else {
             if isFiltering {
-                title = title + "\(filteredMemos.count)/\(viewModel.memos.count))"
+                title += "\(filteredMemos.count)/\(viewModel.memos.count))"
             }
             else {
-                title = title + "\(viewModel.memos.count))"
+                title += "\(viewModel.memos.count))"
             }
         }
         return title
@@ -263,15 +254,13 @@ struct MemosView: View {
             }
             .keyboardShortcut(.cancelAction)
         }
-        else {
-            if !viewModel.memos.isEmpty {
-                Button("Edit", systemImage: "pencil") {
-                    selectedMemo = nil
-                    editMode = .active
-                }
-                .disabled(isFiltering)
-                .keyboardShortcut("e", modifiers: [.command])
+        else if !viewModel.memos.isEmpty {
+            Button("Edit", systemImage: "pencil") {
+                selectedMemo = nil
+                editMode = .active
             }
+            .disabled(isFiltering)
+            .keyboardShortcut("e", modifiers: [.command])
         }
     }
 
