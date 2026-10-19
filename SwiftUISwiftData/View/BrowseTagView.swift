@@ -85,18 +85,6 @@ struct BrowseTagView: View {
     /// タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        if !tag.title.isEmpty {
-            Button("Copy", systemImage: "doc.on.doc") {
-                if UIPasteboard.general.string == tag.title {
-                    toastMessage = "Already copied."
-                }
-                else {
-                    UIPasteboard.general.string = tag.title
-                    toastMessage = "Successfully copied!"
-                }
-            }
-            .keyboardShortcut("c", modifiers: [.command, .shift])
-        }
         Button("Edit", systemImage: "pencil") {
             showingEditTag = true
         }
