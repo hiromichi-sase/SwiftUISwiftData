@@ -160,6 +160,20 @@ struct MemosView: View {
                                 inactiveRow(for: memo)
                                     .id(memo.id)
                                     .tag(memo.id)
+                                    .if(!memo.title.isEmpty) { view in
+                                        view.swipeActions(
+                                            edge: .leading,
+                                            allowsFullSwipe: false
+                                        ) {
+                                            Button(
+                                                "Copy",
+                                                systemImage: "doc.on.doc"
+                                            ) {
+                                                UIPasteboard.general.string = memo.title
+                                            }
+                                            .tint(.green)
+                                        }
+                                    }
                             }
                         }
                     }
