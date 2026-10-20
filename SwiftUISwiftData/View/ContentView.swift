@@ -95,6 +95,9 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openAddMemoFromShortcut)) { _ in
             openNewMemoFlowFromShortcut()
         }
+        .onChange(of: selectedSection) { _, newValue in
+            resetStateForSectionChange(newValue)
+        }
     }
 }
 
@@ -113,16 +116,31 @@ extension ContentView {
     }
 
     func resetNavigationState() {
-        memosViewEditMode = .inactive
-        tagsViewEditMode = .inactive
-
-        selectedMemo = nil
-        selectedTag = nil
-
-        openEditMemoView = false
-        openEditTagView = false
-
+        clearMemoSelectionState()
+        clearTagSelectionState()
         NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
+    }
+
+    func resetStateForSectionChange(_ section: HomeView.Section?) {
+        if section != .memosView {
+            clearMemoSelectionState()
+        }
+
+        if section != .tagsView {
+            clearTagSelectionState()
+        }
+    }
+
+    func clearMemoSelectionState() {
+        memosViewEditMode = .inactive
+        selectedMemo = nil
+        openEditMemoView = false
+    }
+
+    func clearTagSelectionState() {
+        tagsViewEditMode = .inactive
+        selectedTag = nil
+        openEditTagView = false
     }
 }
 
