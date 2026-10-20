@@ -100,18 +100,6 @@ struct BrowseMemoView: View {
     /// タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        if !memo.title.isEmpty {
-            Button("Copy", systemImage: "doc.on.doc") {
-                if UIPasteboard.general.string == memo.title {
-                    toastMessage = "Already copied."
-                }
-                else {
-                    UIPasteboard.general.string = memo.title
-                    toastMessage = "Successfully copied!"
-                }
-            }
-            .keyboardShortcut("c", modifiers: [.command, .shift])
-        }
         if !memo.protected {
             Button("Edit", systemImage: "pencil") {
                 showingEditMemo = true

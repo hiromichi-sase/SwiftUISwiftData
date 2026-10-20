@@ -127,6 +127,20 @@ struct TagsView: View {
                                 inactiveRow(for: tag)
                                     .id(tag.id)
                                     .tag(tag.id)
+                                    .if(!tag.title.isEmpty) { view in
+                                        view.swipeActions(
+                                            edge: .leading,
+                                            allowsFullSwipe: false
+                                        ) {
+                                            Button(
+                                                "Copy",
+                                                systemImage: "doc.on.doc"
+                                            ) {
+                                                UIPasteboard.general.string = tag.title
+                                            }
+                                            .tint(.green)
+                                        }
+                                    }
                             }
                         }
                     }
