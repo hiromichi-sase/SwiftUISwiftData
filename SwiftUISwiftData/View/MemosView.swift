@@ -102,7 +102,7 @@ struct MemosView: View {
                         toolbarItemTopBarTrailing
                     }
                     ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarItemBottonpBar
+                        toolbarItemBottomBar
                     }
                 }
                 .environment(\.editMode, $editMode)
@@ -223,7 +223,7 @@ struct MemosView: View {
     }
 
     @ViewBuilder
-    private var toolbarItemBottonpBar: some View {
+    private var toolbarItemBottomBar: some View {
         if editMode.isEditing {
             GlassMenu(imageSystemName: "square.and.arrow.up") {
                 Button("Delete", systemImage: "trash", role: .destructive) {
