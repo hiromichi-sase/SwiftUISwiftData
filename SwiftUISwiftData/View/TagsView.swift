@@ -141,6 +141,15 @@ struct TagsView: View {
                                             .tint(.green)
                                         }
                                     }
+                                    .swipeActions(
+                                        edge: .trailing,
+                                        allowsFullSwipe: false
+                                    ) {
+                                        Button("Delete", systemImage: "trash", role: .destructive) {
+                                            tagToDelete = tag
+                                            currentAlert = .delete
+                                        }
+                                    }
                             }
                         }
                     }
@@ -286,7 +295,7 @@ struct TagsView: View {
 
     /// 非編集モードで表示する行のビューを生成する関数。
     ///
-    /// タグをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
+    /// タグをタップすると選択される。
     /// - Parameter tag: 表示するタグ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for tag: Tag) -> some View {
@@ -304,13 +313,8 @@ struct TagsView: View {
             selectedTag = tag
         }
         .contextMenu {
-            Button("Edit", systemImage: "pencil") {
-                openEditTagView = true
+            Button("Preview", systemImage: "eye") {
                 selectedTag = tag
-            }
-            Button("Delete", systemImage: "trash", role: .destructive) {
-                tagToDelete = tag
-                currentAlert = .delete
             }
         }
         .listRowInsets(.init())
