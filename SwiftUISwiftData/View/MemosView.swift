@@ -160,11 +160,11 @@ struct MemosView: View {
                                 inactiveRow(for: memo)
                                     .id(memo.id)
                                     .tag(memo.id)
-                                    .if(!memo.title.isEmpty) { view in
-                                        view.swipeActions(
-                                            edge: .leading,
-                                            allowsFullSwipe: false
-                                        ) {
+                                    .swipeActions(
+                                        edge: .leading,
+                                        allowsFullSwipe: false
+                                    ) {
+                                        if !memo.title.isEmpty {
                                             Button(
                                                 "Copy",
                                                 systemImage: "doc.on.doc"
@@ -172,6 +172,39 @@ struct MemosView: View {
                                                 UIPasteboard.general.string = memo.title
                                             }
                                             .tint(.green)
+                                        }
+                                        if !memo.protected {
+                                            Button(
+                                                "Duplicate",
+                                                systemImage: "plus.square"
+                                            ) {
+                                                duplicateMemo(memo)
+                                            }
+                                            .tint(.blue)
+                                        }
+                                    }
+                                    .swipeActions(
+                                        edge: .trailing,
+                                        allowsFullSwipe: false
+                                    ) {
+                                        if memo.protected {
+                                            Button("Unprotect", systemImage: "lock.open.fill") {
+                                                Task {
+                                                    await unprotect([memo])
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                                memoToDelete = memo
+                                                currentAlert = .delete
+                                            }
+                                            Divider()
+                                            Button("Protect", systemImage: "lock.fill") {
+                                                Task {
+                                                    await protect([memo])
+                                                }
+                                            }
                                         }
                                     }
                             }
@@ -357,7 +390,7 @@ struct MemosView: View {
 
     /// 非編集モードで表示する行のビューを生成する関数。
     ///
-    /// メモをタップすると選択され、コンテキストメニューから編集や削除ができるようになっている。
+    /// メモをタップすると選択される。
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
@@ -375,31 +408,8 @@ struct MemosView: View {
             selectedMemo = memo
         }
         .contextMenu {
-            if memo.protected {
-                Button("Unprotect", systemImage: "lock.open.fill") {
-                    Task {
-                        await unprotect([memo])
-                    }
-                }
-            }
-            else {
-                Button("Edit", systemImage: "pencil") {
-                    selectedMemo = memo
-                    openEditMemoView = true
-                }
-                Button("Duplicate", systemImage: "plus.square") {
-                    duplicateMemo(memo)
-                }
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    memoToDelete = memo
-                    currentAlert = .delete
-                }
-                Divider()
-                Button("Protect", systemImage: "lock.fill") {
-                    Task {
-                        await protect([memo])
-                    }
-                }
+            Button("Preview", systemImage: "eye") {
+                selectedMemo = memo
             }
         } preview: {
             PreviewMemoView(memo: memo)
