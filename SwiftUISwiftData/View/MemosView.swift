@@ -21,7 +21,7 @@ struct MemosView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = MemosViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// 編集モードの状態を管理する状態変数。

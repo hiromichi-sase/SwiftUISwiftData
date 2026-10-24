@@ -13,7 +13,7 @@ struct ContentView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer)
+        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext)
     )
 
     @State

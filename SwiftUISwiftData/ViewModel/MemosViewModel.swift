@@ -38,7 +38,7 @@ final class MemosViewModel: ObservableObject {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave)
             .sink { [weak self] _ in
-                Task { self?.fetchMemos() }
+                Task { @MainActor in self?.fetchMemos() }
             }
             .store(in: &cancellables)
     }
@@ -46,8 +46,14 @@ final class MemosViewModel: ObservableObject {
     private(set) var keywordsForFiltering: [String] = []
 
     /// Fetches memos from the memoRepository and updates the published memos array.
+    @MainActor
     private func fetchMemos() {
-        memos = memoRepository.memos()
+        do {
+            memos = try memoRepository.memos()
+        }
+        catch {
+            memos = []
+        }
     }
 
     func filteredMemos(

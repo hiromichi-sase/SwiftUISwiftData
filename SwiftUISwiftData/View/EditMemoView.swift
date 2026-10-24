@@ -19,7 +19,7 @@ struct EditMemoView: View {
     /// ビューモデルの状態変数。
     @ObservedObject
     var viewModel = EditMemoViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
         userDefaultsRepository: UserDefaultsRepository()
     )
