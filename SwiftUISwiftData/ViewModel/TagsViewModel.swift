@@ -48,6 +48,10 @@ final class TagsViewModel: ObservableObject {
         tags = (try? tagRepository.tags()) ?? []
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
     /// Deletes the specified tags from the tagRepository and refreshes the tags list, and renumbers the order of tags in the tagRepository and refreshes the tags list.
     ///
     /// If an error occurs during the deletion, it throws an error.
@@ -69,18 +73,18 @@ final class TagsViewModel: ObservableObject {
     }
 
     func getTitleLineLimit() -> Int {
-        userDefaultsRepository.getTitleLineLimit()
+        value(UserDefaultsRepository.getTitleLineLimit)
     }
 
     func getTitleFontSize() -> Float {
-        userDefaultsRepository.getTitleFontSize()
+        value(UserDefaultsRepository.getTitleFontSize)
     }
 
     func getTitleLineSpacing() -> Float {
-        userDefaultsRepository.getTitleLineSpacing()
+        value(UserDefaultsRepository.getTitleLineSpacing)
     }
 
     func getShowInfo() -> Bool {
-        userDefaultsRepository.getShowInfo()
+        value(UserDefaultsRepository.getShowInfo)
     }
 }
