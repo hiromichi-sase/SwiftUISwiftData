@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 final class MemoRepository {
-    private(set) var modelContext: ModelContext
+    let modelContext: ModelContext
     private let descriptor = FetchDescriptor<Memo>(sortBy: [SortDescriptor(\.order)])
 
     init(modelContext: ModelContext) {
