@@ -34,6 +34,10 @@ final class EditMemoViewModel: ObservableObject {
         tags = (try? tagRepository.tags()) ?? []
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
     /// Adds a new memo to the memoRepository.
     ///
     /// This function takes a Memo object as a parameter and attempts to add it to the memoRepository. If an error occurs during the addition, it throws an error.
@@ -57,14 +61,14 @@ final class EditMemoViewModel: ObservableObject {
     }
 
     func getContentFontSize() -> Float {
-        userDefaultsRepository.getContentFontSize()
+        value(UserDefaultsRepository.getContentFontSize)
     }
 
     func getContentLineSpacing() -> Float {
-        userDefaultsRepository.getContentLineSpacing()
+        value(UserDefaultsRepository.getContentLineSpacing)
     }
 
     func getShowInfo() -> Bool {
-        userDefaultsRepository.getShowInfo()
+        value(UserDefaultsRepository.getShowInfo)
     }
 }
