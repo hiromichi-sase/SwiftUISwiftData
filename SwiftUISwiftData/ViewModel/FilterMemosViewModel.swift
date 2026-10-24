@@ -15,7 +15,7 @@ final class FilterMemosViewModel: ObservableObject {
     /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
     /// An array of Tag objects that are published to update the UI when changes occur.
-    private(set) var tags: [Tag] = []
+    let tags: [Tag]
     private let suiteName: String?
 
     init(
@@ -23,7 +23,7 @@ final class FilterMemosViewModel: ObservableObject {
         userDefaultsRepository: UserDefaultsRepository,
         suiteName: String? = nil,
     ) {
-        tags = (try? tagRepository.tags()) ?? []
+        self.tags = (try? tagRepository.tags()) ?? []
         self.userDefaultsRepository = userDefaultsRepository
         self.suiteName = suiteName
     }
