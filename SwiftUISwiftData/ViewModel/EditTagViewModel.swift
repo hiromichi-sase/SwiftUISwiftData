@@ -29,6 +29,10 @@ final class EditTagViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
     /// Adds a new tag to the tagRepository.
     ///
     /// This function takes a Tag object as a parameter and attempts to add it to the tagRepository. If an error occurs during the addition, it throws an error.
@@ -51,10 +55,10 @@ final class EditTagViewModel: ObservableObject {
     }
 
     func getShowInfo() -> Bool {
-        userDefaultsRepository.getShowInfo()
+        value(UserDefaultsRepository.getShowInfo)
     }
 
     func getDefaultTagColor() -> String {
-        userDefaultsRepository.getDefaultTagColor()
+        value(UserDefaultsRepository.getDefaultTagColor)
     }
 }
