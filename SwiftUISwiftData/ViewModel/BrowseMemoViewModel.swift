@@ -19,19 +19,23 @@ final class BrowseMemoViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
     func getHasLink() -> Bool {
-        userDefaultsRepository.getHasLink()
+        value(UserDefaultsRepository.getHasLink)
     }
 
     func getContentFontSize() -> Float {
-        userDefaultsRepository.getContentFontSize()
+        value(UserDefaultsRepository.getContentFontSize)
     }
 
     func getContentLineSpacing() -> Float {
-        userDefaultsRepository.getContentLineSpacing()
+        value(UserDefaultsRepository.getContentLineSpacing)
     }
 
     func getShowInfo() -> Bool {
-        userDefaultsRepository.getShowInfo()
+        value(UserDefaultsRepository.getShowInfo)
     }
 }
