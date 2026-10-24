@@ -31,7 +31,7 @@ final class EditMemoViewModel: ObservableObject {
     ) {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
-        tags = tagRepository.tags()
+        tags = (try? tagRepository.tags()) ?? []
     }
 
     /// Adds a new memo to the memoRepository.

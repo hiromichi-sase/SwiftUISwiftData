@@ -23,7 +23,7 @@ final class FilterMemosViewModel: ObservableObject {
         userDefaultsRepository: UserDefaultsRepository,
         suiteName: String? = nil,
     ) {
-        tags = tagRepository.tags()
+        tags = (try? tagRepository.tags()) ?? []
         self.userDefaultsRepository = userDefaultsRepository
         self.suiteName = suiteName
     }

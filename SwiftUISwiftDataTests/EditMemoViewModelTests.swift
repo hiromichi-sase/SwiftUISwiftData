@@ -119,7 +119,7 @@ extension EditMemoViewModelTests {
             )
 
             memoRepository = .init(modelContext: container.mainContext)
-            tagRepository = .init(modelContainer: container)
+            tagRepository = .init(modelContext: container.mainContext)
 
             guard let userDefaults = UserDefaults(suiteName: suiteName) else {
                 fatalError("Could not create UserDefaults")

@@ -18,7 +18,7 @@ struct TagsView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = TagsViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// 編集モードの状態を管理する状態変数。

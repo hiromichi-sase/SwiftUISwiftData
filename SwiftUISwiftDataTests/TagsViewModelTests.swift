@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -14,7 +15,8 @@ struct TagsViewModelTests {
     @MainActor
     @Test
     func deleteTags() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
         let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
         let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
@@ -24,7 +26,7 @@ struct TagsViewModelTests {
         try dependency.tagRepository.add(tag3)
         try dependency.testTarget.delete([tag2])
 
-        let tags = dependency.tagRepository.tags()
+        let tags = try dependency.tagRepository.tags()
         if tags.count > 2 {
             throw TestError(message: "Expected only 2 tags after deletion, but found \(tags.count).")
         }
@@ -36,13 +38,13 @@ struct TagsViewModelTests {
         #expect(tags[1].order == 2)
         #expect(tags[1].title == "Test Title 3")
         #expect(tags[1].color == "#0000FF")
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
     func moveTag() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
         let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
         let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
@@ -52,7 +54,7 @@ struct TagsViewModelTests {
         try dependency.tagRepository.add(tag3)
         try dependency.testTarget.moveTag(from: [2], to: 1)
 
-        let tags = dependency.tagRepository.tags()
+        let tags = try dependency.tagRepository.tags()
         if tags.count != 3 {
             throw TestError(message: "Expected 3 tags after moving, but found \(tags.count).")
         }
@@ -68,66 +70,71 @@ struct TagsViewModelTests {
         #expect(tags[2].order == 3)
         #expect(tags[2].title == "Test Title 2")
         #expect(tags[2].color == "#00FF00")
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getTitleLineLimit() {
+    func getTitleLineLimit() throws {
         let titleLineLimit = 3
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
 
         #expect(dependency.testTarget.getTitleLineLimit() == titleLineLimit)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getTitleFontSize() {
+    func getTitleFontSize() throws {
         let titleFontSize = Float(16.0)
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
 
         #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getTitleLineSpacing() {
+    func getTitleLineSpacing() throws {
         let titleLineSpacing = Float.zero
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
 
         #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getShowInfo() {
+    func getShowInfo() throws {
         let hasLink = false
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setShowInfo(hasLink)
 
         #expect(dependency.testTarget.getShowInfo() == hasLink)
-        dependency.removeUserDefaults()
     }
 }
 
 extension TagsViewModelTests {
     struct Dependency {
+        private let container: ModelContainer
         let testTarget: TagsViewModel
         let tagRepository: TagRepository
         private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let suiteName = UUID().uuidString
 
         @MainActor
-        init() {
-            tagRepository = TagRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            guard let userDefaults = UserDefaults(suiteName: TagsViewModelTests.Dependency.suiteName) else {
+        init() throws {
+            container = try ModelContainer(
+                for: Memo.self,
+                Tag.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+            tagRepository = TagRepository(modelContext: container.mainContext)
+            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
                 fatalError("Could not create UserDefaults")
             }
             self.userDefaults = userDefaults
@@ -139,7 +146,7 @@ extension TagsViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: TagsViewModelTests.Dependency.suiteName)
+            userDefaults.removePersistentDomain(forName: suiteName)
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -55,7 +56,8 @@ extension SelectTagViewModelTests {
 
         @MainActor
         init() {
-            tagRepository = TagRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
+            let modelContainerManager = ModelContainerManager(isStoredInMemoryOnly: true)
+            tagRepository = TagRepository(modelContext: modelContainerManager.modelContainer.mainContext)
             guard let userDefaults = UserDefaults(suiteName: SelectTagViewModelTests.Dependency.suiteName) else {
                 fatalError("Could not create UserDefaults")
             }

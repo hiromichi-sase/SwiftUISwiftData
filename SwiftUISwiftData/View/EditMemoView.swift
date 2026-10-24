@@ -20,7 +20,7 @@ struct EditMemoView: View {
     @ObservedObject
     var viewModel = EditMemoViewModel(
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。

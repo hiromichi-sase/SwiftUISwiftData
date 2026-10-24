@@ -17,7 +17,7 @@ struct FilterMemosView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = FilterMemosViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。

@@ -22,7 +22,7 @@ final class SelectTagViewModel: ObservableObject {
         userDefaultsRepository: UserDefaultsRepository
     ) {
         self.userDefaultsRepository = userDefaultsRepository
-        tags = tagRepository.tags()
+        tags = (try? tagRepository.tags()) ?? []
     }
 
     func getTitleLineLimit() -> Int {

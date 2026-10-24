@@ -38,14 +38,14 @@ final class TagsViewModel: ObservableObject {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave)
             .sink { [weak self] _ in
-                Task { self?.fetchTags() }
+                self?.fetchTags()
             }
             .store(in: &cancellables)
     }
 
     /// Fetches tags from the tagRepository and updates the published tags array.
     private func fetchTags() {
-        tags = tagRepository.tags()
+        tags = (try? tagRepository.tags()) ?? []
     }
 
     /// Deletes the specified tags from the tagRepository and refreshes the tags list, and renumbers the order of tags in the tagRepository and refreshes the tags list.

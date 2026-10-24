@@ -12,7 +12,7 @@ struct SelectTagView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = SelectTagViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
 

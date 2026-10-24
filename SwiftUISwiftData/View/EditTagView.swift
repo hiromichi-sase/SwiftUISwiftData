@@ -19,7 +19,7 @@ struct EditTagView: View {
     /// ビューモデルの状態変数。
     @ObservedObject
     var viewModel = EditTagViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。
