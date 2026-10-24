@@ -23,11 +23,15 @@ final class PreviewMemoViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
     func getContentFontSize() -> Float {
-        userDefaultsRepository.getContentFontSize()
+        value(UserDefaultsRepository.getContentFontSize)
     }
 
     func getContentLineSpacing() -> Float {
-        userDefaultsRepository.getContentLineSpacing()
+        value(UserDefaultsRepository.getContentLineSpacing)
     }
 }
