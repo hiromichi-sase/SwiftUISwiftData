@@ -81,6 +81,12 @@ private struct WrappingLayout: Layout {
 
     struct Cache {}
 
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
     func makeCache(subviews: Subviews) -> Cache { Cache() }
     func updateCache(_ cache: inout Cache, subviews: Subviews) {}
 
@@ -90,28 +96,14 @@ private struct WrappingLayout: Layout {
         cache: inout Cache
     ) -> CGSize {
         let maxWidth = proposal.width ?? .infinity
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
+        let rows = rows(for: subviews, maxWidth: maxWidth)
+        let contentWidth = rows.map(\.width).max() ?? 0
+        let contentHeight =
+            rows.reduce(CGFloat.zero) { partialResult, row in
+                partialResult + row.height
+            } + verticalSpacing * CGFloat(max(0, rows.count - 1))
 
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-
-            let isFirstInRow = x == 0
-            let spacingBefore = isFirstInRow ? 0 : horizontalSpacing
-
-            if !isFirstInRow && x + spacingBefore + size.width > maxWidth {
-                x = 0
-                y += rowHeight + verticalSpacing
-                rowHeight = 0
-            }
-
-            let currentSpacing = (x == 0) ? 0 : horizontalSpacing
-            x += currentSpacing + size.width
-            rowHeight = max(rowHeight, size.height)
-        }
-
-        return CGSize(width: proposal.width ?? x, height: y + rowHeight)
+        return CGSize(width: proposal.width ?? contentWidth, height: contentHeight)
     }
 
     func placeSubviews(
@@ -120,33 +112,55 @@ private struct WrappingLayout: Layout {
         subviews: Subviews,
         cache: inout Cache
     ) {
-        let maxWidth = bounds.width
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
+        let rows = rows(for: subviews, maxWidth: bounds.width)
+        var y = bounds.minY
 
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+        for row in rows {
+            var x = bounds.minX
 
-            let isFirstInRow = x == 0
-            let spacingBefore = isFirstInRow ? 0 : horizontalSpacing
+            for (position, index) in row.indices.enumerated() {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                if position > 0 {
+                    x += horizontalSpacing
+                }
 
-            if !isFirstInRow && x + spacingBefore + size.width > maxWidth {
-                x = 0
-                y += rowHeight + verticalSpacing
-                rowHeight = 0
+                subviews[index]
+                    .place(
+                        at: CGPoint(x: x, y: y),
+                        proposal: ProposedViewSize(width: size.width, height: size.height)
+                    )
+                x += size.width
             }
 
-            let placeSpacing = (x == 0) ? 0 : horizontalSpacing
-            let placeX = bounds.minX + x + placeSpacing
-
-            subview.place(
-                at: CGPoint(x: placeX, y: bounds.minY + y),
-                proposal: ProposedViewSize(width: size.width, height: size.height)
-            )
-
-            x += placeSpacing + size.width
-            rowHeight = max(rowHeight, size.height)
+            y += row.height + verticalSpacing
         }
+    }
+
+    private func rows(for subviews: Subviews, maxWidth: CGFloat) -> [Row] {
+        guard !subviews.isEmpty else {
+            return []
+        }
+
+        var rows: [Row] = []
+        var currentRow = Row()
+
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let spacing = currentRow.indices.isEmpty ? 0 : horizontalSpacing
+            let proposedWidth = currentRow.width + spacing + size.width
+
+            if !currentRow.indices.isEmpty && proposedWidth > maxWidth {
+                rows.append(currentRow)
+                currentRow = Row()
+            }
+
+            let nextSpacing = currentRow.indices.isEmpty ? 0 : horizontalSpacing
+            currentRow.indices.append(index)
+            currentRow.width += nextSpacing + size.width
+            currentRow.height = max(currentRow.height, size.height)
+        }
+
+        rows.append(currentRow)
+        return rows
     }
 }
