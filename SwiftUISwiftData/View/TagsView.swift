@@ -253,6 +253,27 @@ struct TagsView: View {
         }
     }
 
+    private func makeTagRow(for tag: Tag) -> TagRow {
+        TagRow(
+            tag: tag,
+            titleLineLimit: viewModel.getTitleLineLimit(),
+            titleFontSize: viewModel.getTitleFontSize(),
+            titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showColorString: true,
+            showInfo: viewModel.getShowInfo(),
+            showTagCount: true,
+        )
+    }
+
+    private func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
+    }
+
     /// 編集モードで表示する行のビューを生成する関数。
     ///
     /// タグをタップすると選択状態が切り替わるようになっている。
@@ -260,22 +281,9 @@ struct TagsView: View {
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for tag: Tag) -> some View {
         Button {
-            if selection.contains(tag.id) {
-                selection.remove(tag.id)
-            }
-            else {
-                selection.insert(tag.id)
-            }
+            toggleSelection(for: tag.id)
         } label: {
-            TagRow(
-                tag: tag,
-                titleLineLimit: viewModel.getTitleLineLimit(),
-                titleFontSize: viewModel.getTitleFontSize(),
-                titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showColorString: true,
-                showInfo: viewModel.getShowInfo(),
-                showTagCount: true,
-            )
+            makeTagRow(for: tag)
         }
         .foregroundStyle(.primary)
         .contentShape(Rectangle())
@@ -290,26 +298,18 @@ struct TagsView: View {
     /// - Parameter tag: 表示するタグ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for tag: Tag) -> some View {
-        TagRow(
-            tag: tag,
-            titleLineLimit: viewModel.getTitleLineLimit(),
-            titleFontSize: viewModel.getTitleFontSize(),
-            titleLineSpacing: viewModel.getTitleLineSpacing(),
-            showColorString: true,
-            showInfo: viewModel.getShowInfo(),
-            showTagCount: true,
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            selectedTag = tag
-        }
-        .contextMenu {
-            Button("Preview", systemImage: "eye") {
+        makeTagRow(for: tag)
+            .contentShape(Rectangle())
+            .onTapGesture {
                 selectedTag = tag
             }
-        }
-        .listRowInsets(.init())
-        .moveDisabled(true)
-        .listRowBackground(Color(uiColor: tag == selectedTag ? .quaternaryLabel : .systemBackground))
+            .contextMenu {
+                Button("Preview", systemImage: "eye") {
+                    selectedTag = tag
+                }
+            }
+            .listRowInsets(.init())
+            .moveDisabled(true)
+            .listRowBackground(Color(uiColor: tag == selectedTag ? .quaternaryLabel : .systemBackground))
     }
 }
