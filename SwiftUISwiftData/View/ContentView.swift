@@ -53,46 +53,57 @@ struct ContentView: View {
                     EmptyView()
             }
         } detail: {
-            switch selectedSection {
-                case .memosView:
-                    if memosViewEditMode.isEditing {
-                        Text("Select memos to edit or delete")
-                    }
-                    else {
-                        if let selectedMemo {
-                            BrowseMemoView(memo: selectedMemo)
-                                .modelContext(viewModel.modelContext)
-                                .id(selectedMemo.id)
-                        }
-                        else {
-                            Text("No memos selected")
-                        }
-                    }
-                case .tagsView:
-                    if tagsViewEditMode.isEditing {
-                        Text("Select tags to edit or delete")
-                    }
-                    else {
-                        if let selectedTag {
-                            BrowseTagView(tag: selectedTag)
-                                .modelContext(viewModel.modelContext)
-                                .id(selectedTag.id)
-                        }
-                        else {
-                            Text("No tags selected")
-                        }
-                    }
-                case .settingsView:
-                    EmptyView()
-                default:
-                    EmptyView()
-            }
+            detailView
         }
         .onReceive(NotificationCenter.default.publisher(for: .openAddMemoFromShortcut)) { _ in
             openNewMemoFlowFromShortcut()
         }
         .onChange(of: selectedSection) { _, newValue in
             resetStateForSectionChange(newValue)
+        }
+    }
+
+    @ViewBuilder
+    private var detailView: some View {
+        switch selectedSection {
+            case .memosView:
+                memosDetailView
+            case .tagsView:
+                tagsDetailView
+            case .settingsView:
+                EmptyView()
+            default:
+                EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var memosDetailView: some View {
+        if memosViewEditMode.isEditing {
+            Text("Select memos to edit or delete")
+        }
+        else if let selectedMemo {
+            BrowseMemoView(memo: selectedMemo)
+                .modelContext(viewModel.modelContext)
+                .id(selectedMemo.id)
+        }
+        else {
+            Text("No memos selected")
+        }
+    }
+
+    @ViewBuilder
+    private var tagsDetailView: some View {
+        if tagsViewEditMode.isEditing {
+            Text("Select tags to edit or delete")
+        }
+        else if let selectedTag {
+            BrowseTagView(tag: selectedTag)
+                .modelContext(viewModel.modelContext)
+                .id(selectedTag.id)
+        }
+        else {
+            Text("No tags selected")
         }
     }
 }
