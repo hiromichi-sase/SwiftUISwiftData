@@ -24,9 +24,6 @@ struct BrowseTagView: View {
     /// 編集画面を表示するかどうかのフラグ。
     @State
     private var showingEditTag = false
-    /// トーストメッセージの状態変数。
-    @State
-    private var toastMessage = ""
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -60,10 +57,7 @@ struct BrowseTagView: View {
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
             .onAppear {
-                if openEditTagView {
-                    showingEditTag = true
-                    openEditTagView = false
-                }
+                openEditIfNeeded()
             }
             .sheet(isPresented: $showingEditTag) {
                 EditTagView(tag: tag)
@@ -76,8 +70,16 @@ struct BrowseTagView: View {
                     toolbarItemTopBarTrailing
                 }
             }
-            .toast(message: $toastMessage)
         }
+    }
+
+    private func openEditIfNeeded() {
+        guard openEditTagView else {
+            return
+        }
+
+        showingEditTag = true
+        openEditTagView = false
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
