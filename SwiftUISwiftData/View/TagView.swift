@@ -21,16 +21,24 @@ struct TagView: View {
         self.tagForFiltering = tagForFiltering
     }
 
+    private var tagColor: Color {
+        tag.color.color()
+    }
+
+    private var textColor: Color {
+        tagColor.appropriateTextColor
+    }
+
     var body: some View {
         Text(tag.title)
             .fontWeight(tagForFiltering ? .bold : .regular)
-            .foregroundColor(tag.color.color().appropriateTextColor)
+            .foregroundColor(textColor)
             .lineLimit(1)
             .truncationMode(.tail)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .frame(height: 32)
-            .background(tag.color.color())
+            .background(tagColor)
             .clipShape(Capsule())
             .overlay(
                 Capsule()
@@ -42,11 +50,11 @@ struct TagView: View {
     }
 
     private var borderColor: Color {
-        if tag.color.color().needsBorder(colorScheme: colorScheme) {
-            tag.color.color().appropriateTextColor
+        if tagColor.needsBorder(colorScheme: colorScheme) {
+            textColor
         }
         else {
-            tag.color.color()
+            tagColor
         }
     }
 }
