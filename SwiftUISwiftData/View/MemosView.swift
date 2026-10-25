@@ -351,6 +351,27 @@ struct MemosView: View {
         }
     }
 
+    private func makeMemoRow(for memo: Memo, keywordsForFiltering: [String] = []) -> MemoRow {
+        MemoRow(
+            memo: memo,
+            titleLineLimit: viewModel.getTitleLineLimit(),
+            titleFontSize: viewModel.getTitleFontSize(),
+            titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showInfo: viewModel.getShowInfo(),
+            keywordsForFiltering: keywordsForFiltering,
+            tagsForFiltering: tagsForFiltering,
+        )
+    }
+
+    private func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
+    }
+
     /// 編集モードで表示する行のビューを生成する関数。
     ///
     /// メモをタップすると選択状態が切り替わるようになっている。
@@ -358,20 +379,9 @@ struct MemosView: View {
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
         Button {
-            if selection.contains(memo.id) {
-                selection.remove(memo.id)
-            }
-            else {
-                selection.insert(memo.id)
-            }
+            toggleSelection(for: memo.id)
         } label: {
-            MemoRow(
-                memo: memo,
-                titleLineLimit: viewModel.getTitleLineLimit(),
-                titleFontSize: viewModel.getTitleFontSize(),
-                titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showInfo: viewModel.getShowInfo()
-            )
+            makeMemoRow(for: memo)
         }
         .foregroundStyle(.primary)
         .contentShape(Rectangle())
@@ -386,14 +396,9 @@ struct MemosView: View {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        MemoRow(
-            memo: memo,
-            titleLineLimit: viewModel.getTitleLineLimit(),
-            titleFontSize: viewModel.getTitleFontSize(),
-            titleLineSpacing: viewModel.getTitleLineSpacing(),
-            showInfo: viewModel.getShowInfo(),
-            keywordsForFiltering: viewModel.keywordsForFiltering,
-            tagsForFiltering: tagsForFiltering,
+        makeMemoRow(
+            for: memo,
+            keywordsForFiltering: viewModel.keywordsForFiltering
         )
         .contentShape(Rectangle())
         .onTapGesture {
