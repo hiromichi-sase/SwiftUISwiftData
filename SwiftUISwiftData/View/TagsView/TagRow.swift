@@ -34,6 +34,10 @@ struct TagRow: View {
         self.showTagCount = showTagCount
     }
 
+    private var memoCount: Int {
+        tag.memos.count
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             HStack {
@@ -49,8 +53,8 @@ struct TagRow: View {
                     showColorString: showColorString
                 )
             }
-            if showTagCount, tag.memos.count > .zero {
-                Text(tag.memos.count.nounText(for: .memo))
+            if showTagCount, memoCount > .zero {
+                Text(memoCount.nounText(for: .memo))
                     .foregroundStyle(.secondary)
                     .font(.system(size: 12.0))
             }
