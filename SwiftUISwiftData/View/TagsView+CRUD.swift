@@ -29,9 +29,7 @@ extension TagsView {
             toastMessage = "Successfully deleted!"
         }
         catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to delete tags: \(error)")
+            handleError(error, message: "Failed to delete tags")
         }
     }
 
@@ -49,10 +47,14 @@ extension TagsView {
                 try viewModel.moveTag(from: indices, to: destination)
             }
             catch {
-                self.error = error
-                currentAlert = .error
-                print("Failed to move tag: \(error)")
+                handleError(error, message: "Failed to move tag")
             }
         }
+    }
+
+    private func handleError(_ error: any Error, message: String) {
+        self.error = error
+        currentAlert = .error
+        print("\(message): \(error)")
     }
 }
