@@ -27,9 +27,9 @@ struct ContentView: View {
     var tagsViewEditMode: EditMode = .inactive
     @State
     var selectedTag: Tag?
-    /// メモの内容を編集するビューを開くかどうかのフラグ。
+    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
-    var openEditMemoView: Bool = false
+    var showingAddMemo: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -40,7 +40,7 @@ struct ContentView: View {
                     MemosView(
                         editMode: $memosViewEditMode,
                         selectedMemo: $selectedMemo,
-                        openEditMemoView: $openEditMemoView
+                        showingAddMemo: $showingAddMemo,
                     )
                 case .tagsView:
                     TagsView(
@@ -60,7 +60,7 @@ struct ContentView: View {
                     }
                     else {
                         if let selectedMemo {
-                            BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
+                            BrowseMemoView(memo: selectedMemo)
                                 .modelContext(viewModel.modelContext)
                                 .id(selectedMemo.id)
                         }
@@ -102,13 +102,7 @@ extension ContentView {
         resetNavigationState()
 
         selectedSection = .memosView
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            openEditMemoView = false
-            DispatchQueue.main.async {
-                openEditMemoView = true
-            }
-        }
+        showingAddMemo = true
     }
 
     func resetNavigationState() {
@@ -130,7 +124,6 @@ extension ContentView {
     func clearMemoSelectionState() {
         memosViewEditMode = .inactive
         selectedMemo = nil
-        openEditMemoView = false
     }
 
     func clearTagSelectionState() {

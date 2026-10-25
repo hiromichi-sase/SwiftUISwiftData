@@ -18,9 +18,6 @@ struct BrowseMemoView: View {
     /// 表示するメモ。
     @State
     private var memo: Memo
-    /// 編集画面を開くかどうかのフラグ。
-    @State
-    private var openEditMemoView = false
     /// 編集画面を表示するかどうかのフラグ。
     @State
     private var showingEditMemo = false
@@ -34,12 +31,9 @@ struct BrowseMemoView: View {
     var path = NavigationPath()
 
     /// イニシャライザ。
-    /// - Parameters:
-    ///   - memo: 表示するメモ
-    ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
-    init(memo: Memo, openEditMemoView: Bool = false) {
+    /// - Parameter memo: 表示するメモ
+    init(memo: Memo) {
         self.memo = memo
-        _openEditMemoView = State(initialValue: openEditMemoView)
     }
 
     var body: some View {
@@ -75,12 +69,6 @@ struct BrowseMemoView: View {
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .onAppear {
-                if openEditMemoView {
-                    showingEditMemo = true
-                    openEditMemoView = false
-                }
-            }
             .fullScreenCover(isPresented: $showingEditMemo) {
                 EditMemoView(memo: memo)
             }

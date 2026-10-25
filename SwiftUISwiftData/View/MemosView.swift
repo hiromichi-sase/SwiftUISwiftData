@@ -40,11 +40,8 @@ struct MemosView: View {
     @State
     private var scrollViewProxy: ScrollViewProxy?
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
-    @State
-    private var showingAddMemo = false
-    /// メモの内容を編集するビューを開くかどうかのフラグ。
     @Binding
-    private var openEditMemoView: Bool
+    private var showingAddMemo: Bool
     /// トーストメッセージの状態変数。
     @State
     var toastMessage = ""
@@ -67,11 +64,11 @@ struct MemosView: View {
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
-        openEditMemoView: Binding<Bool>,
+        showingAddMemo: Binding<Bool>,
     ) {
         _editMode = editMode
         _selectedMemo = selectedMemo
-        _openEditMemoView = openEditMemoView
+        _showingAddMemo = showingAddMemo
     }
 
     var body: some View {
@@ -120,11 +117,6 @@ struct MemosView: View {
                     isFiltering = false
                     keywordsForFiltering = ""
                     tagsForFiltering = []
-                }
-                .onChange(of: openEditMemoView) { _, isOpen in
-                    guard isOpen else { return }
-                    showingAddMemo = true
-                    openEditMemoView = false
                 }
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
