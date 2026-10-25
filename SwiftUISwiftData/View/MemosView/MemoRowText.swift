@@ -14,9 +14,17 @@ struct MemoRowText: View {
     let titleLineSpacing: Float
     var keywordsForFiltering: [String] = []
 
+    private var isTitleEmpty: Bool {
+        memo.title.isEmpty
+    }
+
+    private var displayTitle: AttributedString {
+        isTitleEmpty ? AttributedString(CommonString.noTitle) : attributedTitle
+    }
+
     var body: some View {
-        Text(memo.title.isEmpty ? AttributedString(CommonString.noTitle) : attributedTitle)
-            .foregroundStyle(memo.title.isEmpty ? .secondary : .primary)
+        Text(displayTitle)
+            .foregroundStyle(isTitleEmpty ? .secondary : .primary)
             .lineLimit(titleLineLimit)
             .font(.system(size: CGFloat(titleFontSize)))
             .lineSpacing(CGFloat(titleLineSpacing))
