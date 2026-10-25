@@ -8,18 +8,25 @@
 import SwiftUI
 
 extension MemosView {
+    private var memosToDelete: [Memo] {
+        if editMode.isEditing {
+            return selectedMemos
+        }
+
+        guard let memoToDelete else {
+            return []
+        }
+        return [memoToDelete]
+    }
+
     var deleteAlert: Alert {
         .init(
             title: Text("Delete \(editMode.isEditing ? "selected memos" : "this memo")?"),
             primaryButton: .destructive(Text("Delete")) {
-                if editMode.isEditing {
-                    guard !selectedMemos.isEmpty else { return }
-                    deleteMemos(selectedMemos)
+                guard !memosToDelete.isEmpty else {
+                    return
                 }
-                else {
-                    guard let memoToDelete = memoToDelete else { return }
-                    deleteMemos([memoToDelete])
-                }
+                deleteMemos(memosToDelete)
             },
             secondaryButton: .cancel()
         )
