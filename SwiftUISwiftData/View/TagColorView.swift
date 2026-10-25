@@ -13,10 +13,18 @@ struct TagColorView: View {
     var colorString: String
     var showColorString: Bool
 
+    private var tagColor: Color {
+        colorString.color()
+    }
+
+    private var textColor: Color {
+        tagColor.appropriateTextColor
+    }
+
     var body: some View {
-        if colorString.color().needsBorder(colorScheme: colorScheme) {
+        if tagColor.needsBorder(colorScheme: colorScheme) {
             commonView()
-                .border(colorString.color().appropriateTextColor)
+                .border(textColor)
         }
         else {
             commonView()
@@ -26,8 +34,8 @@ struct TagColorView: View {
     private func commonView() -> some View {
         Text(showColorString ? colorString : "")
             .frame(width: showColorString ? 90 : 50)
-            .foregroundStyle(colorString.color().appropriateTextColor)
-            .background(colorString.color())
+            .foregroundStyle(textColor)
+            .background(tagColor)
     }
 }
 
