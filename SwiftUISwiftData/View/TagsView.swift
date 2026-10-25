@@ -39,9 +39,6 @@ struct TagsView: View {
     /// 新しいタグを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
     private var showingAddTag = false
-    /// タグの内容を編集するビューを開くかどうかのフラグ。
-    @Binding
-    private var openEditTagView: Bool
     /// トーストメッセージの状態変数。
     @State
     var toastMessage = ""
@@ -54,11 +51,9 @@ struct TagsView: View {
     init(
         editMode: Binding<EditMode>,
         selectedTag: Binding<Tag?>,
-        openEditTagView: Binding<Bool>,
     ) {
         _editMode = editMode
         _selectedTag = selectedTag
-        _openEditTagView = openEditTagView
     }
 
     var body: some View {
@@ -90,7 +85,6 @@ struct TagsView: View {
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
                     showingAddTag = false
-                    openEditTagView = false
                     selectedTag = nil
                     selection.removeAll()
                     editMode = .inactive
@@ -157,9 +151,6 @@ struct TagsView: View {
             }
             .onAppear {
                 scrollViewProxy = proxy
-            }
-            .onDisappear {
-                openEditTagView = false
             }
         }
     }

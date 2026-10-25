@@ -30,9 +30,6 @@ struct ContentView: View {
     /// メモの内容を編集するビューを開くかどうかのフラグ。
     @State
     var openEditMemoView: Bool = false
-    /// タグの内容を編集するビューを開くかどうかのフラグ。
-    @State
-    var openEditTagView: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -49,7 +46,6 @@ struct ContentView: View {
                     TagsView(
                         editMode: $tagsViewEditMode,
                         selectedTag: $selectedTag,
-                        openEditTagView: $openEditTagView
                     )
                 case .settingsView:
                     SettingsView()
@@ -78,7 +74,7 @@ struct ContentView: View {
                     }
                     else {
                         if let selectedTag {
-                            BrowseTagView(tag: selectedTag, openEditTagView: openEditTagView)
+                            BrowseTagView(tag: selectedTag)
                                 .modelContext(viewModel.modelContext)
                                 .id(selectedTag.id)
                         }
@@ -140,7 +136,6 @@ extension ContentView {
     func clearTagSelectionState() {
         tagsViewEditMode = .inactive
         selectedTag = nil
-        openEditTagView = false
     }
 }
 

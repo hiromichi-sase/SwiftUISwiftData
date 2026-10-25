@@ -18,9 +18,6 @@ struct BrowseTagView: View {
     /// 表示するメモ。
     @State
     private var tag: Tag
-    /// 編集画面を開くかどうかのフラグ。
-    @State
-    private var openEditTagView = false
     /// 編集画面を表示するかどうかのフラグ。
     @State
     private var showingEditTag = false
@@ -29,12 +26,9 @@ struct BrowseTagView: View {
     var path = NavigationPath()
 
     /// イニシャライザ。
-    /// - Parameters:
-    ///   - tag: 表示するタグ
-    ///   - openEditTagView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
-    init(tag: Tag, openEditTagView: Bool = false) {
+    /// - Parameter tag: 表示するタグ
+    init(tag: Tag) {
         self.tag = tag
-        _openEditTagView = State(initialValue: openEditTagView)
     }
 
     var body: some View {
@@ -56,9 +50,6 @@ struct BrowseTagView: View {
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .onAppear {
-                openEditIfNeeded()
-            }
             .sheet(isPresented: $showingEditTag) {
                 EditTagView(tag: tag)
                     .interactiveDismissDisabled(true)
@@ -71,15 +62,6 @@ struct BrowseTagView: View {
                 }
             }
         }
-    }
-
-    private func openEditIfNeeded() {
-        guard openEditTagView else {
-            return
-        }
-
-        showingEditTag = true
-        openEditTagView = false
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
