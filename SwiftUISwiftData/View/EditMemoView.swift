@@ -203,18 +203,10 @@ struct EditMemoView: View {
             }
         }
         .disabled(showTitleView)
-        if tags.isEmpty {
-            Button("Tag", systemImage: "tag") {
-                showSelectTagView = true
-            }
-            .disabled(showTitleView || viewModel.tags.isEmpty)
+        Button("Tag", systemImage: tags.isEmpty ? "tag" : "tag.fill") {
+            showSelectTagView = true
         }
-        else {
-            Button("Tag", systemImage: "tag.fill") {
-                showSelectTagView = true
-            }
-            .disabled(showTitleView || viewModel.tags.isEmpty)
-        }
+        .disabled(showTitleView || viewModel.tags.isEmpty)
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
@@ -230,43 +222,56 @@ struct EditMemoView: View {
         }
         .disabled(showTitleView)
         .keyboardShortcut("t", modifiers: [.command])
+
         Button("Save", systemImage: "checkmark.circle.fill") {
-            if let memo {
-                let oldTitle = memo.title
-                let oldContent = memo.content
-                let oldTags = memo.tags
-
-                do {
-                    try viewModel.update(memo, title: title, content: content, tags: tags)
-                    toastMessage = "Successfully saved!"
-                }
-                catch {
-                    self.error = error
-                    currentAlert = .error
-
-                    memo.title = oldTitle
-                    memo.content = oldContent
-                    memo.tags = oldTags
-                    print("Failed to update memo: \(error)")
-                }
-            }
-            else {
-                let memo = Memo(title: title, content: content, tags: tags)
-
-                do {
-                    try viewModel.add(memo)
-                    self.memo = memo
-                    toastMessage = "Successfully saved!"
-                }
-                catch {
-                    self.error = error
-                    currentAlert = .error
-                    print("Failed to add memo: \(error)")
-                }
-            }
+            saveMemo()
         }
         .disabled(!memoUpdated || showTitleView)
         .keyboardShortcut("s", modifiers: [.command])
+    }
+
+    private func saveMemo() {
+        if let memo {
+            updateMemo(memo)
+        }
+        else {
+            addMemo()
+        }
+    }
+
+    private func updateMemo(_ memo: Memo) {
+        let oldTitle = memo.title
+        let oldContent = memo.content
+        let oldTags = memo.tags
+
+        do {
+            try viewModel.update(memo, title: title, content: content, tags: tags)
+            toastMessage = "Successfully saved!"
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+
+            memo.title = oldTitle
+            memo.content = oldContent
+            memo.tags = oldTags
+            print("Failed to update memo: \(error)")
+        }
+    }
+
+    private func addMemo() {
+        let memo = Memo(title: title, content: content, tags: tags)
+
+        do {
+            try viewModel.add(memo)
+            self.memo = memo
+            toastMessage = "Successfully saved!"
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+            print("Failed to add memo: \(error)")
+        }
     }
 
     /// メモが更新されたかどうかを判定するプロパティ。
