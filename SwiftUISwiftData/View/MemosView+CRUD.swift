@@ -28,9 +28,7 @@ extension MemosView {
         }
         catch {
             memoDuplicateSource = nil
-            self.error = error
-            currentAlert = .error
-            print("Failed to duplicate memo: \(memo)")
+            handleError(error, message: "Failed to duplicate memo: \(memo)")
         }
     }
 
@@ -50,9 +48,7 @@ extension MemosView {
             toastMessage = "Successfully deleted!"
         }
         catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to delete memos: \(error)")
+            handleError(error, message: "Failed to delete memos: \(error)")
         }
     }
 
@@ -70,9 +66,7 @@ extension MemosView {
                 try viewModel.moveMemo(from: indices, to: destination)
             }
             catch {
-                self.error = error
-                currentAlert = .error
-                print("Failed to move memo: \(error)")
+                handleError(error, message: "Failed to move memo: \(error)")
             }
         }
     }
@@ -83,9 +77,7 @@ extension MemosView {
             try viewModel.protect(memos)
         }
         catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to protect memos: \(error)")
+            handleError(error, message: "Failed to protect memos: \(error)")
         }
     }
 
@@ -95,9 +87,7 @@ extension MemosView {
             try viewModel.unprotect(memos)
         }
         catch {
-            self.error = error
-            currentAlert = .error
-            print("Failed to unprotect memos: \(error)")
+            handleError(error, message: "Failed to unprotect memos: \(error)")
         }
     }
 
@@ -110,5 +100,11 @@ extension MemosView {
             throw error
         }
         return result.success
+    }
+
+    private func handleError(_ error: any Error, message: String) {
+        self.error = error
+        currentAlert = .error
+        print(message)
     }
 }
