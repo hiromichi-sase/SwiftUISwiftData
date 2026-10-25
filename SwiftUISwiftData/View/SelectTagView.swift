@@ -58,22 +58,14 @@ struct SelectTagView: View {
                 .environment(\.editMode, $editMode)
             }
             .onAppear {
-                if selection.isEmpty {
-                    selection = Set(selectedTags.map { $0.id })
-                }
-                isPresentedModally = _isPresented.wrappedValue
+                setupOnAppear()
             }
         }
     }
 
     private func activeRow(for tag: Tag) -> some View {
         Button {
-            if selection.contains(tag.id) {
-                selection.remove(tag.id)
-            }
-            else {
-                selection.insert(tag.id)
-            }
+            toggleSelection(for: tag.id)
         } label: {
             TagRow(
                 tag: tag,
@@ -88,6 +80,22 @@ struct SelectTagView: View {
         .listRowInsets(.init())
         .moveDisabled(false)
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
+    }
+
+    private func setupOnAppear() {
+        if selection.isEmpty {
+            selection = Set(selectedTags.map { $0.id })
+        }
+        isPresentedModally = _isPresented.wrappedValue
+    }
+
+    private func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
     }
 
     /// ツールバーの左側のアイテムを定義するビュー。
