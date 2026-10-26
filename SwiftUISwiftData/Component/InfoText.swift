@@ -10,13 +10,9 @@ import SwiftUI
 struct InfoText {
     static func countView(content: String, textSelection: TextSelection? = nil) -> some View {
         HStack(spacing: .zero) {
-            Text("Content: \(content.count.nounText(for: .character))")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
+            info("Content: \(content.count.nounText(for: .character))")
             if !content.isEmpty {
-                Text(", \(content.components(separatedBy: .newlines).count.nounText(for: .line))")
-                    .font(.system(size: 8.0))
-                    .multilineTextAlignment(.leading)
+                info(", \(content.components(separatedBy: .newlines).count.nounText(for: .line))")
             }
             if let textSelection,
                 let selection = selectedText(text: content, selection: textSelection),
@@ -24,12 +20,8 @@ struct InfoText {
             {
                 Spacer()
                     .frame(width: 8.0)
-                Text("Selection: \(selection.count.nounText(for: .character))")
-                    .font(.system(size: 8.0))
-                    .multilineTextAlignment(.leading)
-                Text(", \(selection.components(separatedBy: .newlines).count.nounText(for: .line))")
-                    .font(.system(size: 8.0))
-                    .multilineTextAlignment(.leading)
+                info("Selection: \(selection.count.nounText(for: .character))")
+                info(", \(selection.components(separatedBy: .newlines).count.nounText(for: .line))")
             }
             Spacer()
         }
@@ -48,31 +40,27 @@ struct InfoText {
     }
 
     static func dateView(for memo: Memo) -> some View {
+        dateView(createdAt: memo.createdAt, updatedAt: memo.updatedAt)
+    }
+
+    static func dateView(for tag: Tag) -> some View {
+        dateView(createdAt: tag.createdAt, updatedAt: tag.updatedAt)
+    }
+
+    private static func dateView(createdAt: Date, updatedAt: Date) -> some View {
         HStack(spacing: .zero) {
-            Text("Created at: \(memo.createdAt.dateString)")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
+            info("Created at: \(createdAt.dateString)")
             Spacer()
                 .frame(width: 8.0)
-            Text("Updated at: \(memo.updatedAt.dateString)")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
+            info("Updated at: \(updatedAt.dateString)")
             Spacer()
         }
     }
 
-    static func dateView(for tag: Tag) -> some View {
-        HStack(spacing: .zero) {
-            Text("Created at: \(tag.createdAt.dateString)")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
-            Spacer()
-                .frame(width: 8.0)
-            Text("Updated at: \(tag.updatedAt.dateString)")
-                .font(.system(size: 8.0))
-                .multilineTextAlignment(.leading)
-            Spacer()
-        }
+    private static func info(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 8.0))
+            .multilineTextAlignment(.leading)
     }
 }
 
