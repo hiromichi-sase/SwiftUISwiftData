@@ -21,17 +21,24 @@ struct EditMemoViewModelTests {
         let context = dependency.memoRepository.modelContext
         let addedTitle = "Added Title"
         let addedContent = "Added Content"
-        let addedTag = Tag(title: "Added Tag", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
+        let addedTag = SwiftUISwiftData.Tag(
+            title: "Added Tag",
+            color: "#000000",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero
+        )
         context.insert(addedTag)
 
         let memo = Memo(title: addedTitle, content: addedContent, tags: [addedTag])
         try dependency.testTarget.add(memo)
 
-        guard let newMemo = try dependency.memoRepository.memos().first else {
+        let memos = try dependency.memoRepository.memos()
+        guard let newMemo = memos.first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
-        #expect(try dependency.memoRepository.memos().count == 1)
+        #expect(memos.count == 1)
         #expect(newMemo.title == addedTitle)
         #expect(newMemo.content == addedContent)
         #expect(newMemo.tags == [addedTag])
@@ -51,12 +58,19 @@ struct EditMemoViewModelTests {
 
         let updatedTitle = "Updated Title"
         let updatedContent = "Updated Content"
-        let updatedTag = Tag(title: "Updated Tag 1", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
+        let updatedTag = SwiftUISwiftData.Tag(
+            title: "Updated Tag 1",
+            color: "#000000",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero
+        )
         context.insert(updatedTag)
 
         try dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent, tags: [updatedTag])
 
-        guard let newMemo = try dependency.memoRepository.memos().first else {
+        let memos = try dependency.memoRepository.memos()
+        guard let newMemo = memos.first else {
             throw TestError(message: "Memo was not added to the memoRepository.")
         }
 
