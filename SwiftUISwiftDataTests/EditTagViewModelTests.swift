@@ -17,16 +17,18 @@ struct EditTagViewModelTests {
     func addTag() async throws {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
+
         let addedTitle = "Added Title"
         let addedColor = "#000000"
-        let tag = Tag(title: addedTitle, color: addedColor)
+        let tag = SwiftUISwiftData.Tag(title: addedTitle, color: addedColor)
         try dependency.testTarget.add(tag)
 
-        guard let newTag = try dependency.tagRepository.tags().first else {
+        let tags = try dependency.tagRepository.tags()
+        guard let newTag = tags.first else {
             throw TestError(message: "Tag was not added to the tagRepository.")
         }
 
-        #expect(try dependency.tagRepository.tags().count == 1)
+        #expect(tags.count == 1)
         #expect(newTag.title == addedTitle)
         #expect(newTag.color == addedColor)
         #expect(newTag.createdAt == newTag.updatedAt)
@@ -38,14 +40,16 @@ struct EditTagViewModelTests {
     func updateTag() async throws {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
-        let tag = Tag(title: "Test Title", color: "Test Tag")
+
+        let tag = SwiftUISwiftData.Tag(title: "Test Title", color: "Test Tag")
         try dependency.testTarget.add(tag)
 
         let updatedTitle = "Updated Title"
         let updatedColor = "#000000"
         try dependency.testTarget.update(tag, title: updatedTitle, color: updatedColor)
 
-        guard let newTag = try dependency.tagRepository.tags().first else {
+        let tags = try dependency.tagRepository.tags()
+        guard let newTag = tags.first else {
             throw TestError(message: "Tag was not added to the tagRepository.")
         }
 
