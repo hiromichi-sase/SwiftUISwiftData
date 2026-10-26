@@ -18,15 +18,16 @@ struct MemosViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let context = dependency.memoRepository.modelContext
         let tag1 = Tag(title: "Test Tag 1", color: "#000000")
-        context.insert(tag1)
-
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1])
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1])
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            tags: [tag1],
+            memos: [
+                Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1]),
+                Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1]),
+            ]
+        )
 
         let testTarget = dependency.makeTestTarget()
         let filteredMemos = testTarget.filteredMemos(by: "Title 1", and: [tag1])
@@ -39,15 +40,16 @@ struct MemosViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let context = dependency.memoRepository.modelContext
         let tag1 = Tag(title: "Test Tag 1", color: "#000000")
-        context.insert(tag1)
-
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1])
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1])
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            tags: [tag1],
+            memos: [
+                Memo(title: "Test Title 1", content: "Test Memo 1", order: 1, tags: [tag1]),
+                Memo(title: "Test Title 2", content: "Test Memo 2", order: 2, tags: [tag1]),
+            ]
+        )
 
         let testTarget = dependency.makeTestTarget()
         let filteredMemos = testTarget.filteredMemos(by: "", and: [])
@@ -62,9 +64,11 @@ struct MemosViewModelTests {
 
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
 
         let testTarget = dependency.makeTestTarget()
         let countBeforeDuplication = try dependency.memoRepository.memos().count
@@ -92,19 +96,17 @@ struct MemosViewModelTests {
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
-        try dependency.memoRepository.add(memo3)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2, memo3]
+        )
 
         let testTarget = dependency.makeTestTarget()
         try testTarget.delete([memo2])
 
         let memos = try dependency.memoRepository.memos()
-        if memos.count > 2 {
-            throw TestError(message: "Expected only 2 memos after deletion, but found \(memos.count).")
-        }
-
+        #expect(memos.count == 2)
         #expect(memos[0].order == 1)
         #expect(memos[0].title == "Test Title 1")
         #expect(memos[0].content == "Test Memo 1")
@@ -122,19 +124,17 @@ struct MemosViewModelTests {
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", order: 1)
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", order: 2)
         let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", order: 3)
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
-        try dependency.memoRepository.add(memo3)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2, memo3]
+        )
 
         let testTarget = dependency.makeTestTarget()
         try testTarget.moveMemo(from: [2], to: 1)
 
         let memos = try dependency.memoRepository.memos()
-        if memos.count != 3 {
-            throw TestError(message: "Expected 3 memos after moving, but found \(memos.count).")
-        }
-
+        #expect(memos.count == 3)
         #expect(memos[0].order == 1)
         #expect(memos[0].title == "Test Title 1")
         #expect(memos[0].content == "Test Memo 1")
@@ -152,18 +152,21 @@ struct MemosViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: false)
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: false)
-        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: false)
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
-        try dependency.memoRepository.add(memo3)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Test Title 1", content: "Test Memo 1", protected: false),
+                Memo(title: "Test Title 2", content: "Test Memo 2", protected: false),
+                Memo(title: "Test Title 3", content: "Test Memo 3", protected: false),
+            ]
+        )
 
         let testTarget = dependency.makeTestTarget()
-        try testTarget.protect([memo1])
-        try testTarget.protect([memo2])
-        try testTarget.protect([memo3])
+        let memosBefore = try dependency.memoRepository.memos()
+        try testTarget.protect([memosBefore[0]])
+        try testTarget.protect([memosBefore[1]])
+        try testTarget.protect([memosBefore[2]])
 
         let memos = try dependency.memoRepository.memos()
         for memo in memos {
@@ -177,18 +180,21 @@ struct MemosViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1", protected: true)
-        let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2", protected: true)
-        let memo3 = Memo(title: "Test Title 3", content: "Test Memo 3", protected: true)
-
-        try dependency.memoRepository.add(memo1)
-        try dependency.memoRepository.add(memo2)
-        try dependency.memoRepository.add(memo3)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Test Title 1", content: "Test Memo 1", protected: true),
+                Memo(title: "Test Title 2", content: "Test Memo 2", protected: true),
+                Memo(title: "Test Title 3", content: "Test Memo 3", protected: true),
+            ]
+        )
 
         let testTarget = dependency.makeTestTarget()
-        try testTarget.unprotect([memo1])
-        try testTarget.unprotect([memo2])
-        try testTarget.unprotect([memo3])
+        let memosBefore = try dependency.memoRepository.memos()
+        try testTarget.unprotect([memosBefore[0]])
+        try testTarget.unprotect([memosBefore[1]])
+        try testTarget.unprotect([memosBefore[2]])
 
         let memos = try dependency.memoRepository.memos()
         for memo in memos {
@@ -242,6 +248,21 @@ struct MemosViewModelTests {
         dependency.userDefaultsRepository.setShowInfo(hasLink)
         let testTarget = dependency.makeTestTarget()
         #expect(testTarget.getShowInfo() == hasLink)
+    }
+
+    @MainActor
+    private func seed(
+        memoRepository: MemoRepository,
+        context: ModelContext,
+        tags: [SwiftUISwiftData.Tag] = [],
+        memos: [Memo]
+    ) throws {
+        for tag in tags {
+            context.insert(tag)
+        }
+        for memo in memos {
+            try memoRepository.add(memo)
+        }
     }
 }
 
