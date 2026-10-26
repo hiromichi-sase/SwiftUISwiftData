@@ -17,9 +17,10 @@ struct TagsViewModelTests {
     func deleteTags() async throws {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
-        let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
-        let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
-        let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
+
+        let tag1 = SwiftUISwiftData.Tag(title: "Test Title 1", color: "#FF0000", order: 1)
+        let tag2 = SwiftUISwiftData.Tag(title: "Test Title 2", color: "#00FF00", order: 2)
+        let tag3 = SwiftUISwiftData.Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
         try dependency.tagRepository.add(tag1)
         try dependency.tagRepository.add(tag2)
@@ -27,9 +28,7 @@ struct TagsViewModelTests {
         try dependency.testTarget.delete([tag2])
 
         let tags = try dependency.tagRepository.tags()
-        if tags.count > 2 {
-            throw TestError(message: "Expected only 2 tags after deletion, but found \(tags.count).")
-        }
+        #expect(tags.count == 2)
 
         #expect(tags[0].order == 1)
         #expect(tags[0].title == "Test Title 1")
@@ -45,9 +44,10 @@ struct TagsViewModelTests {
     func moveTag() async throws {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
-        let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
-        let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
-        let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
+
+        let tag1 = SwiftUISwiftData.Tag(title: "Test Title 1", color: "#FF0000", order: 1)
+        let tag2 = SwiftUISwiftData.Tag(title: "Test Title 2", color: "#00FF00", order: 2)
+        let tag3 = SwiftUISwiftData.Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
         try dependency.tagRepository.add(tag1)
         try dependency.tagRepository.add(tag2)
@@ -55,9 +55,7 @@ struct TagsViewModelTests {
         try dependency.testTarget.moveTag(from: [2], to: 1)
 
         let tags = try dependency.tagRepository.tags()
-        if tags.count != 3 {
-            throw TestError(message: "Expected 3 tags after moving, but found \(tags.count).")
-        }
+        #expect(tags.count == 3)
 
         #expect(tags[0].order == 1)
         #expect(tags[0].title == "Test Title 1")
