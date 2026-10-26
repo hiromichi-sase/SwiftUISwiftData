@@ -254,7 +254,7 @@ struct MemosViewModelTests {
     private func seed(
         memoRepository: MemoRepository,
         context: ModelContext,
-        tags: [SwiftUISwiftData.Tag] = [],
+        tags: [Tag] = [],
         memos: [Memo]
     ) throws {
         for tag in tags {

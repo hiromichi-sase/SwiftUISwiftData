@@ -20,7 +20,7 @@ struct EditTagViewModelTests {
 
         let addedTitle = "Added Title"
         let addedColor = "#000000"
-        let tag = SwiftUISwiftData.Tag(title: addedTitle, color: addedColor)
+        let tag = Tag(title: addedTitle, color: addedColor)
         try dependency.testTarget.add(tag)
 
         let tags = try dependency.tagRepository.tags()
@@ -41,7 +41,7 @@ struct EditTagViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let tag = SwiftUISwiftData.Tag(title: "Test Title", color: "Test Tag")
+        let tag = Tag(title: "Test Title", color: "Test Tag")
         try dependency.testTarget.add(tag)
 
         let updatedTitle = "Updated Title"

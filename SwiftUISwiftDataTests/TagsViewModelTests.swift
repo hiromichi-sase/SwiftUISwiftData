@@ -18,9 +18,9 @@ struct TagsViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let tag1 = SwiftUISwiftData.Tag(title: "Test Title 1", color: "#FF0000", order: 1)
-        let tag2 = SwiftUISwiftData.Tag(title: "Test Title 2", color: "#00FF00", order: 2)
-        let tag3 = SwiftUISwiftData.Tag(title: "Test Title 3", color: "#0000FF", order: 3)
+        let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
+        let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
+        let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
         try dependency.tagRepository.add(tag1)
         try dependency.tagRepository.add(tag2)
@@ -45,9 +45,9 @@ struct TagsViewModelTests {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        let tag1 = SwiftUISwiftData.Tag(title: "Test Title 1", color: "#FF0000", order: 1)
-        let tag2 = SwiftUISwiftData.Tag(title: "Test Title 2", color: "#00FF00", order: 2)
-        let tag3 = SwiftUISwiftData.Tag(title: "Test Title 3", color: "#0000FF", order: 3)
+        let tag1 = Tag(title: "Test Title 1", color: "#FF0000", order: 1)
+        let tag2 = Tag(title: "Test Title 2", color: "#00FF00", order: 2)
+        let tag3 = Tag(title: "Test Title 3", color: "#0000FF", order: 3)
 
         try dependency.tagRepository.add(tag1)
         try dependency.tagRepository.add(tag2)

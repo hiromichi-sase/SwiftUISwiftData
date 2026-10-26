@@ -21,7 +21,7 @@ struct EditMemoViewModelTests {
         let context = dependency.memoRepository.modelContext
         let addedTitle = "Added Title"
         let addedContent = "Added Content"
-        let addedTag = SwiftUISwiftData.Tag(
+        let addedTag = Tag(
             title: "Added Tag",
             color: "#000000",
             createdAt: Date(),
@@ -58,7 +58,7 @@ struct EditMemoViewModelTests {
 
         let updatedTitle = "Updated Title"
         let updatedContent = "Updated Content"
-        let updatedTag = SwiftUISwiftData.Tag(
+        let updatedTag = Tag(
             title: "Updated Tag 1",
             color: "#000000",
             createdAt: Date(),
