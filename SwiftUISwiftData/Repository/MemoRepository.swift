@@ -70,7 +70,7 @@ final class MemoRepository {
     func moveMemo(from source: [Int], to destination: Int) throws {
         try modelContext.transaction {
             var ordered = try memos()
-            ordered.move(from: source, to: destination)
+            ordered.move(fromOffsets: source, toOffset: destination)
             for (index, memo) in ordered.enumerated() {
                 memo.order = index + 1
             }

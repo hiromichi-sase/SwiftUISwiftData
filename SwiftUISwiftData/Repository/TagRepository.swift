@@ -49,7 +49,7 @@ final class TagRepository {
     func moveTag(from source: [Int], to destination: Int) throws {
         try modelContext.transaction {
             var ordered = try tags()
-            ordered.move(from: source, to: destination)
+            ordered.move(fromOffsets: source, toOffset: destination)
             assignOrder(for: ordered)
         }
     }

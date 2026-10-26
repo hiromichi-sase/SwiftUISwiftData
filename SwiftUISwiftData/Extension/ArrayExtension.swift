@@ -8,9 +8,9 @@
 import SwiftUI
 
 extension Array {
-    mutating func move(from: [Int], to: Int) {
-        let source = IndexSet(from)
-        move(fromOffsets: source, toOffset: to)
+    mutating func move(fromOffsets: [Int], toOffset: Int) {
+        let source = IndexSet(fromOffsets)
+        move(fromOffsets: source, toOffset: toOffset)
     }
 }
 
