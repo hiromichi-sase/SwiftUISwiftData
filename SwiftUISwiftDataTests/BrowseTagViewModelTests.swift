@@ -16,10 +16,10 @@ struct BrowseTagViewModelTests {
     func getShowInfo() {
         let hasLink = false
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setShowInfo(hasLink)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setShowInfo(hasLink)
         #expect(dependency.testTarget.getShowInfo() == hasLink)
-        dependency.removeUserDefaults()
     }
 }
 
@@ -28,22 +28,20 @@ extension BrowseTagViewModelTests {
         let testTarget: BrowseTagViewModel
         private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let suiteName = UUID().uuidString
 
         @MainActor
         init() {
-            guard let userDefaults = UserDefaults(suiteName: BrowseTagViewModelTests.Dependency.suiteName) else {
+            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
                 fatalError("Could not create UserDefaults")
             }
             self.userDefaults = userDefaults
             userDefaultsRepository = .init(userDefaults: userDefaults)
-            testTarget = .init(
-                userDefaultsRepository: userDefaultsRepository
-            )
+            testTarget = .init(userDefaultsRepository: userDefaultsRepository)
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: BrowseTagViewModelTests.Dependency.suiteName)
+            userDefaults.removePersistentDomain(forName: suiteName)
         }
     }
 }
