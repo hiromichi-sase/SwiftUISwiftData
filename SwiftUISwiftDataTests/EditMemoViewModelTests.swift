@@ -120,12 +120,15 @@ extension EditMemoViewModelTests {
         let testTarget: EditMemoViewModel
         let memoRepository: MemoRepository
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private let suiteName = UUID().uuidString
+        private let support: TestDependencySupport
 
         @MainActor
         init() throws {
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
             container = try ModelContainer(
                 for: Memo.self,
                 Tag.self,
@@ -135,12 +138,6 @@ extension EditMemoViewModelTests {
             memoRepository = .init(modelContext: container.mainContext)
             tagRepository = .init(modelContext: container.mainContext)
 
-            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
-
             testTarget = .init(
                 memoRepository: memoRepository,
                 tagRepository: tagRepository,
@@ -149,7 +146,7 @@ extension EditMemoViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: suiteName)
+            support.removeUserDefaults()
         }
     }
 }

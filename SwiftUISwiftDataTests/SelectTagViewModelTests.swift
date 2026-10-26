@@ -50,21 +50,18 @@ extension SelectTagViewModelTests {
     struct Dependency {
         let testTarget: SelectTagViewModel
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private let suiteName = UUID().uuidString
+        private let support: TestDependencySupport
 
         @MainActor
         init() {
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
             let modelContainerManager = ModelContainerManager(isStoredInMemoryOnly: true)
             tagRepository = TagRepository(modelContext: modelContainerManager.modelContainer.mainContext)
 
-            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
             testTarget = .init(
                 tagRepository: tagRepository,
                 userDefaultsRepository: userDefaultsRepository
@@ -72,7 +69,7 @@ extension SelectTagViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: suiteName)
+            support.removeUserDefaults()
         }
     }
 }

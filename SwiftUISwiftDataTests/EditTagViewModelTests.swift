@@ -86,12 +86,15 @@ extension EditTagViewModelTests {
         private let container: ModelContainer
         let testTarget: EditTagViewModel
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private let suiteName = UUID().uuidString
+        private let support: TestDependencySupport
 
         @MainActor
         init() throws {
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
             container = try ModelContainer(
                 for: Memo.self,
                 Tag.self,
@@ -99,11 +102,7 @@ extension EditTagViewModelTests {
             )
 
             tagRepository = .init(modelContext: container.mainContext)
-            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
+
             testTarget = .init(
                 tagRepository: tagRepository,
                 userDefaultsRepository: userDefaultsRepository
@@ -111,7 +110,7 @@ extension EditTagViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: suiteName)
+            support.removeUserDefaults()
         }
     }
 }

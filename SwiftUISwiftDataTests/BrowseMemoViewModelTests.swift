@@ -59,22 +59,19 @@ struct BrowseMemoViewModelTests {
 extension BrowseMemoViewModelTests {
     struct Dependency {
         let testTarget: BrowseMemoViewModel
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private let suiteName = UUID().uuidString
+        private let support: TestDependencySupport
 
         @MainActor
         init() {
-            guard let userDefaults = UserDefaults(suiteName: suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
             testTarget = .init(userDefaultsRepository: userDefaultsRepository)
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: suiteName)
+            support.removeUserDefaults()
         }
     }
 }
