@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct GlassMenu<Content: View>: View {
-    @State
-    var imageSystemName: String
+    let imageSystemName: String
     @ViewBuilder
     var content: () -> Content
 
