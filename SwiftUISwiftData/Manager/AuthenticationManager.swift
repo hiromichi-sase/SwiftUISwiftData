@@ -13,25 +13,27 @@ final class AuthenticationManager {
 
     private let context: LAContext = LAContext()
     private let policy: LAPolicy = .deviceOwnerAuthentication
-    private var authError: NSError?
     private let reason = "This app uses Touch ID / Face ID to secure your data."
 
     func authenticate() async throws -> (success: Bool, error: any Error?) {
         try await withCheckedThrowingContinuation { continuation in
-            if context.canEvaluatePolicy(policy, error: &authError) {
-                context.evaluatePolicy(policy, localizedReason: reason) { success, error in
-                    if success {
-                        DispatchQueue.main.async {
-                            continuation.resume(returning: (true, nil))
-                        }
-                    }
-                    else if let laError = error as? LAError {
-                        continuation.resume(returning: (false, laError))
-                    }
-                }
-            }
-            else {
+            var authError: NSError?
+
+            guard context.canEvaluatePolicy(policy, error: &authError) else {
                 continuation.resume(returning: (false, authError))
+                return
+            }
+
+            context.evaluatePolicy(policy, localizedReason: reason) { success, error in
+                if success {
+                    continuation.resume(returning: (true, nil))
+                }
+                else if let laError = error as? LAError {
+                    continuation.resume(returning: (false, laError))
+                }
+                else {
+                    continuation.resume(returning: (false, error))
+                }
             }
         }
     }
