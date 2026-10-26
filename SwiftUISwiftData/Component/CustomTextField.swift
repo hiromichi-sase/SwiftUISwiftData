@@ -12,11 +12,9 @@ struct CustomTextField: View {
     var text: String
     @FocusState
     var focus: Bool
-    @State
-    var placeholder: String
-    @State
-    var background: Color
-    @State
+
+    let placeholder: String
+    let background: Color
     var submitLabel: SubmitLabel = .done
     var submitButtonTapped: (() -> Void)?
 
@@ -47,7 +45,7 @@ struct CustomTextField: View {
     var focus: Bool
 
     CustomTextField(
-        text: Binding(projectedValue: .constant("a b c")),
+        text: .constant("a b c"),
         focus: _focus,
         placeholder: "Input Keywords",
         background: Color(uiColor: .secondarySystemBackground)
