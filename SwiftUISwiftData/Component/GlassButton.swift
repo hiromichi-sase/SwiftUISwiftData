@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct GlassButton: View {
-    @State
-    var imageSystemName: String
+    let imageSystemName: String
     var action: (() -> Void)?
 
     var body: some View {
