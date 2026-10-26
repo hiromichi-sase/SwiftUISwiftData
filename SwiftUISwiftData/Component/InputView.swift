@@ -12,11 +12,8 @@ struct InputView: View {
     var text: String
     @FocusState
     var focus: Bool
-    @State
-    var placeholder: String
-    @State
-    var textFieldBackground: Color
-    @State
+    let placeholder: String
+    let textFieldBackground: Color
     var submitLabel: SubmitLabel = .done
     var submitButtonTapped: (() -> Void)?
     var cancelButtonTapped: (() -> Void)?
@@ -45,7 +42,7 @@ struct InputView: View {
     var focus: Bool
 
     InputView(
-        text: Binding(projectedValue: .constant("a b c")),
+        text: .constant("a b c"),
         focus: _focus,
         placeholder: "Input Keywords",
         textFieldBackground: Color(uiColor: .secondarySystemBackground)
