@@ -77,6 +77,9 @@ struct TagsView: View {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
                     }
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        toolbarItemBottomBar
+                    }
                 }
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $showingAddTag) {
@@ -92,8 +95,6 @@ struct TagsView: View {
                     currentAlert = nil
                 }
                 .toast(message: $toastMessage)
-            bottomBar
-                .padding(.bottom, 8)
         }
     }
 
@@ -155,39 +156,6 @@ struct TagsView: View {
         }
     }
 
-    private var bottomBar: some View {
-        HStack {
-            Spacer()
-                .frame(width: 24)
-            if editMode.isEditing {
-                GlassButton(imageSystemName: "trash") {
-                    currentAlert = .delete
-                }
-                .disabled(selection.isEmpty)
-                Spacer()
-                GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
-                    Button("Deselect All", systemImage: "circle") {
-                        selection.removeAll()
-                    }
-                    .disabled(selection.isEmpty)
-                    Button("Select All", systemImage: "checkmark.circle") {
-                        selection = Set(viewModel.tags.map { $0.id })
-                    }
-                    .disabled(selection.count == viewModel.tags.count)
-                }
-            }
-            else {
-                Spacer()
-                GlassButton(imageSystemName: "plus.circle") {
-                    showingAddTag = true
-                }
-                .keyboardShortcut("n", modifiers: [.command])
-            }
-            Spacer()
-                .frame(width: 24)
-        }
-    }
-
     /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
     private var navigationTitle: String {
         var title = "Tags ("
@@ -218,6 +186,40 @@ struct TagsView: View {
                 }
                 .keyboardShortcut("e", modifiers: [.command])
             }
+        }
+    }
+
+    @ViewBuilder
+    private var toolbarItemBottomBar: some View {
+        if editMode.isEditing {
+            Button(
+                "trash",
+                systemImage: "trash"
+            ) {
+                currentAlert = .delete
+            }
+            .disabled(selection.isEmpty)
+            Spacer()
+            GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
+                Button("Deselect All", systemImage: "circle") {
+                    selection.removeAll()
+                }
+                .disabled(selection.isEmpty)
+                Button("Select All", systemImage: "checkmark.circle") {
+                    selection = Set(viewModel.tags.map { $0.id })
+                }
+                .disabled(selection.count == viewModel.tags.count)
+            }
+        }
+        else {
+            Spacer()
+            Button(
+                "Add",
+                systemImage: "plus.circle"
+            ) {
+                showingAddTag = true
+            }
+            .keyboardShortcut("n", modifiers: [.command])
         }
     }
 
