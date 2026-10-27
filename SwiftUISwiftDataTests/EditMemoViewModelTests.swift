@@ -34,11 +34,9 @@ struct EditMemoViewModelTests {
         try dependency.testTarget.add(memo)
 
         let memos = try dependency.memoRepository.memos()
-        guard let newMemo = memos.first else {
-            throw TestError(message: "Memo was not added to the memoRepository.")
-        }
-
         #expect(memos.count == 1)
+        let newMemo = try #require(memos.first)
+
         #expect(newMemo.title == addedTitle)
         #expect(newMemo.content == addedContent)
         #expect(newMemo.tags == [addedTag])
@@ -70,9 +68,8 @@ struct EditMemoViewModelTests {
         try dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent, tags: [updatedTag])
 
         let memos = try dependency.memoRepository.memos()
-        guard let newMemo = memos.first else {
-            throw TestError(message: "Memo was not added to the memoRepository.")
-        }
+        #expect(memos.count == 1)
+        let newMemo = try #require(memos.first)
 
         #expect(newMemo.title == updatedTitle)
         #expect(newMemo.content == updatedContent)

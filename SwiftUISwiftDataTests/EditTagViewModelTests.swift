@@ -24,11 +24,9 @@ struct EditTagViewModelTests {
         try dependency.testTarget.add(tag)
 
         let tags = try dependency.tagRepository.tags()
-        guard let newTag = tags.first else {
-            throw TestError(message: "Tag was not added to the tagRepository.")
-        }
-
         #expect(tags.count == 1)
+        let newTag = try #require(tags.first)
+
         #expect(newTag.title == addedTitle)
         #expect(newTag.color == addedColor)
         #expect(newTag.createdAt == newTag.updatedAt)
@@ -49,9 +47,8 @@ struct EditTagViewModelTests {
         try dependency.testTarget.update(tag, title: updatedTitle, color: updatedColor)
 
         let tags = try dependency.tagRepository.tags()
-        guard let newTag = tags.first else {
-            throw TestError(message: "Tag was not added to the tagRepository.")
-        }
+        #expect(tags.count == 1)
+        let newTag = try #require(tags.first)
 
         #expect(newTag.title == updatedTitle)
         #expect(newTag.color == updatedColor)
