@@ -10,6 +10,52 @@ import SwiftUI
 
 /// 設定画面を表示するビュー。
 struct SettingsView: View {
+    private struct SettingsSnapshot: Equatable {
+        var hasLink: Bool
+        var contentFontSize: Float
+        var contentLineSpacing: Float
+        var titleLineLimit: Int
+        var titleFontSize: Float
+        var titleLineSpacing: Float
+        var showInfo: Bool
+        var divideKeywordsBySpace: Bool
+        var defaultTagColor: String
+
+        init(
+            hasLink: Bool,
+            contentFontSize: Float,
+            contentLineSpacing: Float,
+            titleLineLimit: Int,
+            titleFontSize: Float,
+            titleLineSpacing: Float,
+            showInfo: Bool,
+            divideKeywordsBySpace: Bool,
+            defaultTagColor: String
+        ) {
+            self.hasLink = hasLink
+            self.contentFontSize = contentFontSize
+            self.contentLineSpacing = contentLineSpacing
+            self.titleLineLimit = titleLineLimit
+            self.titleFontSize = titleFontSize
+            self.titleLineSpacing = titleLineSpacing
+            self.showInfo = showInfo
+            self.divideKeywordsBySpace = divideKeywordsBySpace
+            self.defaultTagColor = defaultTagColor
+        }
+
+        init(viewModel: SettingsViewModel) {
+            hasLink = viewModel.getHasLink()
+            contentFontSize = viewModel.getContentFontSize()
+            contentLineSpacing = viewModel.getContentLineSpacing()
+            titleLineLimit = viewModel.getTitleLineLimit()
+            titleFontSize = viewModel.getTitleFontSize()
+            titleLineSpacing = viewModel.getTitleLineSpacing()
+            showInfo = viewModel.getShowInfo()
+            divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
+            defaultTagColor = viewModel.getDefaultTagColor()
+        }
+    }
+
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = SettingsViewModel(
@@ -66,25 +112,26 @@ struct SettingsView: View {
     private var dismiss
 
     init() {
-        _hasLink = State(initialValue: viewModel.getHasLink())
-        _contentFontSize = State(initialValue: viewModel.getContentFontSize())
-        _contentLineSpacing = State(initialValue: viewModel.getContentLineSpacing())
-        _titleLineLimit = State(initialValue: viewModel.getTitleLineLimit())
-        _titleFontSize = State(initialValue: viewModel.getTitleFontSize())
-        _titleLineSpacing = State(initialValue: viewModel.getTitleLineSpacing())
-        _showInfo = State(initialValue: viewModel.getShowInfo())
-        _divideKeywordsBySpace = State(initialValue: viewModel.getDivideKeywordsBySpace())
-        _defaultTagColor = State(initialValue: viewModel.getDefaultTagColor())
+        let snapshot = SettingsSnapshot(viewModel: viewModel)
+        _hasLink = State(initialValue: snapshot.hasLink)
+        _contentFontSize = State(initialValue: snapshot.contentFontSize)
+        _contentLineSpacing = State(initialValue: snapshot.contentLineSpacing)
+        _titleLineLimit = State(initialValue: snapshot.titleLineLimit)
+        _titleFontSize = State(initialValue: snapshot.titleFontSize)
+        _titleLineSpacing = State(initialValue: snapshot.titleLineSpacing)
+        _showInfo = State(initialValue: snapshot.showInfo)
+        _divideKeywordsBySpace = State(initialValue: snapshot.divideKeywordsBySpace)
+        _defaultTagColor = State(initialValue: snapshot.defaultTagColor)
 
-        _hasLinkToStore = State(initialValue: viewModel.getHasLink())
-        _contentFontSizeToStore = State(initialValue: viewModel.getContentFontSize())
-        _contentLineSpacingToStore = State(initialValue: viewModel.getContentLineSpacing())
-        _titleLineLimitToStore = State(initialValue: viewModel.getTitleLineLimit())
-        _titleFontSizeToStore = State(initialValue: viewModel.getTitleFontSize())
-        _titleLineSpacingToStore = State(initialValue: viewModel.getTitleLineSpacing())
-        _showInfoToStore = State(initialValue: viewModel.getShowInfo())
-        _divideKeywordsBySpaceToStore = State(initialValue: viewModel.getDivideKeywordsBySpace())
-        _defaultTagColorToStore = State(initialValue: viewModel.getDefaultTagColor())
+        _hasLinkToStore = State(initialValue: snapshot.hasLink)
+        _contentFontSizeToStore = State(initialValue: snapshot.contentFontSize)
+        _contentLineSpacingToStore = State(initialValue: snapshot.contentLineSpacing)
+        _titleLineLimitToStore = State(initialValue: snapshot.titleLineLimit)
+        _titleFontSizeToStore = State(initialValue: snapshot.titleFontSize)
+        _titleLineSpacingToStore = State(initialValue: snapshot.titleLineSpacing)
+        _showInfoToStore = State(initialValue: snapshot.showInfo)
+        _divideKeywordsBySpaceToStore = State(initialValue: snapshot.divideKeywordsBySpace)
+        _defaultTagColorToStore = State(initialValue: snapshot.defaultTagColor)
     }
 
     var body: some View {
@@ -251,16 +298,26 @@ struct SettingsView: View {
             title: Text("Reset all settings?"),
             primaryButton: .destructive(Text("Reset")) {
                 viewModel.reset()
-                hasLink = viewModel.getHasLink()
-                contentFontSize = viewModel.getContentFontSize()
-                contentLineSpacing = viewModel.getContentLineSpacing()
-                titleLineLimit = viewModel.getTitleLineLimit()
-                titleFontSize = viewModel.getTitleFontSize()
-                titleLineSpacing = viewModel.getTitleLineSpacing()
-                showInfo = viewModel.getShowInfo()
-                divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
-                defaultTagColor = viewModel.getDefaultTagColor()
-                updateStore()
+                let snapshot = SettingsSnapshot(viewModel: viewModel)
+                hasLink = snapshot.hasLink
+                contentFontSize = snapshot.contentFontSize
+                contentLineSpacing = snapshot.contentLineSpacing
+                titleLineLimit = snapshot.titleLineLimit
+                titleFontSize = snapshot.titleFontSize
+                titleLineSpacing = snapshot.titleLineSpacing
+                showInfo = snapshot.showInfo
+                divideKeywordsBySpace = snapshot.divideKeywordsBySpace
+                defaultTagColor = snapshot.defaultTagColor
+
+                hasLinkToStore = snapshot.hasLink
+                contentFontSizeToStore = snapshot.contentFontSize
+                contentLineSpacingToStore = snapshot.contentLineSpacing
+                titleLineLimitToStore = snapshot.titleLineLimit
+                titleFontSizeToStore = snapshot.titleFontSize
+                titleLineSpacingToStore = snapshot.titleLineSpacing
+                showInfoToStore = snapshot.showInfo
+                divideKeywordsBySpaceToStore = snapshot.divideKeywordsBySpace
+                defaultTagColorToStore = snapshot.defaultTagColor
                 toastMessage = "Successfully reset!"
             },
             secondaryButton: .cancel()
@@ -276,16 +333,17 @@ struct SettingsView: View {
         .disabled(!viewModel.settingsChanged)
         .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark.circle.fill") {
-            viewModel.setHasLink(hasLink)
-            viewModel.setContentFontSize(contentFontSize)
-            viewModel.setContentLineSpacing(contentLineSpacing)
-            viewModel.setTitleLineLimit(titleLineLimit)
-            viewModel.setTitleFontSize(titleFontSize)
-            viewModel.setTitleLineSpacing(titleLineSpacing)
-            viewModel.setShowInfo(showInfo)
-            viewModel.setDivideKeywordsBySpace(divideKeywordsBySpace)
-            viewModel.setDefaultTagColor(defaultTagColor)
-            updateStore()
+            let snapshot = currentSnapshot
+            save(snapshot: snapshot)
+            hasLinkToStore = snapshot.hasLink
+            contentFontSizeToStore = snapshot.contentFontSize
+            contentLineSpacingToStore = snapshot.contentLineSpacing
+            titleLineLimitToStore = snapshot.titleLineLimit
+            titleFontSizeToStore = snapshot.titleFontSize
+            titleLineSpacingToStore = snapshot.titleLineSpacing
+            showInfoToStore = snapshot.showInfo
+            divideKeywordsBySpaceToStore = snapshot.divideKeywordsBySpace
+            defaultTagColorToStore = snapshot.defaultTagColor
             toastMessage = "Successfully saved!"
         }
         .disabled(!settingsUpdated)
@@ -294,28 +352,47 @@ struct SettingsView: View {
 
     /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
-        guard hasLinkToStore == hasLink else { return true }
-        guard contentFontSizeToStore == contentFontSize else { return true }
-        guard contentLineSpacingToStore == contentLineSpacing else { return true }
-        guard titleLineLimitToStore == titleLineLimit else { return true }
-        guard titleFontSizeToStore == titleFontSize else { return true }
-        guard titleLineSpacingToStore == titleLineSpacing else { return true }
-        guard showInfoToStore == showInfo else { return true }
-        guard divideKeywordsBySpaceToStore == divideKeywordsBySpace else { return true }
-        guard defaultTagColorToStore == defaultTagColor else { return true }
-        return false
+        storeSnapshot != currentSnapshot
     }
 
-    private func updateStore() {
-        hasLinkToStore = hasLink
-        contentFontSizeToStore = contentFontSize
-        contentLineSpacingToStore = contentLineSpacing
-        titleLineLimitToStore = titleLineLimit
-        titleFontSizeToStore = titleFontSize
-        titleLineSpacingToStore = titleLineSpacing
-        showInfoToStore = showInfo
-        divideKeywordsBySpaceToStore = divideKeywordsBySpace
-        defaultTagColorToStore = defaultTagColor
+    private var currentSnapshot: SettingsSnapshot {
+        SettingsSnapshot(
+            hasLink: hasLink,
+            contentFontSize: contentFontSize,
+            contentLineSpacing: contentLineSpacing,
+            titleLineLimit: titleLineLimit,
+            titleFontSize: titleFontSize,
+            titleLineSpacing: titleLineSpacing,
+            showInfo: showInfo,
+            divideKeywordsBySpace: divideKeywordsBySpace,
+            defaultTagColor: defaultTagColor
+        )
+    }
+
+    private var storeSnapshot: SettingsSnapshot {
+        SettingsSnapshot(
+            hasLink: hasLinkToStore,
+            contentFontSize: contentFontSizeToStore,
+            contentLineSpacing: contentLineSpacingToStore,
+            titleLineLimit: titleLineLimitToStore,
+            titleFontSize: titleFontSizeToStore,
+            titleLineSpacing: titleLineSpacingToStore,
+            showInfo: showInfoToStore,
+            divideKeywordsBySpace: divideKeywordsBySpaceToStore,
+            defaultTagColor: defaultTagColorToStore
+        )
+    }
+
+    private func save(snapshot: SettingsSnapshot) {
+        viewModel.setHasLink(snapshot.hasLink)
+        viewModel.setContentFontSize(snapshot.contentFontSize)
+        viewModel.setContentLineSpacing(snapshot.contentLineSpacing)
+        viewModel.setTitleLineLimit(snapshot.titleLineLimit)
+        viewModel.setTitleFontSize(snapshot.titleFontSize)
+        viewModel.setTitleLineSpacing(snapshot.titleLineSpacing)
+        viewModel.setShowInfo(snapshot.showInfo)
+        viewModel.setDivideKeywordsBySpace(snapshot.divideKeywordsBySpace)
+        viewModel.setDefaultTagColor(snapshot.defaultTagColor)
     }
 
     private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {

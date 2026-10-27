@@ -27,8 +27,11 @@ struct Toast: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(alignment: .top) {
-                toastView
-                    .padding(.top, 10)
+                if !message.isEmpty {
+                    toastView
+                        .padding(.top, 10)
+                        .transition(.opacity)
+                }
             }
             .onChange(of: message) { _, newValue in
                 scheduleAutoDismissIfNeeded(for: newValue)
@@ -39,40 +42,36 @@ struct Toast: ViewModifier {
             .onDisappear {
                 cancelDismissTask()
             }
+            .animation(.linear(duration: 1.0), value: message)
     }
 
     /// A private computed property that defines the view for the toast message.
     ///
     /// It displays the message in a styled text view with a background and border. The toast disappears after 2 seconds or when tapped.
     private var toastView: some View {
-        VStack {
-            if !message.isEmpty {
-                Text(message)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 18)
-                    .background(.gray.opacity(0.8))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(lineWidth: 5)
-                            .fill(.secondary)
-                    }
-                    .mask {
-                        RoundedRectangle(cornerRadius: 10)
-                    }
-                    .onTapGesture {
-                        cancelDismissTask()
-                        message = ""
-                    }
+        Text(message)
+            .multilineTextAlignment(.center)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 18)
+            .background(.gray.opacity(0.8))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(lineWidth: 5)
+                    .fill(.secondary)
             }
-        }
-        .animation(.linear(duration: 1.0), value: message)
-        .transition(.opacity)
+            .mask {
+                RoundedRectangle(cornerRadius: 10)
+            }
+            .onTapGesture {
+                cancelDismissTask()
+                message = ""
+            }
     }
 
     private func scheduleAutoDismissIfNeeded(for newValue: String) {
         cancelDismissTask()
         guard !newValue.isEmpty else { return }
+
         dismissTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             if !Task.isCancelled {

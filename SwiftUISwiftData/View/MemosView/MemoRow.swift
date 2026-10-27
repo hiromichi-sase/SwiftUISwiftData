@@ -58,9 +58,7 @@ struct MemoRow: View {
                                 tagForFiltering: tagsForFiltering.contains(tag),
                             )
                         },
-                        viewHeight: { height in
-                            tagListViewHeight = height
-                        }
+                        viewHeight: updateTagListViewHeight
                     )
                     .frame(height: tagListViewHeight)
                 }
@@ -76,6 +74,10 @@ struct MemoRow: View {
             }
         }
         .padding()
+    }
+
+    private func updateTagListViewHeight(_ height: CGFloat) {
+        tagListViewHeight = height
     }
 }
 

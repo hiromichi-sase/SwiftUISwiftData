@@ -31,15 +31,12 @@ enum MemoMigrationPlan: SchemaMigrationPlan {
         toVersion: MemoSchemaV2.self,
         willMigrate: nil
     ) { context in
-        do {
+        runMigration("Could not migrate mem fromos v1 to v2", context: context) {
             let memos = try context.fetch(FetchDescriptor<MemoSchemaV2.Memo>())
             for memo in memos {
                 memo.protected = false
             }
             try context.save()
-        }
-        catch {
-            fatalError("Could not migrate memos from v1 to v2: \(error)")
         }
     }
 
@@ -48,7 +45,7 @@ enum MemoMigrationPlan: SchemaMigrationPlan {
         toVersion: MemoSchemaV3.self,
         willMigrate: nil
     ) { context in
-        do {
+        runMigration("Could not migrate memos from v2 to v3", context: context) {
             let memos = try context.fetch(FetchDescriptor<MemoSchemaV3.Memo>())
             for memo in memos {
                 memo.tags = []
@@ -59,8 +56,18 @@ enum MemoMigrationPlan: SchemaMigrationPlan {
             }
             try context.save()
         }
+    }
+
+    private static func runMigration(
+        _ message: String,
+        context: ModelContext,
+        _ operation: () throws -> Void
+    ) {
+        do {
+            try operation()
+        }
         catch {
-            fatalError("Could not migrate memos from v2 to v3: \(error)")
+            fatalError("\(message): \(error)")
         }
     }
 }

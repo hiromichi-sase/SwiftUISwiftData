@@ -22,18 +22,22 @@ final class SelectTagViewModel: ObservableObject {
         userDefaultsRepository: UserDefaultsRepository
     ) {
         self.userDefaultsRepository = userDefaultsRepository
-        tags = tagRepository.tags()
+        tags = (try? tagRepository.tags()) ?? []
+    }
+
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
     }
 
     func getTitleLineLimit() -> Int {
-        userDefaultsRepository.getTitleLineLimit()
+        value(UserDefaultsRepository.getTitleLineLimit)
     }
 
     func getTitleFontSize() -> Float {
-        userDefaultsRepository.getTitleFontSize()
+        value(UserDefaultsRepository.getTitleFontSize)
     }
 
     func getTitleLineSpacing() -> Float {
-        userDefaultsRepository.getTitleLineSpacing()
+        value(UserDefaultsRepository.getTitleLineSpacing)
     }
 }

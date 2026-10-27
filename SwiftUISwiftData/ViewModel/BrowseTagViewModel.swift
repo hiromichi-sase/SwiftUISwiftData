@@ -6,7 +6,6 @@
 //
 
 internal import Combine
-import SwiftData
 
 /// BrowseTagViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving tags using the TagRepository.
 final class BrowseTagViewModel: ObservableObject {

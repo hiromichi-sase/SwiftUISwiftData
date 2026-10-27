@@ -17,11 +17,11 @@ final class ModelContainerManager {
     /// Initializes the ModelContainerManager with an optional parameter to specify if the data should be stored in memory only.
     /// - Parameter isStoredInMemoryOnly: A Boolean value indicating whether the data should be stored in memory only. Default is `false`.
     init(isStoredInMemoryOnly: Bool = false) {
-        let schema = Schema([
-            Memo.self,
-            Tag.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isStoredInMemoryOnly)
+        let schema = ModelContainerManager.makeSchema()
+        let modelConfiguration = ModelContainerManager.makeModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: isStoredInMemoryOnly
+        )
 
         do {
             modelContainer = try ModelContainer(
@@ -34,5 +34,22 @@ final class ModelContainerManager {
         catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
+    }
+
+    private static func makeSchema() -> Schema {
+        Schema([
+            Memo.self,
+            Tag.self,
+        ])
+    }
+
+    private static func makeModelConfiguration(
+        schema: Schema,
+        isStoredInMemoryOnly: Bool
+    ) -> ModelConfiguration {
+        ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: isStoredInMemoryOnly
+        )
     }
 }

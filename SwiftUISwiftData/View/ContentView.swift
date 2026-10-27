@@ -13,7 +13,7 @@ struct ContentView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = ContentViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer)
+        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext)
     )
 
     @State
@@ -27,12 +27,9 @@ struct ContentView: View {
     var tagsViewEditMode: EditMode = .inactive
     @State
     var selectedTag: Tag?
-    /// メモの内容を編集するビューを開くかどうかのフラグ。
+    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @State
-    var openEditMemoView: Bool = false
-    /// タグの内容を編集するビューを開くかどうかのフラグ。
-    @State
-    var openEditTagView: Bool = false
+    var showingAddMemo: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -43,13 +40,12 @@ struct ContentView: View {
                     MemosView(
                         editMode: $memosViewEditMode,
                         selectedMemo: $selectedMemo,
-                        openEditMemoView: $openEditMemoView
+                        showingAddMemo: $showingAddMemo,
                     )
                 case .tagsView:
                     TagsView(
                         editMode: $tagsViewEditMode,
                         selectedTag: $selectedTag,
-                        openEditTagView: $openEditTagView
                     )
                 case .settingsView:
                     SettingsView()
@@ -57,46 +53,57 @@ struct ContentView: View {
                     EmptyView()
             }
         } detail: {
-            switch selectedSection {
-                case .memosView:
-                    if memosViewEditMode.isEditing {
-                        Text("Select memos to edit or delete")
-                    }
-                    else {
-                        if let selectedMemo {
-                            BrowseMemoView(memo: selectedMemo, openEditMemoView: openEditMemoView)
-                                .modelContext(viewModel.modelContext)
-                                .id(selectedMemo.id)
-                        }
-                        else {
-                            Text("No memos selected")
-                        }
-                    }
-                case .tagsView:
-                    if tagsViewEditMode.isEditing {
-                        Text("Select tags to edit or delete")
-                    }
-                    else {
-                        if let selectedTag {
-                            BrowseTagView(tag: selectedTag, openEditTagView: openEditTagView)
-                                .modelContext(viewModel.modelContext)
-                                .id(selectedTag.id)
-                        }
-                        else {
-                            Text("No tags selected")
-                        }
-                    }
-                case .settingsView:
-                    EmptyView()
-                default:
-                    EmptyView()
-            }
+            detailView
         }
         .onReceive(NotificationCenter.default.publisher(for: .openAddMemoFromShortcut)) { _ in
             openNewMemoFlowFromShortcut()
         }
         .onChange(of: selectedSection) { _, newValue in
             resetStateForSectionChange(newValue)
+        }
+    }
+
+    @ViewBuilder
+    private var detailView: some View {
+        switch selectedSection {
+            case .memosView:
+                memosDetailView
+            case .tagsView:
+                tagsDetailView
+            case .settingsView:
+                EmptyView()
+            default:
+                EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private var memosDetailView: some View {
+        if memosViewEditMode.isEditing {
+            Text("Select memos to edit or delete")
+        }
+        else if let selectedMemo {
+            BrowseMemoView(memo: selectedMemo)
+                .modelContext(viewModel.modelContext)
+                .id(selectedMemo.id)
+        }
+        else {
+            Text("No memos selected")
+        }
+    }
+
+    @ViewBuilder
+    private var tagsDetailView: some View {
+        if tagsViewEditMode.isEditing {
+            Text("Select tags to edit or delete")
+        }
+        else if let selectedTag {
+            BrowseTagView(tag: selectedTag)
+                .modelContext(viewModel.modelContext)
+                .id(selectedTag.id)
+        }
+        else {
+            Text("No tags selected")
         }
     }
 }
@@ -106,13 +113,7 @@ extension ContentView {
         resetNavigationState()
 
         selectedSection = .memosView
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            openEditMemoView = false
-            DispatchQueue.main.async {
-                openEditMemoView = true
-            }
-        }
+        showingAddMemo = true
     }
 
     func resetNavigationState() {
@@ -134,13 +135,11 @@ extension ContentView {
     func clearMemoSelectionState() {
         memosViewEditMode = .inactive
         selectedMemo = nil
-        openEditMemoView = false
     }
 
     func clearTagSelectionState() {
         tagsViewEditMode = .inactive
         selectedTag = nil
-        openEditTagView = false
     }
 }
 

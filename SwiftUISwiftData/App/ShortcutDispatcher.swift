@@ -16,15 +16,22 @@ enum ShortcutDispatcher {
 
         switch shortcut {
             case .addMemo:
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + closeThenOpenDelay) {
-                    NotificationCenter.default.post(name: .openAddMemoFromShortcut, object: nil)
-                }
-
+                postOnMain(.closeAllPresentedViewsFromShortcut)
+                postOnMain(.openAddMemoFromShortcut, delay: closeThenOpenDelay)
                 return true
+        }
+    }
+
+    private static func postOnMain(_ name: Notification.Name, delay: TimeInterval = .zero) {
+        if delay == .zero {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: name, object: nil)
+            }
+        }
+        else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                NotificationCenter.default.post(name: name, object: nil)
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ struct MemosView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = MemosViewModel(
-        memoRepository: MemoRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// 編集モードの状態を管理する状態変数。
@@ -40,11 +40,8 @@ struct MemosView: View {
     @State
     private var scrollViewProxy: ScrollViewProxy?
     /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
-    @State
-    private var showingAddMemo = false
-    /// メモの内容を編集するビューを開くかどうかのフラグ。
     @Binding
-    private var openEditMemoView: Bool
+    private var showingAddMemo: Bool
     /// トーストメッセージの状態変数。
     @State
     var toastMessage = ""
@@ -67,11 +64,11 @@ struct MemosView: View {
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
-        openEditMemoView: Binding<Bool>,
+        showingAddMemo: Binding<Bool>,
     ) {
         _editMode = editMode
         _selectedMemo = selectedMemo
-        _openEditMemoView = openEditMemoView
+        _showingAddMemo = showingAddMemo
     }
 
     var body: some View {
@@ -120,11 +117,6 @@ struct MemosView: View {
                     isFiltering = false
                     keywordsForFiltering = ""
                     tagsForFiltering = []
-                }
-                .onChange(of: openEditMemoView) { _, isOpen in
-                    guard isOpen else { return }
-                    showingAddMemo = true
-                    openEditMemoView = false
                 }
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
@@ -359,6 +351,27 @@ struct MemosView: View {
         }
     }
 
+    private func makeMemoRow(for memo: Memo, keywordsForFiltering: [String] = []) -> MemoRow {
+        MemoRow(
+            memo: memo,
+            titleLineLimit: viewModel.getTitleLineLimit(),
+            titleFontSize: viewModel.getTitleFontSize(),
+            titleLineSpacing: viewModel.getTitleLineSpacing(),
+            showInfo: viewModel.getShowInfo(),
+            keywordsForFiltering: keywordsForFiltering,
+            tagsForFiltering: tagsForFiltering,
+        )
+    }
+
+    private func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
+    }
+
     /// 編集モードで表示する行のビューを生成する関数。
     ///
     /// メモをタップすると選択状態が切り替わるようになっている。
@@ -366,20 +379,9 @@ struct MemosView: View {
     /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
         Button {
-            if selection.contains(memo.id) {
-                selection.remove(memo.id)
-            }
-            else {
-                selection.insert(memo.id)
-            }
+            toggleSelection(for: memo.id)
         } label: {
-            MemoRow(
-                memo: memo,
-                titleLineLimit: viewModel.getTitleLineLimit(),
-                titleFontSize: viewModel.getTitleFontSize(),
-                titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showInfo: viewModel.getShowInfo()
-            )
+            makeMemoRow(for: memo)
         }
         .foregroundStyle(.primary)
         .contentShape(Rectangle())
@@ -394,14 +396,9 @@ struct MemosView: View {
     /// - Parameter memo: 表示するメモ
     /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        MemoRow(
-            memo: memo,
-            titleLineLimit: viewModel.getTitleLineLimit(),
-            titleFontSize: viewModel.getTitleFontSize(),
-            titleLineSpacing: viewModel.getTitleLineSpacing(),
-            showInfo: viewModel.getShowInfo(),
-            keywordsForFiltering: viewModel.keywordsForFiltering,
-            tagsForFiltering: tagsForFiltering,
+        makeMemoRow(
+            for: memo,
+            keywordsForFiltering: viewModel.keywordsForFiltering
         )
         .contentShape(Rectangle())
         .onTapGesture {

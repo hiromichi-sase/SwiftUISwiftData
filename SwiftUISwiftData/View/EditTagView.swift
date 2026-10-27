@@ -19,7 +19,7 @@ struct EditTagView: View {
     /// ビューモデルの状態変数。
     @ObservedObject
     var viewModel = EditTagViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。
@@ -49,6 +49,10 @@ struct EditTagView: View {
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
+
+    private var defaultTagColor: String {
+        viewModel.getDefaultTagColor()
+    }
 
     /// イニシャライザ。
     /// - Parameter tag: 編集するタグ（デフォルトはnilで新規作成）
@@ -164,40 +168,44 @@ struct EditTagView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Save", systemImage: "checkmark.circle.fill") {
-            if let tag {
-                let oldTitle = tag.title
-                let oldColor = tag.color
-
-                do {
-                    try viewModel.update(tag, title: title, color: colorString)
-                    toastMessage = "Successfully saved!"
-                }
-                catch {
-                    self.error = error
-                    currentAlert = .error
-
-                    tag.title = oldTitle
-                    tag.color = oldColor
-                    print("Failed to update tag: \(error)")
-                }
-            }
-            else {
-                let tag = Tag(title: title, color: colorString)
-
-                do {
-                    try viewModel.add(tag)
-                    self.tag = tag
-                    toastMessage = "Successfully saved!"
-                }
-                catch {
-                    self.error = error
-                    currentAlert = .error
-                    print("Failed to add tag: \(error)")
-                }
-            }
+            saveTag()
         }
         .disabled(!tagUpdated || title.isEmpty)
         .keyboardShortcut("s", modifiers: [.command])
+    }
+
+    private func saveTag() {
+        if let tag {
+            let oldTitle = tag.title
+            let oldColor = tag.color
+
+            do {
+                try viewModel.update(tag, title: title, color: colorString)
+                toastMessage = "Successfully saved!"
+            }
+            catch {
+                self.error = error
+                currentAlert = .error
+
+                tag.title = oldTitle
+                tag.color = oldColor
+                print("Failed to update tag: \(error)")
+            }
+        }
+        else {
+            let tag = Tag(title: title, color: colorString)
+
+            do {
+                try viewModel.add(tag)
+                self.tag = tag
+                toastMessage = "Successfully saved!"
+            }
+            catch {
+                self.error = error
+                currentAlert = .error
+                print("Failed to add tag: \(error)")
+            }
+        }
     }
 
     /// タグが更新されたかどうかを判定するプロパティ。
@@ -205,11 +213,10 @@ struct EditTagView: View {
     /// 既存のタグがある場合はタイトルまたは色が変更されたかどうかを確認し、既存のタグがない場合はタイトルまたは色が空でないかどうかを確認する。
     private var tagUpdated: Bool {
         if let tag {
-            tag.title != title || tag.color != colorString
+            return tag.title != title || tag.color != colorString
         }
-        else {
-            !title.isEmpty || colorString != viewModel.getDefaultTagColor()
-        }
+
+        return !title.isEmpty || colorString != defaultTagColor
     }
 }
 

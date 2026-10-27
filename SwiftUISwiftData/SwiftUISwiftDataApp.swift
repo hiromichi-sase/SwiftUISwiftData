@@ -14,12 +14,13 @@ struct SwiftUISwiftDataApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self)
     var appDelegate
 
+    init() {
+        UITextField.appearance().clearButtonMode = .whileEditing
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .onAppear {
-                    UITextField.appearance().clearButtonMode = .whileEditing
-                }
         }
         .modelContainer(ModelContainerManager.shared.modelContainer)
     }

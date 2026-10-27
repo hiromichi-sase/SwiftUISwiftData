@@ -16,10 +16,10 @@ struct PreviewMemoViewModelTests {
     func getContentFontSize() {
         let contentFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
         #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
@@ -27,34 +27,29 @@ struct PreviewMemoViewModelTests {
     func getContentLineSpacing() {
         let contentLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
-        dependency.removeUserDefaults()
     }
 }
 
 extension PreviewMemoViewModelTests {
     struct Dependency {
         let testTarget: PreviewMemoViewModel
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let support: TestDependencySupport
 
         @MainActor
         init() {
-            guard let userDefaults = UserDefaults(suiteName: PreviewMemoViewModelTests.Dependency.suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
-            testTarget = .init(
-                userDefaultsRepository: userDefaultsRepository
-            )
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+            testTarget = .init(userDefaultsRepository: userDefaultsRepository)
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: PreviewMemoViewModelTests.Dependency.suiteName)
+            support.removeUserDefaults()
         }
     }
 }

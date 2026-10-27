@@ -13,9 +13,17 @@ struct TagRowText: View {
     let titleFontSize: Float
     let titleLineSpacing: Float
 
+    private var isTitleEmpty: Bool {
+        tag.title.isEmpty
+    }
+
+    private var displayTitle: String {
+        isTitleEmpty ? CommonString.noTitle : tag.title
+    }
+
     var body: some View {
-        Text(tag.title.isEmpty ? CommonString.noTitle : tag.title)
-            .foregroundStyle(tag.title.isEmpty ? .secondary : .primary)
+        Text(displayTitle)
+            .foregroundStyle(isTitleEmpty ? .secondary : .primary)
             .lineLimit(titleLineLimit)
             .font(.system(size: CGFloat(titleFontSize)))
             .lineSpacing(CGFloat(titleLineSpacing))

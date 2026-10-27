@@ -24,7 +24,7 @@ struct TextView: UIViewRepresentable {
     /// - Parameters:
     ///   - text: The text content of the TextView, bound to a SwiftUI state variable.
     ///   - isEditable: A flag indicating whether the TextView is editable or read-only.
-    ///   - defaultText: An optional default text to display when the TextView is empty and not editable. display when the TextView is empty and not editable.
+    ///   - defaultText: An optional default text to display when the TextView is empty and not editable.
     ///   - hasLink: An optional default flag indicating where the TextView has links.
     ///   - contentFontSize: A value to indicate the font size of the content.
     ///   - contentLineSpacing: A value to indicate the line spacing of the content.
@@ -58,8 +58,8 @@ struct TextView: UIViewRepresentable {
         textView.delegate = context.coordinator
         textView.isEditable = isEditable
         textView.dataDetectorTypes = hasLink ? .all : []
-        textView.font = UIFont.systemFont(ofSize: CGFloat(contentFontSize))
-        textView.attributedText = attributedText
+        textView.attributedText = attributedText(for: displayText)
+        textView.textColor = text.isEmpty ? .secondaryLabel : .label
 
         return textView
     }
@@ -69,31 +69,33 @@ struct TextView: UIViewRepresentable {
     ///   - uiView: The UITextView instance to be updated.
     ///   - context: The context for the UIView.
     func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.attributedText = attributedText
+        let newDisplayText = displayText
 
-        if uiView.text != text {
-            uiView.text = text
+        if uiView.text != newDisplayText {
+            uiView.attributedText = attributedText(for: newDisplayText)
         }
 
-        if let defaultText, text.isEmpty {
-            uiView.text = defaultText
-        }
-
-        uiView.textColor = !text.isEmpty ? .label : .secondaryLabel
+        uiView.textColor = text.isEmpty ? .secondaryLabel : .label
         uiView.dataDetectorTypes = hasLink ? .all : []
     }
 
-    private var attributedText: NSAttributedString {
+    private var displayText: String {
+        if let defaultText, text.isEmpty {
+            return defaultText
+        }
+        return text
+    }
+
+    private func attributedText(for value: String) -> NSAttributedString {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = CGFloat(contentLineSpacing)
+
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: CGFloat(contentFontSize)),
             .paragraphStyle: paragraphStyle,
         ]
-        return NSAttributedString(
-            string: text,
-            attributes: attributes
-        )
+
+        return NSAttributedString(string: value, attributes: attributes)
     }
 }
 

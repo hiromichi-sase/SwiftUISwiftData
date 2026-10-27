@@ -18,26 +18,23 @@ struct HomeView: View {
         case settingsView
         var id: Section { self }
 
-        var title: String {
+        private var item: (title: String, icon: String) {
             switch self {
                 case .memosView:
-                    "Memos"
+                    ("Memos", "long.text.page.and.pencil")
                 case .tagsView:
-                    "Tags"
+                    ("Tags", "tag")
                 case .settingsView:
-                    "Settings"
+                    ("Settings", "gearshape")
             }
         }
 
+        var title: String {
+            item.title
+        }
+
         var icon: String {
-            switch self {
-                case .memosView:
-                    "long.text.page.and.pencil"
-                case .tagsView:
-                    "tag"
-                case .settingsView:
-                    "gearshape"
-            }
+            item.icon
         }
     }
 

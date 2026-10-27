@@ -9,29 +9,20 @@ import SwiftUI
 
 extension Color {
     func hexString(alpha: Bool = false) -> String {
-        guard let cgColor else { fatalError("no color") }
-        let ciColor = CIColor(cgColor: cgColor)
-        let redInt = lroundf(Float(ciColor.red) * 255)
-        let greenInt = lroundf(Float(ciColor.green) * 255)
-        let blueInt = lroundf(Float(ciColor.blue) * 255)
-        let alphaInt = alpha ? lroundf(Float(ciColor.alpha) * 255) : 1
+        let components = rgbComponents()
+        let alphaInt = alpha ? components.alpha : 1
 
         guard alpha else {
-            return String(format: "#%02lX%02lX%02lX", redInt, greenInt, blueInt)
+            return String(format: "#%02lX%02lX%02lX", components.red, components.green, components.blue)
         }
-        return String(format: "#%02lX%02lX%02lX%02lX", redInt, greenInt, blueInt, alphaInt)
+        return String(format: "#%02lX%02lX%02lX%02lX", components.red, components.green, components.blue, alphaInt)
     }
 
     /// # Reference
     /// [W3C](https://www.w3.org/TR/AERT/#color-contrast)
     var appropriateTextColor: Color {
-        guard let cgColor else { fatalError("no color") }
-        let ciColor = CIColor(cgColor: cgColor)
-        let redInt = lroundf(Float(ciColor.red) * 255)
-        let greenInt = lroundf(Float(ciColor.green) * 255)
-        let blueInt = lroundf(Float(ciColor.blue) * 255)
-
-        return ((((redInt * 299) + (greenInt * 587) + (blueInt * 114)) / 1000) < 125) ? .white : .black
+        let components = rgbComponents()
+        return ((((components.red * 299) + (components.green * 587) + (components.blue * 114)) / 1000) < 125) ? .white : .black
     }
 
     func needsBorder(colorScheme: ColorScheme) -> Bool {
@@ -44,5 +35,17 @@ extension Color {
         else {
             false
         }
+    }
+
+    private func rgbComponents() -> (red: Int, green: Int, blue: Int, alpha: Int) {
+        guard let cgColor else { fatalError("no color") }
+        let ciColor = CIColor(cgColor: cgColor)
+
+        let red = lroundf(Float(ciColor.red) * 255)
+        let green = lroundf(Float(ciColor.green) * 255)
+        let blue = lroundf(Float(ciColor.blue) * 255)
+        let alpha = lroundf(Float(ciColor.alpha) * 255)
+
+        return (red, green, blue, alpha)
     }
 }

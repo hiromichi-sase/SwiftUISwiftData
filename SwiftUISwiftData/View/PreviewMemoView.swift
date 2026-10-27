@@ -18,13 +18,21 @@ struct PreviewMemoView: View {
     /// 表示するメモのデータ。
     var memo: Memo
 
+    private var isContentEmpty: Bool {
+        memo.content.isEmpty
+    }
+
+    private var displayContent: String {
+        isContentEmpty ? CommonString.noContent : memo.content
+    }
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                Text(memo.content.isEmpty ? CommonString.noContent : memo.content)
+                Text(displayContent)
                     .font(.system(size: CGFloat(viewModel.getContentFontSize())))
                     .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
-                    .foregroundStyle(memo.content.isEmpty ? .secondary : .primary)
+                    .foregroundStyle(isContentEmpty ? .secondary : .primary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
             }

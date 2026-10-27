@@ -202,23 +202,20 @@ struct SettingsViewModelTests {
 extension SettingsViewModelTests {
     struct Dependency {
         let testTarget: SettingsViewModel
-        private let userDefaults: UserDefaults
-        private static let suiteName: String = "Test"
+        private let support: TestDependencySupport
 
         @MainActor
         init() {
-            guard let userDefaults = UserDefaults(suiteName: SettingsViewModelTests.Dependency.suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
+            let support = TestDependencySupport()
+            self.support = support
             testTarget = .init(
-                userDefaultsRepository: .init(userDefaults: userDefaults),
-                suiteName: SettingsViewModelTests.Dependency.suiteName
+                userDefaultsRepository: support.userDefaultsRepository,
+                suiteName: support.suiteName
             )
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: SettingsViewModelTests.Dependency.suiteName)
+            support.removeUserDefaults()
         }
     }
 }

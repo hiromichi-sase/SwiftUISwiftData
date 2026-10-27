@@ -13,12 +13,18 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         configurationForConnecting connectingSceneSession: UISceneSession,
         options: UIScene.ConnectionOptions
     ) -> UISceneConfiguration {
-        if let shortcutItem = options.shortcutItem {
-            _ = ShortcutDispatcher.handle(shortcutItem: shortcutItem)
-        }
+        handleShortcutIfNeeded(options)
 
-        let config = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
-        config.delegateClass = SceneDelegate.self
-        return config
+        let configuration = UISceneConfiguration(
+            name: nil,
+            sessionRole: connectingSceneSession.role
+        )
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+
+    private func handleShortcutIfNeeded(_ options: UIScene.ConnectionOptions) {
+        guard let shortcutItem = options.shortcutItem else { return }
+        _ = ShortcutDispatcher.handle(shortcutItem: shortcutItem)
     }
 }

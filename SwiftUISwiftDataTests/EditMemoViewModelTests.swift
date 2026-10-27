@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -14,101 +15,126 @@ struct EditMemoViewModelTests {
     @MainActor
     @Test
     func addMemo() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let context = dependency.memoRepository.modelContext
         let addedTitle = "Added Title"
         let addedContent = "Added Content"
-        let addedTags = [Tag(title: "Added Tag", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)]
-        let memo = Memo(title: addedTitle, content: addedContent, tags: addedTags)
+        let addedTag = Tag(
+            title: "Added Tag",
+            color: "#000000",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero
+        )
+        context.insert(addedTag)
+
+        let memo = Memo(title: addedTitle, content: addedContent, tags: [addedTag])
         try dependency.testTarget.add(memo)
 
-        guard let newMemo = dependency.memoRepository.memos().first else {
-            throw TestError(message: "Memo was not added to the memoRepository.")
-        }
+        let memos = try dependency.memoRepository.memos()
+        #expect(memos.count == 1)
+        let newMemo = try #require(memos.first)
 
-        #expect(dependency.memoRepository.memos().count == 1)
         #expect(newMemo.title == addedTitle)
         #expect(newMemo.content == addedContent)
-        #expect(newMemo.tags == addedTags)
+        #expect(newMemo.tags == [addedTag])
         #expect(newMemo.createdAt == newMemo.updatedAt)
         #expect(newMemo.order == 1)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
     func updateMemo() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let context = dependency.memoRepository.modelContext
         let memo = Memo(title: "Test Title", content: "Test Memo")
         try dependency.testTarget.add(memo)
 
         let updatedTitle = "Updated Title"
         let updatedContent = "Updated Content"
-        let updateTags = [Tag(title: "Updated Tag 1", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)]
-        try dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent, tags: updateTags)
+        let updatedTag = Tag(
+            title: "Updated Tag 1",
+            color: "#000000",
+            createdAt: Date(),
+            updatedAt: Date(),
+            order: .zero
+        )
+        context.insert(updatedTag)
 
-        guard let newMemo = dependency.memoRepository.memos().first else {
-            throw TestError(message: "Memo was not added to the memoRepository.")
-        }
+        try dependency.testTarget.update(memo, title: updatedTitle, content: updatedContent, tags: [updatedTag])
+
+        let memos = try dependency.memoRepository.memos()
+        #expect(memos.count == 1)
+        let newMemo = try #require(memos.first)
 
         #expect(newMemo.title == updatedTitle)
         #expect(newMemo.content == updatedContent)
-        #expect(newMemo.tags == updateTags)
+        #expect(newMemo.tags == [updatedTag])
         #expect(newMemo.createdAt < newMemo.updatedAt)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getContentFontSize() {
+    func getContentFontSize() throws {
         let contentFontSize = Float(16.0)
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
 
         #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getContentLineSpacing() {
+    func getContentLineSpacing() throws {
         let contentLineSpacing = Float.zero
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
 
         #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getShowInfo() {
+    func getShowInfo() throws {
         let hasLink = false
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setShowInfo(hasLink)
 
         #expect(dependency.testTarget.getShowInfo() == hasLink)
-        dependency.removeUserDefaults()
     }
 }
 
 extension EditMemoViewModelTests {
     struct Dependency {
+        private let container: ModelContainer
         let testTarget: EditMemoViewModel
         let memoRepository: MemoRepository
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let support: TestDependencySupport
 
         @MainActor
-        init() {
-            memoRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            tagRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            guard let userDefaults = UserDefaults(suiteName: EditMemoViewModelTests.Dependency.suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
+        init() throws {
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
+            container = try ModelContainer(
+                for: Memo.self,
+                Tag.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+
+            memoRepository = .init(modelContext: container.mainContext)
+            tagRepository = .init(modelContext: container.mainContext)
+
             testTarget = .init(
                 memoRepository: memoRepository,
                 tagRepository: tagRepository,
@@ -117,7 +143,7 @@ extension EditMemoViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: EditMemoViewModelTests.Dependency.suiteName)
+            support.removeUserDefaults()
         }
     }
 }

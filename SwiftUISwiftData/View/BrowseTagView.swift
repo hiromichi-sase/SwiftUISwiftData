@@ -18,26 +18,17 @@ struct BrowseTagView: View {
     /// 表示するメモ。
     @State
     private var tag: Tag
-    /// 編集画面を開くかどうかのフラグ。
-    @State
-    private var openEditTagView = false
     /// 編集画面を表示するかどうかのフラグ。
     @State
     private var showingEditTag = false
-    /// トーストメッセージの状態変数。
-    @State
-    private var toastMessage = ""
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
 
     /// イニシャライザ。
-    /// - Parameters:
-    ///   - tag: 表示するタグ
-    ///   - openEditTagView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
-    init(tag: Tag, openEditTagView: Bool = false) {
+    /// - Parameter tag: 表示するタグ
+    init(tag: Tag) {
         self.tag = tag
-        _openEditTagView = State(initialValue: openEditTagView)
     }
 
     var body: some View {
@@ -59,12 +50,6 @@ struct BrowseTagView: View {
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .onAppear {
-                if openEditTagView {
-                    showingEditTag = true
-                    openEditTagView = false
-                }
-            }
             .sheet(isPresented: $showingEditTag) {
                 EditTagView(tag: tag)
                     .interactiveDismissDisabled(true)
@@ -76,7 +61,6 @@ struct BrowseTagView: View {
                     toolbarItemTopBarTrailing
                 }
             }
-            .toast(message: $toastMessage)
         }
     }
 

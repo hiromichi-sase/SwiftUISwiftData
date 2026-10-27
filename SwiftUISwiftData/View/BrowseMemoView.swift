@@ -18,15 +18,9 @@ struct BrowseMemoView: View {
     /// 表示するメモ。
     @State
     private var memo: Memo
-    /// 編集画面を開くかどうかのフラグ。
-    @State
-    private var openEditMemoView = false
     /// 編集画面を表示するかどうかのフラグ。
     @State
     private var showingEditMemo = false
-    /// トーストメッセージの状態変数。
-    @State
-    private var toastMessage = ""
     @State
     private var tagListViewHeight: CGFloat = .zero
     /// ナビゲーションパスの状態変数。
@@ -34,12 +28,9 @@ struct BrowseMemoView: View {
     var path = NavigationPath()
 
     /// イニシャライザ。
-    /// - Parameters:
-    ///   - memo: 表示するメモ
-    ///   - openEditMemoView: 編集画面を開くかどうかのフラグ（デフォルトはfalse）
-    init(memo: Memo, openEditMemoView: Bool = false) {
+    /// - Parameter memo: 表示するメモ
+    init(memo: Memo) {
         self.memo = memo
-        _openEditMemoView = State(initialValue: openEditMemoView)
     }
 
     var body: some View {
@@ -54,18 +45,7 @@ struct BrowseMemoView: View {
                     contentLineSpacing: viewModel.getContentLineSpacing()
                 )
                 .disabled(memo.content.isEmpty)
-                if !memo.tags.isEmpty {
-                    TagListView(
-                        items: memo.tags.sortedByOrder,
-                        content: { tag in
-                            TagView(tag: tag)
-                        },
-                        viewHeight: { height in
-                            tagListViewHeight = height
-                        }
-                    )
-                    .frame(height: tagListViewHeight)
-                }
+                tagListView
                 if viewModel.getShowInfo() {
                     VStack(alignment: .leading, spacing: .zero) {
                         InfoText.countView(content: memo.content)
@@ -75,12 +55,6 @@ struct BrowseMemoView: View {
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .onAppear {
-                if openEditMemoView {
-                    showingEditMemo = true
-                    openEditMemoView = false
-                }
-            }
             .fullScreenCover(isPresented: $showingEditMemo) {
                 EditMemoView(memo: memo)
             }
@@ -91,8 +65,25 @@ struct BrowseMemoView: View {
                     toolbarItemTopBarTrailing
                 }
             }
-            .toast(message: $toastMessage)
         }
+    }
+
+    @ViewBuilder
+    private var tagListView: some View {
+        if !memo.tags.isEmpty {
+            TagListView(
+                items: memo.tags.sortedByOrder,
+                content: { tag in
+                    TagView(tag: tag)
+                },
+                viewHeight: updateTagListViewHeight
+            )
+            .frame(height: tagListViewHeight)
+        }
+    }
+
+    private func updateTagListViewHeight(_ height: CGFloat) {
+        tagListViewHeight = height
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。

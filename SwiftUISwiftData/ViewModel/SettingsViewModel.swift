@@ -24,6 +24,18 @@ final class SettingsViewModel: ObservableObject {
         self.suiteName = suiteName
     }
 
+    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
+        getter(userDefaultsRepository)()
+    }
+
+    private func setValue<T>(_ value: T, with setter: (UserDefaultsRepository) -> (T) -> Void) {
+        setter(userDefaultsRepository)(value)
+    }
+
+    private func hasChanged<T>(_ value: T, with checker: (UserDefaultsRepository) -> (T) -> Bool) -> Bool {
+        checker(userDefaultsRepository)(value)
+    }
+
     var settingsChanged: Bool {
         userDefaultsRepository.settingsChanged
     }
@@ -53,110 +65,110 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func getHasLink() -> Bool {
-        userDefaultsRepository.getHasLink()
+        value(UserDefaultsRepository.getHasLink)
     }
 
     func setHasLink(_ value: Bool) {
-        userDefaultsRepository.setHasLink(value)
+        setValue(value, with: UserDefaultsRepository.setHasLink)
     }
 
     func getContentFontSize() -> Float {
-        userDefaultsRepository.getContentFontSize()
+        value(UserDefaultsRepository.getContentFontSize)
     }
 
     func setContentFontSize(_ value: Float) {
-        userDefaultsRepository.setContentFontSize(value)
+        setValue(value, with: UserDefaultsRepository.setContentFontSize)
     }
 
     func getContentLineSpacing() -> Float {
-        userDefaultsRepository.getContentLineSpacing()
+        value(UserDefaultsRepository.getContentLineSpacing)
     }
 
     func setContentLineSpacing(_ value: Float) {
-        userDefaultsRepository.setContentLineSpacing(value)
+        setValue(value, with: UserDefaultsRepository.setContentLineSpacing)
     }
 
     func getTitleLineLimit() -> Int {
-        userDefaultsRepository.getTitleLineLimit()
+        value(UserDefaultsRepository.getTitleLineLimit)
     }
 
     func setTitleLineLimit(_ value: Int) {
-        userDefaultsRepository.setTitleLineLimit(value)
+        setValue(value, with: UserDefaultsRepository.setTitleLineLimit)
     }
 
     func getTitleFontSize() -> Float {
-        userDefaultsRepository.getTitleFontSize()
+        value(UserDefaultsRepository.getTitleFontSize)
     }
 
     func setTitleFontSize(_ value: Float) {
-        userDefaultsRepository.setTitleFontSize(value)
+        setValue(value, with: UserDefaultsRepository.setTitleFontSize)
     }
 
     func getTitleLineSpacing() -> Float {
-        userDefaultsRepository.getTitleLineSpacing()
+        value(UserDefaultsRepository.getTitleLineSpacing)
     }
 
     func setTitleLineSpacing(_ value: Float) {
-        userDefaultsRepository.setTitleLineSpacing(value)
+        setValue(value, with: UserDefaultsRepository.setTitleLineSpacing)
     }
 
     func getShowInfo() -> Bool {
-        userDefaultsRepository.getShowInfo()
+        value(UserDefaultsRepository.getShowInfo)
     }
 
     func setShowInfo(_ value: Bool) {
-        userDefaultsRepository.setShowInfo(value)
+        setValue(value, with: UserDefaultsRepository.setShowInfo)
     }
 
     func getDivideKeywordsBySpace() -> Bool {
-        userDefaultsRepository.getDivideKeywordsBySpace()
+        value(UserDefaultsRepository.getDivideKeywordsBySpace)
     }
 
     func setDivideKeywordsBySpace(_ value: Bool) {
-        userDefaultsRepository.setDivideKeywordsBySpace(value)
+        setValue(value, with: UserDefaultsRepository.setDivideKeywordsBySpace)
     }
 
     func getDefaultTagColor() -> String {
-        userDefaultsRepository.getDefaultTagColor()
+        value(UserDefaultsRepository.getDefaultTagColor)
     }
 
     func setDefaultTagColor(_ value: String) {
-        userDefaultsRepository.setDefaultTagColor(value)
+        setValue(value, with: UserDefaultsRepository.setDefaultTagColor)
     }
 
     func hasLinkChanged(_ hasLink: Bool) -> Bool {
-        userDefaultsRepository.hasLinkChanged(hasLink)
+        hasChanged(hasLink, with: UserDefaultsRepository.hasLinkChanged)
     }
 
     func contentFontSizeChanged(_ contentFontSize: Float) -> Bool {
-        userDefaultsRepository.contentFontSizeChanged(contentFontSize)
+        hasChanged(contentFontSize, with: UserDefaultsRepository.contentFontSizeChanged)
     }
 
     func contentLineSpacingChanged(_ contentLineSpacing: Float) -> Bool {
-        userDefaultsRepository.contentLineSpacingChanged(contentLineSpacing)
+        hasChanged(contentLineSpacing, with: UserDefaultsRepository.contentLineSpacingChanged)
     }
 
     func titleLineLimitChanged(_ titleLineLimit: Int) -> Bool {
-        userDefaultsRepository.titleLineLimitChanged(titleLineLimit)
+        hasChanged(titleLineLimit, with: UserDefaultsRepository.titleLineLimitChanged)
     }
 
     func titleFontSizeChanged(_ titleFontSize: Float) -> Bool {
-        userDefaultsRepository.titleFontSizeChanged(titleFontSize)
+        hasChanged(titleFontSize, with: UserDefaultsRepository.titleFontSizeChanged)
     }
 
     func titleLineSpacingChanged(_ titleLineSpacing: Float) -> Bool {
-        userDefaultsRepository.titleLineSpacingChanged(titleLineSpacing)
+        hasChanged(titleLineSpacing, with: UserDefaultsRepository.titleLineSpacingChanged)
     }
 
     func showInfoChanged(_ showInfo: Bool) -> Bool {
-        userDefaultsRepository.showInfoChanged(showInfo)
+        hasChanged(showInfo, with: UserDefaultsRepository.showInfoChanged)
     }
 
     func divideKeywordsBySpaceChanged(_ divideKeywordsBySpace: Bool) -> Bool {
-        userDefaultsRepository.showDivideKeywordsBySpaceChanged(divideKeywordsBySpace)
+        hasChanged(divideKeywordsBySpace, with: UserDefaultsRepository.showDivideKeywordsBySpaceChanged)
     }
 
     func defaultTagColorChanged(_ defaultTagColor: String) -> Bool {
-        userDefaultsRepository.showDefaultTagColorChanged(defaultTagColor)
+        hasChanged(defaultTagColor, with: UserDefaultsRepository.showDefaultTagColorChanged)
     }
 }

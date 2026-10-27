@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -16,10 +17,10 @@ struct SelectTagViewModelTests {
     func getTitleLineLimit() {
         let titleLineLimit = 3
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
         #expect(dependency.testTarget.getTitleLineLimit() == titleLineLimit)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
@@ -27,10 +28,10 @@ struct SelectTagViewModelTests {
     func getTitleFontSize() {
         let titleFontSize = Float(16.0)
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
         #expect(dependency.testTarget.getTitleFontSize() == titleFontSize)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
@@ -38,10 +39,10 @@ struct SelectTagViewModelTests {
     func getTitleLineSpacing() {
         let titleLineSpacing = Float.zero
         let dependency = Dependency()
-        dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
+        defer { dependency.removeUserDefaults() }
 
+        dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
         #expect(dependency.testTarget.getTitleLineSpacing() == titleLineSpacing)
-        dependency.removeUserDefaults()
     }
 }
 
@@ -49,18 +50,18 @@ extension SelectTagViewModelTests {
     struct Dependency {
         let testTarget: SelectTagViewModel
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let support: TestDependencySupport
 
         @MainActor
         init() {
-            tagRepository = TagRepository(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            guard let userDefaults = UserDefaults(suiteName: SelectTagViewModelTests.Dependency.suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
+            let modelContainerManager = ModelContainerManager(isStoredInMemoryOnly: true)
+            tagRepository = TagRepository(modelContext: modelContainerManager.modelContainer.mainContext)
+
             testTarget = .init(
                 tagRepository: tagRepository,
                 userDefaultsRepository: userDefaultsRepository
@@ -68,7 +69,7 @@ extension SelectTagViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: SelectTagViewModelTests.Dependency.suiteName)
+            support.removeUserDefaults()
         }
     }
 }

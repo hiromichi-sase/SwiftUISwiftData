@@ -8,6 +8,11 @@
 import Foundation
 
 extension Notification.Name {
-    static let openAddMemoFromShortcut = Notification.Name("openAddMemoFromShortcut")
-    static let closeAllPresentedViewsFromShortcut = Notification.Name("closeAllPresentedViewsFromShortcut")
+    private enum ShortcutName {
+        static let openAddMemo = "openAddMemoFromShortcut"
+        static let closeAllPresentedViews = "closeAllPresentedViewsFromShortcut"
+    }
+
+    static let openAddMemoFromShortcut = Notification.Name(ShortcutName.openAddMemo)
+    static let closeAllPresentedViewsFromShortcut = Notification.Name(ShortcutName.closeAllPresentedViews)
 }

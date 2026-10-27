@@ -17,7 +17,7 @@ struct FilterMemosView: View {
     /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = FilterMemosViewModel(
-        tagRepository: TagRepository(modelContainer: ModelContainerManager.shared.modelContainer),
+        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
     /// ビューを閉じるための環境変数。
@@ -131,10 +131,7 @@ struct FilterMemosView: View {
         .disabled(!isFiltering)
         .keyboardShortcut("r", modifiers: [.command])
         Button("Save", systemImage: "checkmark") {
-            title = titleToStore
-            tagsForFiltering = selectedTags
-            isFiltering = !title.isEmpty || !tagsForFiltering.isEmpty
-            dismiss()
+            saveFiltering()
         }
         .disabled(saveButtonDisabled)
         .keyboardShortcut("s", modifiers: [.command])
@@ -146,15 +143,30 @@ struct FilterMemosView: View {
         return true
     }
 
+    private var hasFilteringCondition: Bool {
+        !title.isEmpty || !tagsForFiltering.isEmpty
+    }
+
+    private func saveFiltering() {
+        title = titleToStore
+        tagsForFiltering = selectedTags
+        isFiltering = hasFilteringCondition
+        dismiss()
+    }
+
+    private func resetFiltering() {
+        isFiltering = false
+        title = ""
+        tagsForFiltering = []
+        selectedMemo = nil
+        dismiss()
+    }
+
     private var resetAlert: Alert {
         Alert(
             title: Text("Reset filtering?"),
             primaryButton: .destructive(Text("Reset")) {
-                isFiltering = false
-                title = ""
-                tagsForFiltering = []
-                selectedMemo = nil
-                dismiss()
+                resetFiltering()
             },
             secondaryButton: .cancel()
         )

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -14,28 +15,30 @@ struct EditTagViewModelTests {
     @MainActor
     @Test
     func addTag() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let addedTitle = "Added Title"
         let addedColor = "#000000"
         let tag = Tag(title: addedTitle, color: addedColor)
         try dependency.testTarget.add(tag)
 
-        guard let newTag = dependency.tagRepository.tags().first else {
-            throw TestError(message: "Tag was not added to the tagRepository.")
-        }
+        let tags = try dependency.tagRepository.tags()
+        #expect(tags.count == 1)
+        let newTag = try #require(tags.first)
 
-        #expect(dependency.tagRepository.tags().count == 1)
         #expect(newTag.title == addedTitle)
         #expect(newTag.color == addedColor)
         #expect(newTag.createdAt == newTag.updatedAt)
         #expect(newTag.order == 1)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
     func updateTag() async throws {
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tag = Tag(title: "Test Title", color: "Test Tag")
         try dependency.testTarget.add(tag)
 
@@ -43,55 +46,60 @@ struct EditTagViewModelTests {
         let updatedColor = "#000000"
         try dependency.testTarget.update(tag, title: updatedTitle, color: updatedColor)
 
-        guard let newTag = dependency.tagRepository.tags().first else {
-            throw TestError(message: "Tag was not added to the tagRepository.")
-        }
+        let tags = try dependency.tagRepository.tags()
+        #expect(tags.count == 1)
+        let newTag = try #require(tags.first)
 
         #expect(newTag.title == updatedTitle)
         #expect(newTag.color == updatedColor)
         #expect(newTag.createdAt < newTag.updatedAt)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getShowInfo() {
+    func getShowInfo() throws {
         let hasLink = false
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setShowInfo(hasLink)
 
         #expect(dependency.testTarget.getShowInfo() == hasLink)
-        dependency.removeUserDefaults()
     }
 
     @MainActor
     @Test
-    func getDefaultTagColor() {
+    func getDefaultTagColor() throws {
         let defaultTagColor = "#FF0000"
-        let dependency = Dependency()
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
         dependency.userDefaultsRepository.setDefaultTagColor(defaultTagColor)
 
         #expect(dependency.testTarget.getDefaultTagColor() == defaultTagColor)
-        dependency.removeUserDefaults()
     }
 }
 
 extension EditTagViewModelTests {
     struct Dependency {
+        private let container: ModelContainer
         let testTarget: EditTagViewModel
         let tagRepository: TagRepository
-        private let userDefaults: UserDefaults
         let userDefaultsRepository: UserDefaultsRepository
-        private static let suiteName: String = "Test"
+        private let support: TestDependencySupport
 
         @MainActor
-        init() {
-            tagRepository = .init(modelContainer: ModelContainerManager(isStoredInMemoryOnly: true).modelContainer)
-            guard let userDefaults = UserDefaults(suiteName: EditTagViewModelTests.Dependency.suiteName) else {
-                fatalError("Could not create UserDefaults")
-            }
-            self.userDefaults = userDefaults
-            userDefaultsRepository = .init(userDefaults: userDefaults)
+        init() throws {
+            let support = TestDependencySupport()
+            self.support = support
+            userDefaultsRepository = support.userDefaultsRepository
+
+            container = try ModelContainer(
+                for: Memo.self,
+                Tag.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+
+            tagRepository = .init(modelContext: container.mainContext)
+
             testTarget = .init(
                 tagRepository: tagRepository,
                 userDefaultsRepository: userDefaultsRepository
@@ -99,7 +107,7 @@ extension EditTagViewModelTests {
         }
 
         func removeUserDefaults() {
-            userDefaults.removePersistentDomain(forName: EditTagViewModelTests.Dependency.suiteName)
+            support.removeUserDefaults()
         }
     }
 }

@@ -16,6 +16,7 @@ struct EmptyListView: View {
             Image(systemName: "tray")
                 .font(.largeTitle)
                 .padding(.bottom)
+                .accessibilityHidden(true)
             Text(message)
             Spacer()
         }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ViewDidLoadModifier: ViewModifier {
+private struct ViewDidLoadModifier: ViewModifier {
     @State
     private var didLoad = false
     private let action: (() -> Void)?
@@ -18,10 +18,9 @@ struct ViewDidLoadModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content.onAppear {
-            if didLoad == false {
-                didLoad = true
-                action?()
-            }
+            guard !didLoad else { return }
+            didLoad = true
+            action?()
         }
     }
 }
