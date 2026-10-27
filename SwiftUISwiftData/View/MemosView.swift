@@ -12,8 +12,6 @@ struct MemosView: View {
     enum AlertType: Identifiable {
         case delete
         case containsProtectedMemo
-        case protect
-        case unprotect
         case error
         var id: AlertType { self }
     }
@@ -83,10 +81,6 @@ struct MemosView: View {
                             deleteAlert
                         case .containsProtectedMemo:
                             containsProtectedMemoAlert
-                        case .protect:
-                            protectAlert
-                        case .unprotect:
-                            unprotectAlert
                         case .error:
                             errorAlert
                     }
@@ -250,21 +244,12 @@ struct MemosView: View {
     @ViewBuilder
     private var toolbarItemBottomBar: some View {
         if editMode.isEditing {
-            GlassMenu(imageSystemName: "square.and.arrow.up") {
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    if selectedMemos.filter({ $0.protected }).isEmpty {
-                        currentAlert = .delete
-                    }
-                    else {
-                        currentAlert = .containsProtectedMemo
-                    }
+            Button("Delete", systemImage: "trash") {
+                if selectedMemos.filter({ $0.protected }).isEmpty {
+                    currentAlert = .delete
                 }
-                Divider()
-                Button("Unprotect", systemImage: "lock.open.fill") {
-                    currentAlert = .unprotect
-                }
-                Button("Protect", systemImage: "lock.fill") {
-                    currentAlert = .protect
+                else {
+                    currentAlert = .containsProtectedMemo
                 }
             }
             .disabled(selection.isEmpty)

@@ -47,30 +47,4 @@ extension MemosView {
             dismissButton: .default(Text("OK"))
         )
     }
-
-    var protectAlert: Alert {
-        .init(
-            title: Text("Protect selected memos?"),
-            primaryButton: .default(Text("Protect")) {
-                guard !selectedMemos.isEmpty else { return }
-                Task {
-                    await protect(selectedMemos)
-                }
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
-    var unprotectAlert: Alert {
-        .init(
-            title: Text("Unprotect selected memos?"),
-            primaryButton: .default(Text("Unprotect")) {
-                guard !selectedMemos.isEmpty else { return }
-                Task {
-                    await unprotect(selectedMemos)
-                }
-            },
-            secondaryButton: .cancel()
-        )
-    }
 }
