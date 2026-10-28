@@ -27,8 +27,4 @@ final class FilterMemosViewModel: ObservableObject {
         self.userDefaultsRepository = userDefaultsRepository
         self.suiteName = suiteName
     }
-
-    func getDivideKeywordsBySpace() -> Bool {
-        userDefaultsRepository.getDivideKeywordsBySpace()
-    }
 }

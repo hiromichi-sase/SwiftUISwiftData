@@ -67,7 +67,7 @@ struct FilterMemosView: View {
                     CustomTextField(
                         text: $titleToStore,
                         focus: _textFieldFocus,
-                        placeholder: viewModel.getDivideKeywordsBySpace() ? "Divide Keywords By Space" : "Join Keywords By Space",
+                        placeholder: "Divide Keywords By Space",
                         background: Color(uiColor: .secondarySystemBackground),
                         submitLabel: .done,
                         submitButtonTapped: nil

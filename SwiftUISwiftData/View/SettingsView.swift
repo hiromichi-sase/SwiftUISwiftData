@@ -18,7 +18,6 @@ struct SettingsView: View {
         var titleFontSize: Float
         var titleLineSpacing: Float
         var showInfo: Bool
-        var divideKeywordsBySpace: Bool
         var defaultTagColor: String
 
         init(
@@ -29,7 +28,6 @@ struct SettingsView: View {
             titleFontSize: Float,
             titleLineSpacing: Float,
             showInfo: Bool,
-            divideKeywordsBySpace: Bool,
             defaultTagColor: String
         ) {
             self.hasLink = hasLink
@@ -39,7 +37,6 @@ struct SettingsView: View {
             self.titleFontSize = titleFontSize
             self.titleLineSpacing = titleLineSpacing
             self.showInfo = showInfo
-            self.divideKeywordsBySpace = divideKeywordsBySpace
             self.defaultTagColor = defaultTagColor
         }
 
@@ -51,7 +48,6 @@ struct SettingsView: View {
             titleFontSize = viewModel.getTitleFontSize()
             titleLineSpacing = viewModel.getTitleLineSpacing()
             showInfo = viewModel.getShowInfo()
-            divideKeywordsBySpace = viewModel.getDivideKeywordsBySpace()
             defaultTagColor = viewModel.getDefaultTagColor()
         }
     }
@@ -76,8 +72,6 @@ struct SettingsView: View {
     @State
     private var showInfo: Bool = false
     @State
-    private var divideKeywordsBySpace: Bool = false
-    @State
     private var defaultTagColor: String = ""
 
     @State
@@ -94,8 +88,6 @@ struct SettingsView: View {
     private var titleLineSpacingToStore: Float = .zero
     @State
     private var showInfoToStore: Bool = false
-    @State
-    private var divideKeywordsBySpaceToStore: Bool = false
     @State
     private var defaultTagColorToStore: String = ""
 
@@ -120,7 +112,6 @@ struct SettingsView: View {
         _titleFontSize = State(initialValue: snapshot.titleFontSize)
         _titleLineSpacing = State(initialValue: snapshot.titleLineSpacing)
         _showInfo = State(initialValue: snapshot.showInfo)
-        _divideKeywordsBySpace = State(initialValue: snapshot.divideKeywordsBySpace)
         _defaultTagColor = State(initialValue: snapshot.defaultTagColor)
 
         _hasLinkToStore = State(initialValue: snapshot.hasLink)
@@ -130,7 +121,6 @@ struct SettingsView: View {
         _titleFontSizeToStore = State(initialValue: snapshot.titleFontSize)
         _titleLineSpacingToStore = State(initialValue: snapshot.titleLineSpacing)
         _showInfoToStore = State(initialValue: snapshot.showInfo)
-        _divideKeywordsBySpaceToStore = State(initialValue: snapshot.divideKeywordsBySpace)
         _defaultTagColorToStore = State(initialValue: snapshot.defaultTagColor)
     }
 
@@ -141,7 +131,6 @@ struct SettingsView: View {
                 contentSection
                 titleSection
                 infoSection
-                searchSection
                 colorSection
             }
             .onLoad {
@@ -256,19 +245,6 @@ struct SettingsView: View {
         }
     }
 
-    private var searchSection: some View {
-        Section("Search") {
-            VStack(alignment: .leading) {
-                Text("Divide Keywords By Space")
-                    .font(.system(size: 12.0))
-                Toggle(isOn: $divideKeywordsBySpace) {
-                    Text(divideKeywordsBySpace ? "ON" : "OFF")
-                        .fontWeight(viewModel.divideKeywordsBySpaceChanged(divideKeywordsBySpace) ? .bold : .regular)
-                }
-            }
-        }
-    }
-
     private var colorSection: some View {
         Section("Color") {
             VStack(alignment: .leading) {
@@ -306,7 +282,6 @@ struct SettingsView: View {
                 titleFontSize = snapshot.titleFontSize
                 titleLineSpacing = snapshot.titleLineSpacing
                 showInfo = snapshot.showInfo
-                divideKeywordsBySpace = snapshot.divideKeywordsBySpace
                 defaultTagColor = snapshot.defaultTagColor
 
                 hasLinkToStore = snapshot.hasLink
@@ -316,7 +291,6 @@ struct SettingsView: View {
                 titleFontSizeToStore = snapshot.titleFontSize
                 titleLineSpacingToStore = snapshot.titleLineSpacing
                 showInfoToStore = snapshot.showInfo
-                divideKeywordsBySpaceToStore = snapshot.divideKeywordsBySpace
                 defaultTagColorToStore = snapshot.defaultTagColor
                 toastMessage = "Successfully reset!"
             },
@@ -342,7 +316,6 @@ struct SettingsView: View {
             titleFontSizeToStore = snapshot.titleFontSize
             titleLineSpacingToStore = snapshot.titleLineSpacing
             showInfoToStore = snapshot.showInfo
-            divideKeywordsBySpaceToStore = snapshot.divideKeywordsBySpace
             defaultTagColorToStore = snapshot.defaultTagColor
             toastMessage = "Successfully saved!"
         }
@@ -364,7 +337,6 @@ struct SettingsView: View {
             titleFontSize: titleFontSize,
             titleLineSpacing: titleLineSpacing,
             showInfo: showInfo,
-            divideKeywordsBySpace: divideKeywordsBySpace,
             defaultTagColor: defaultTagColor
         )
     }
@@ -378,7 +350,6 @@ struct SettingsView: View {
             titleFontSize: titleFontSizeToStore,
             titleLineSpacing: titleLineSpacingToStore,
             showInfo: showInfoToStore,
-            divideKeywordsBySpace: divideKeywordsBySpaceToStore,
             defaultTagColor: defaultTagColorToStore
         )
     }
@@ -391,7 +362,6 @@ struct SettingsView: View {
         viewModel.setTitleFontSize(snapshot.titleFontSize)
         viewModel.setTitleLineSpacing(snapshot.titleLineSpacing)
         viewModel.setShowInfo(snapshot.showInfo)
-        viewModel.setDivideKeywordsBySpace(snapshot.divideKeywordsBySpace)
         viewModel.setDefaultTagColor(snapshot.defaultTagColor)
     }
 

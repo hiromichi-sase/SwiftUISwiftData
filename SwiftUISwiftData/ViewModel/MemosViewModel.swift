@@ -45,13 +45,6 @@ final class MemosViewModel: ObservableObject {
 
     private(set) var keywordsForFiltering: [String] = []
 
-    private func makeKeywordsForFiltering(from keywords: String) -> [String] {
-        if userDefaultsRepository.getDivideKeywordsBySpace() {
-            return keywords.split(separator: " ").map { String($0) }
-        }
-        return [keywords]
-    }
-
     private func hasAnyMatch(_ memo: Memo, keywords: [String], tags: [Tag]) -> Bool {
         keywords.contains { memo.title.lowercased().contains($0.lowercased()) }
             || tags.contains { memo.tags.contains($0) }
@@ -77,7 +70,7 @@ final class MemosViewModel: ObservableObject {
             return memos
         }
 
-        keywordsForFiltering = makeKeywordsForFiltering(from: keywords)
+        keywordsForFiltering = keywords.split(separator: " ").map { String($0) }
 
         return memos.filter { hasAnyMatch($0, keywords: keywordsForFiltering, tags: tags) }
     }

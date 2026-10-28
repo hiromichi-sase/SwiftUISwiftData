@@ -145,22 +145,6 @@ struct SettingsViewModelTests {
 
     @MainActor
     @Test
-    func divideKeywordsBySpace() {
-        let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
-
-        let defaultValue: Bool = false
-        let changed = dependency.testTarget.divideKeywordsBySpaceChanged(defaultValue)
-        #expect(!changed)
-
-        dependency.testTarget.setDivideKeywordsBySpace(defaultValue)
-        #expect(dependency.testTarget.getDivideKeywordsBySpace() == defaultValue)
-    }
-
-    @MainActor
-    @Test
     func defaultTagColor() {
         let dependency = Dependency()
         defer {
@@ -190,7 +174,6 @@ struct SettingsViewModelTests {
         dependency.testTarget.setTitleFontSize(30.0)
         dependency.testTarget.setTitleLineSpacing(5.0)
         dependency.testTarget.setShowInfo(true)
-        dependency.testTarget.setDivideKeywordsBySpace(true)
         dependency.testTarget.setDefaultTagColor("#FF0000")
         #expect(dependency.testTarget.settingsChanged)
 

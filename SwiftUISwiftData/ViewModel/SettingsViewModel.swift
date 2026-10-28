@@ -120,14 +120,6 @@ final class SettingsViewModel: ObservableObject {
         setValue(value, with: UserDefaultsRepository.setShowInfo)
     }
 
-    func getDivideKeywordsBySpace() -> Bool {
-        value(UserDefaultsRepository.getDivideKeywordsBySpace)
-    }
-
-    func setDivideKeywordsBySpace(_ value: Bool) {
-        setValue(value, with: UserDefaultsRepository.setDivideKeywordsBySpace)
-    }
-
     func getDefaultTagColor() -> String {
         value(UserDefaultsRepository.getDefaultTagColor)
     }
@@ -162,10 +154,6 @@ final class SettingsViewModel: ObservableObject {
 
     func showInfoChanged(_ showInfo: Bool) -> Bool {
         hasChanged(showInfo, with: UserDefaultsRepository.showInfoChanged)
-    }
-
-    func divideKeywordsBySpaceChanged(_ divideKeywordsBySpace: Bool) -> Bool {
-        hasChanged(divideKeywordsBySpace, with: UserDefaultsRepository.showDivideKeywordsBySpaceChanged)
     }
 
     func defaultTagColorChanged(_ defaultTagColor: String) -> Bool {

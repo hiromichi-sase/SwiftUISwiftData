@@ -16,7 +16,6 @@ final class UserDefaultsRepository {
         case titleFontSize
         case titleLineSpacing
         case showInfo
-        case divideKeywordsBySpace
         case defaultTagColor
 
         var defaultValue: Any? {
@@ -28,7 +27,6 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(16.0)
                 case .titleLineSpacing: Float.zero
                 case .showInfo: false
-                case .divideKeywordsBySpace: false
                 case .defaultTagColor: "#000000"
             }
         }
@@ -42,7 +40,6 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(100.0)
                 case .titleLineSpacing: Float(10.0)
                 case .showInfo: nil
-                case .divideKeywordsBySpace: nil
                 case .defaultTagColor: nil
             }
         }
@@ -56,7 +53,6 @@ final class UserDefaultsRepository {
                 case .titleFontSize: Float(5.0)
                 case .titleLineSpacing: Float.zero
                 case .showInfo: nil
-                case .divideKeywordsBySpace: nil
                 case .defaultTagColor: nil
             }
         }
@@ -97,7 +93,6 @@ final class UserDefaultsRepository {
         guard !titleFontSizeChanged(getTitleFontSize()) else { return true }
         guard !titleLineSpacingChanged(getTitleLineSpacing()) else { return true }
         guard !showInfoChanged(getShowInfo()) else { return true }
-        guard !showDivideKeywordsBySpaceChanged(getDivideKeywordsBySpace()) else { return true }
         guard !showDefaultTagColorChanged(getDefaultTagColor()) else { return true }
         return false
     }
@@ -192,14 +187,6 @@ final class UserDefaultsRepository {
         setIfNeeded(value, for: .showInfo, current: getShowInfo())
     }
 
-    func getDivideKeywordsBySpace() -> Bool {
-        userDefaults.bool(forKey: Key.divideKeywordsBySpace.rawValue)
-    }
-
-    func setDivideKeywordsBySpace(_ value: Bool) {
-        setIfNeeded(value, for: .divideKeywordsBySpace, current: getDivideKeywordsBySpace())
-    }
-
     func getDefaultTagColor() -> String {
         guard let value = userDefaults.string(forKey: Key.defaultTagColor.rawValue) else {
             fatalError("defaultTagColor has no defaultValue")
@@ -237,10 +224,6 @@ final class UserDefaultsRepository {
 
     func showInfoChanged(_ showInfo: Bool) -> Bool {
         hasChangedFromDefault(showInfo, for: .showInfo, name: "showInfo")
-    }
-
-    func showDivideKeywordsBySpaceChanged(_ showDivideKeywordsBySpace: Bool) -> Bool {
-        hasChangedFromDefault(showDivideKeywordsBySpace, for: .divideKeywordsBySpace, name: "divideKeywordsBySpace")
     }
 
     func showDefaultTagColorChanged(_ showDefaultTagColor: String) -> Bool {
