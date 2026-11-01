@@ -13,46 +13,161 @@ import Testing
 struct BrowseMemoViewModelTests {
     @MainActor
     @Test
-    func getHasLink() {
-        let hasLink = true
+    func hasLink_reflectsUserDefaults() {
         let dependency = Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setHasLink(hasLink)
-        #expect(dependency.testTarget.getHasLink() == hasLink)
+        dependency.userDefaultsRepository.setHasLink(true)
+        #expect(dependency.testTarget.hasLink)
+
+        dependency.userDefaultsRepository.setHasLink(false)
+        #expect(!dependency.testTarget.hasLink)
     }
 
     @MainActor
     @Test
-    func getContentFontSize() {
-        let contentFontSize = Float(16.0)
+    func contentFontSize_reflectsUserDefaults() {
         let dependency = Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setContentFontSize(contentFontSize)
-        #expect(dependency.testTarget.getContentFontSize() == contentFontSize)
+        let value: Float = 16.0
+        dependency.userDefaultsRepository.setContentFontSize(value)
+        #expect(dependency.testTarget.contentFontSize == value)
     }
 
     @MainActor
     @Test
-    func getContentLineSpacing() {
-        let contentLineSpacing = Float.zero
+    func contentLineSpacing_reflectsUserDefaults() {
         let dependency = Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setContentLineSpacing(contentLineSpacing)
-        #expect(dependency.testTarget.getContentLineSpacing() == contentLineSpacing)
+        let value: Float = 2.0
+        dependency.userDefaultsRepository.setContentLineSpacing(value)
+        #expect(dependency.testTarget.contentLineSpacing == value)
     }
 
     @MainActor
     @Test
-    func getShowInfo() {
-        let hasLink = false
+    func showInfo_reflectsUserDefaults() {
         let dependency = Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setShowInfo(hasLink)
-        #expect(dependency.testTarget.getShowInfo() == hasLink)
+        dependency.userDefaultsRepository.setShowInfo(true)
+        #expect(dependency.testTarget.showInfo)
+
+        dependency.userDefaultsRepository.setShowInfo(false)
+        #expect(!dependency.testTarget.showInfo)
+    }
+
+    @MainActor
+    @Test
+    func isContentEmpty_true_whenMemoContentIsEmpty() {
+        let dependency = Dependency(
+            memo: Memo(title: "Title", content: "")
+        )
+
+        #expect(dependency.testTarget.isContentEmpty)
+    }
+
+    @MainActor
+    @Test
+    func isContentEmpty_false_whenMemoContentExists() {
+        let dependency = Dependency(
+            memo: Memo(title: "Title", content: "Hello")
+        )
+
+        #expect(!dependency.testTarget.isContentEmpty)
+    }
+
+    @MainActor
+    @Test
+    func displayContent_returnsNoContent_whenMemoContentIsEmpty() {
+        let dependency = Dependency(
+            memo: Memo(title: "Title", content: "")
+        )
+
+        #expect(dependency.testTarget.displayContent == CommonString.noContent)
+    }
+
+    @MainActor
+    @Test
+    func displayContent_returnsOriginalContent_whenMemoContentExists() {
+        let content = "Hello, world"
+        let dependency = Dependency(
+            memo: Memo(title: "Title", content: content)
+        )
+
+        #expect(dependency.testTarget.displayContent == content)
+    }
+
+    @MainActor
+    @Test
+    func showingEditMemo_defaultIsFalse() {
+        let dependency = Dependency()
+
+        #expect(!dependency.testTarget.showingEditMemo)
+    }
+
+    @MainActor
+    @Test
+    func editButtonTapped_setsShowingEditMemoTrue() {
+        let dependency = Dependency()
+
+        dependency.testTarget.editButtonTapped()
+
+        #expect(dependency.testTarget.showingEditMemo)
+    }
+
+    @MainActor
+    @Test
+    func dismissEdit_setsShowingEditMemoFalse() {
+        let dependency = Dependency()
+
+        dependency.testTarget.editButtonTapped()
+        dependency.testTarget.dismissEdit()
+
+        #expect(!dependency.testTarget.showingEditMemo)
+    }
+
+    @MainActor
+    @Test
+    func title_returnsMemoTitle() {
+        let title = "Expected Title"
+        let dependency = Dependency(
+            memo: Memo(title: title, content: "Content")
+        )
+
+        #expect(dependency.testTarget.title == title)
+    }
+
+    @MainActor
+    @Test
+    func isProtected_returnsMemoProtected() {
+        let dependency = Dependency(
+            memo: Memo(
+                title: "Title",
+                content: "Content",
+                protected: true
+            )
+        )
+
+        #expect(dependency.testTarget.isProtected)
+    }
+
+    @MainActor
+    @Test
+    func tagsSortedByOrder_returnsTagsInOrder() {
+        let tagB = Tag(title: "TagB", color: "0000FF", order: 2)
+        let tagA = Tag(title: "TagA", color: "FF0000", order: 1)
+        let memo = Memo(title: "Title", content: "Content")
+        memo.tags = [tagB, tagA]
+
+        let dependency = Dependency(memo: memo)
+        let result = dependency.testTarget.tagsSortedByOrder
+
+        #expect(result.count == 2)
+        #expect(result[0].title == tagA.title)
+        #expect(result[1].title == tagB.title)
     }
 }
 
@@ -63,11 +178,19 @@ extension BrowseMemoViewModelTests {
         private let support: TestDependencySupport
 
         @MainActor
-        init() {
+        init(
+            memo: Memo = Memo(
+                title: "Test Memo Title",
+                content: "Test Memo Content"
+            )
+        ) {
             let support = TestDependencySupport()
             self.support = support
             userDefaultsRepository = support.userDefaultsRepository
-            testTarget = .init(userDefaultsRepository: userDefaultsRepository)
+            testTarget = .init(
+                memo: memo,
+                userDefaultsRepository: userDefaultsRepository
+            )
         }
 
         func removeUserDefaults() {

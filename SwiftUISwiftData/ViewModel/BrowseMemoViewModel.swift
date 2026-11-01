@@ -5,37 +5,67 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-internal import Combine
+import Observation
 import SwiftData
+import SwiftUI
 
-/// BrowseMemoViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
-final class BrowseMemoViewModel: ObservableObject {
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class BrowseMemoViewModel {
+    let memo: Memo
     private let userDefaultsRepository: UserDefaultsRepository
 
-    init(userDefaultsRepository: UserDefaultsRepository) {
+    var showingEditMemo = false
+
+    init(
+        memo: Memo,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.memo = memo
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
+    var isContentEmpty: Bool {
+        memo.content.isEmpty
     }
 
-    func getHasLink() -> Bool {
-        value(UserDefaultsRepository.getHasLink)
+    var displayContent: String {
+        isContentEmpty ? CommonString.noContent : memo.content
     }
 
-    func getContentFontSize() -> Float {
-        value(UserDefaultsRepository.getContentFontSize)
+    var hasLink: Bool {
+        userDefaultsRepository.getHasLink()
     }
 
-    func getContentLineSpacing() -> Float {
-        value(UserDefaultsRepository.getContentLineSpacing)
+    var contentFontSize: Float {
+        userDefaultsRepository.getContentFontSize()
     }
 
-    func getShowInfo() -> Bool {
-        value(UserDefaultsRepository.getShowInfo)
+    var contentLineSpacing: Float {
+        userDefaultsRepository.getContentLineSpacing()
+    }
+
+    var showInfo: Bool {
+        userDefaultsRepository.getShowInfo()
+    }
+
+    var title: String {
+        memo.title
+    }
+
+    var isProtected: Bool {
+        memo.protected
+    }
+
+    var tagsSortedByOrder: [Tag] {
+        memo.tags.sortedByOrder
+    }
+
+    func editButtonTapped() {
+        showingEditMemo = true
+    }
+
+    func dismissEdit() {
+        showingEditMemo = false
     }
 }

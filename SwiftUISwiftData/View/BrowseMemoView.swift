@@ -11,54 +11,58 @@ import SwiftUI
 /// メモの内容を表示するビュー。
 struct BrowseMemoView: View {
     /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = BrowseMemoViewModel(
-        userDefaultsRepository: UserDefaultsRepository()
-    )
-    /// 表示するメモ。
     @State
-    private var memo: Memo
-    /// 編集画面を表示するかどうかのフラグ。
-    @State
-    private var showingEditMemo = false
+    private var viewModel: BrowseMemoViewModel
+    /// タグ一覧の高さ。
     @State
     private var tagListViewHeight: CGFloat = .zero
     /// ナビゲーションパスの状態変数。
     @State
-    var path = NavigationPath()
+    private var path = NavigationPath()
 
     /// イニシャライザ。
     /// - Parameter memo: 表示するメモ
     init(memo: Memo) {
-        self.memo = memo
+        _viewModel = State(
+            wrappedValue: BrowseMemoViewModel(
+                memo: memo,
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 4) {
                 TextView(
-                    text: $memo.content,
+                    text: Binding(
+                        get: { viewModel.memo.content },
+                        set: { _ in }
+                    ),
                     isEditable: false,
                     defaultText: CommonString.noContent,
-                    hasLink: viewModel.getHasLink(),
-                    contentFontSize: viewModel.getContentFontSize(),
-                    contentLineSpacing: viewModel.getContentLineSpacing()
+                    hasLink: viewModel.hasLink,
+                    contentFontSize: viewModel.contentFontSize,
+                    contentLineSpacing: viewModel.contentLineSpacing
                 )
-                .disabled(memo.content.isEmpty)
+                .disabled(viewModel.isContentEmpty)
                 tagListView
-                if viewModel.getShowInfo() {
+                if viewModel.showInfo {
                     VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: memo.content)
-                        InfoText.dateView(for: memo)
+                        InfoText.countView(content: viewModel.displayContent)
+                        InfoText.dateView(for: viewModel.memo)
                     }
                 }
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .fullScreenCover(isPresented: $showingEditMemo) {
-                EditMemoView(memo: memo)
+            .fullScreenCover(
+                isPresented: $viewModel.showingEditMemo,
+                onDismiss: { viewModel.dismissEdit() }
+            ) {
+                EditMemoView(memo: viewModel.memo)
             }
-            .navigationTitle(memo.title)
+            .navigationTitle(viewModel.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -70,9 +74,9 @@ struct BrowseMemoView: View {
 
     @ViewBuilder
     private var tagListView: some View {
-        if !memo.tags.isEmpty {
+        if !viewModel.tagsSortedByOrder.isEmpty {
             TagListView(
-                items: memo.tags.sortedByOrder,
+                items: viewModel.tagsSortedByOrder,
                 content: { tag in
                     TagView(tag: tag)
                 },
@@ -87,13 +91,11 @@ struct BrowseMemoView: View {
     }
 
     /// ツールバーの右側のアイテムを定義するビュー。
-    ///
-    /// タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
-        if !memo.protected {
+        if !viewModel.isProtected {
             Button("Edit", systemImage: "pencil") {
-                showingEditMemo = true
+                viewModel.editButtonTapped()
             }
             .keyboardShortcut("e", modifiers: [.command, .shift])
         }
