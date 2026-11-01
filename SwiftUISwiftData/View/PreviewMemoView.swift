@@ -11,28 +11,25 @@ import SwiftUI
 /// メモの内容をプレビュー表示するビュー。
 struct PreviewMemoView: View {
     /// ビューモデルの状態変数。
-    @ObservedObject
-    var viewModel = PreviewMemoViewModel(
-        userDefaultsRepository: UserDefaultsRepository()
-    )
-    /// 表示するメモのデータ。
-    var memo: Memo
+    @State
+    private var viewModel: PreviewMemoViewModel
 
-    private var isContentEmpty: Bool {
-        memo.content.isEmpty
-    }
-
-    private var displayContent: String {
-        isContentEmpty ? CommonString.noContent : memo.content
+    init(memo: Memo) {
+        _viewModel = State(
+            wrappedValue: PreviewMemoViewModel(
+                memo: memo,
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
     }
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                Text(displayContent)
-                    .font(.system(size: CGFloat(viewModel.getContentFontSize())))
-                    .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
-                    .foregroundStyle(isContentEmpty ? .secondary : .primary)
+                Text(viewModel.displayContent)
+                    .font(.system(size: CGFloat(viewModel.contentFontSize)))
+                    .lineSpacing(CGFloat(viewModel.contentLineSpacing))
+                    .foregroundStyle(viewModel.isContentEmpty ? .secondary : .primary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
             }

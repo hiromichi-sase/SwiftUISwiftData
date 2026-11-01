@@ -8,30 +8,33 @@
 internal import Combine
 import SwiftData
 
-/// PreviewMemoViewModel is responsible for handling the logic related to preview memos.
-///
-/// It interacts with the UserDefaultsRepository to perform these operations.
-final class PreviewMemoViewModel: ObservableObject {
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class PreviewMemoViewModel {
+    private let memo: Memo
     private let userDefaultsRepository: UserDefaultsRepository
 
     init(
-        userDefaultsRepository: UserDefaultsRepository
+        memo: Memo,
+        userDefaultsRepository: UserDefaultsRepository,
     ) {
+        self.memo = memo
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
+    var isContentEmpty: Bool {
+        memo.content.isEmpty
     }
 
-    func getContentFontSize() -> Float {
-        value(UserDefaultsRepository.getContentFontSize)
+    var displayContent: String {
+        isContentEmpty ? CommonString.noContent : memo.content
     }
 
-    func getContentLineSpacing() -> Float {
-        value(UserDefaultsRepository.getContentLineSpacing)
+    var contentFontSize: Float {
+        userDefaultsRepository.getContentFontSize()
+    }
+
+    var contentLineSpacing: Float {
+        userDefaultsRepository.getContentLineSpacing()
     }
 }
