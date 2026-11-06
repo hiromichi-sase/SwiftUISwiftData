@@ -11,16 +11,8 @@ import SwiftUI
 /// メモの内容を表示するビュー。
 struct BrowseTagView: View {
     /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = BrowseTagViewModel(
-        userDefaultsRepository: UserDefaultsRepository()
-    )
-    /// 表示するメモ。
     @State
-    private var tag: Tag
-    /// 編集画面を表示するかどうかのフラグ。
-    @State
-    private var showingEditTag = false
+    private var viewModel: BrowseTagViewModel
     /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
@@ -28,7 +20,12 @@ struct BrowseTagView: View {
     /// イニシャライザ。
     /// - Parameter tag: 表示するタグ
     init(tag: Tag) {
-        self.tag = tag
+        _viewModel = State(
+            wrappedValue: BrowseTagViewModel(
+                tag: tag,
+                userDefaultsRepository: UserDefaultsRepository(),
+            )
+        )
     }
 
     var body: some View {
@@ -38,23 +35,35 @@ struct BrowseTagView: View {
                     .frame(height: .zero)
                 HStack {
                     TagColorView(
-                        colorString: tag.color,
+                        colorString: viewModel.tag.color,
                         showColorString: true
                     )
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 Spacer()
-                if viewModel.getShowInfo() {
-                    InfoText.dateView(for: tag)
+                if viewModel.showInfo {
+                    InfoText.dateView(for: viewModel.tag)
                 }
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .sheet(isPresented: $showingEditTag) {
-                EditTagView(tag: tag)
+            .sheet(
+                isPresented: Binding(
+                    get: { viewModel.showingEditTag },
+                    set: { newValue in
+                        if newValue {
+                            viewModel.editButtonTapped()
+                        }
+                        else {
+                            viewModel.dismissEdit()
+                        }
+                    }
+                )
+            ) {
+                EditTagView(tag: viewModel.tag)
                     .interactiveDismissDisabled(true)
             }
-            .navigationTitle(tag.title)
+            .navigationTitle(viewModel.tag.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -70,7 +79,7 @@ struct BrowseTagView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Edit", systemImage: "pencil") {
-            showingEditTag = true
+            viewModel.editButtonTapped()
         }
         .keyboardShortcut("e", modifiers: [.command, .shift])
     }

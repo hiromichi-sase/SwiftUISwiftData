@@ -5,20 +5,32 @@
 //  Created by Hiromichi Sase on 2026/07/16.
 //
 
-internal import Combine
+import SwiftData
 
-/// BrowseTagViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving tags using the TagRepository.
-final class BrowseTagViewModel: ObservableObject {
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class BrowseTagViewModel {
+    let tag: Tag
     private let userDefaultsRepository: UserDefaultsRepository
+    private(set) var showingEditTag = false
 
-    init(userDefaultsRepository: UserDefaultsRepository) {
+    init(
+        tag: Tag,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.tag = tag
         self.userDefaultsRepository = userDefaultsRepository
     }
 
-    func getShowInfo() -> Bool {
+    var showInfo: Bool {
         userDefaultsRepository.getShowInfo()
+    }
+
+    func editButtonTapped() {
+        showingEditTag = true
+    }
+
+    func dismissEdit() {
+        showingEditTag = false
     }
 }
