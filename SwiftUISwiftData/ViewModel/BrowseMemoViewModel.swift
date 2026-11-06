@@ -5,16 +5,13 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import Observation
 import SwiftData
-import SwiftUI
 
 @Observable
 @MainActor
 final class BrowseMemoViewModel {
     let memo: Memo
     private let userDefaultsRepository: UserDefaultsRepository
-
     var showingEditMemo = false
 
     init(
