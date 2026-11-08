@@ -9,31 +9,33 @@ import SwiftData
 import SwiftUI
 
 struct SelectTagView: View {
-    /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = SelectTagViewModel(
-        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-        userDefaultsRepository: UserDefaultsRepository()
-    )
+    @State
+    private var viewModel: SelectTagViewModel
 
     @Environment(\.isPresented)
     private var isPresented
-    /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
     @Binding
     var selectedTags: [Tag]
-    /// 編集モードの状態を管理する状態変数。
     @State
     var editMode: EditMode = .active
-    /// 複数選択されたタグのIDを保持する状態変数。
     @State
     private var selection: Set<UUID> = []
     @State
     private var isPresentedModally = false
-    /// ナビゲーションパスの状態変数。
     @State
     var path = NavigationPath()
+
+    init(selectedTags: Binding<[Tag]>) {
+        _selectedTags = selectedTags
+        _viewModel = State(
+            wrappedValue: SelectTagViewModel(
+                tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -65,14 +67,14 @@ struct SelectTagView: View {
 
     private func activeRow(for tag: Tag) -> some View {
         Button {
-            toggleSelection(for: tag.id)
+            viewModel.toggleSelection(&selection, for: tag.id)
         } label: {
             TagRow(
                 tag: tag,
-                titleLineLimit: viewModel.getTitleLineLimit(),
-                titleFontSize: viewModel.getTitleFontSize(),
-                titleLineSpacing: viewModel.getTitleLineSpacing(),
-                showColorString: false,
+                titleLineLimit: viewModel.titleLineLimit,
+                titleFontSize: viewModel.titleFontSize,
+                titleLineSpacing: viewModel.titleLineSpacing,
+                showColorString: false
             )
         }
         .foregroundStyle(.primary)
@@ -84,23 +86,11 @@ struct SelectTagView: View {
 
     private func setupOnAppear() {
         if selection.isEmpty {
-            selection = Set(selectedTags.map { $0.id })
+            selection = viewModel.selectedIDs(from: selectedTags)
         }
         isPresentedModally = _isPresented.wrappedValue
     }
 
-    private func toggleSelection(for id: UUID) {
-        if selection.contains(id) {
-            selection.remove(id)
-        }
-        else {
-            selection.insert(id)
-        }
-    }
-
-    /// ツールバーの左側のアイテムを定義するビュー。
-    ///
-    /// 変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
     @ViewBuilder
     private var toolbarItemTopBarLeading: some View {
         if isPresentedModally {
@@ -113,14 +103,14 @@ struct SelectTagView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Save", systemImage: "checkmark") {
-            selectedTags = tagsForSelection
+            selectedTags = viewModel.selectedTags(from: selection)
             dismiss()
         }
-        .disabled(selectedTags == tagsForSelection)
+        .disabled(selection == selectedTagIDs)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
-    private var tagsForSelection: [Tag] {
-        viewModel.tags.filter { selection.contains($0.id) }
+    private var selectedTagIDs: Set<UUID> {
+        Set(selectedTags.map(\.id))
     }
 }

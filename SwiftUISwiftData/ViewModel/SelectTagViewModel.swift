@@ -5,39 +5,61 @@
 //  Created by Hiromichi Sase on 2026/07/16.
 //
 
-internal import Combine
+import Foundation
 import SwiftData
 
-/// SelectTagViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving tags using the TagRepository.
-final class SelectTagViewModel: ObservableObject {
-    /// An array of Tag objects that are published to update the UI when changes occur.
-    private(set) var tags: [Tag] = []
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class SelectTagViewModel {
+    private(set) var tags: [Tag]
+    private let tagRepository: TagRepository?
     private let userDefaultsRepository: UserDefaultsRepository
 
     init(
         tagRepository: TagRepository,
         userDefaultsRepository: UserDefaultsRepository
     ) {
+        self.tagRepository = tagRepository
         self.userDefaultsRepository = userDefaultsRepository
-        tags = (try? tagRepository.tags()) ?? []
+        self.tags = (try? tagRepository.tags()) ?? []
     }
 
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
+    // For tests / previews
+    init(
+        tags: [Tag],
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.tagRepository = nil
+        self.userDefaultsRepository = userDefaultsRepository
+        self.tags = tags
     }
 
-    func getTitleLineLimit() -> Int {
-        value(UserDefaultsRepository.getTitleLineLimit)
+    var titleLineLimit: Int {
+        userDefaultsRepository.getTitleLineLimit()
     }
 
-    func getTitleFontSize() -> Float {
-        value(UserDefaultsRepository.getTitleFontSize)
+    var titleFontSize: Float {
+        userDefaultsRepository.getTitleFontSize()
     }
 
-    func getTitleLineSpacing() -> Float {
-        value(UserDefaultsRepository.getTitleLineSpacing)
+    var titleLineSpacing: Float {
+        userDefaultsRepository.getTitleLineSpacing()
+    }
+
+    func toggleSelection(_ selection: inout Set<UUID>, for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
+    }
+
+    func selectedTags(from selection: Set<UUID>) -> [Tag] {
+        tags.filter { selection.contains($0.id) }
+    }
+
+    func selectedIDs(from tags: [Tag]) -> Set<UUID> {
+        Set(tags.map(\.id))
     }
 }
