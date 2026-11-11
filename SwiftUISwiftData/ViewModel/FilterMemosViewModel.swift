@@ -5,26 +5,61 @@
 //  Created by Hiromichi Sase on 2026/07/21.
 //
 
-internal import Combine
+import Observation
 import SwiftData
 
-/// FilterMemosViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving tags using the TagRepository.
-final class FilterMemosViewModel: ObservableObject {
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class FilterMemosViewModel {
     private let userDefaultsRepository: UserDefaultsRepository
-    /// An array of Tag objects that are published to update the UI when changes occur.
-    let tags: [Tag]
-    private let suiteName: String?
+    private(set) var tags: [Tag] = []
+    private let tagRepository: TagRepository
 
     init(
         tagRepository: TagRepository,
-        userDefaultsRepository: UserDefaultsRepository,
-        suiteName: String? = nil,
+        userDefaultsRepository: UserDefaultsRepository
     ) {
-        self.tags = (try? tagRepository.tags()) ?? []
+        self.tagRepository = tagRepository
         self.userDefaultsRepository = userDefaultsRepository
-        self.suiteName = suiteName
+        tags = (try? tagRepository.tags()) ?? []
+    }
+
+    // For tests / previews
+    init(
+        tags: [Tag],
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.tags = tags
+        self.userDefaultsRepository = userDefaultsRepository
+        self.tagRepository = TagRepository(
+            modelContext: ModelContainerManager.shared.modelContainer.mainContext
+        )
+    }
+
+    var titleLineLimit: Int {
+        userDefaultsRepository.getTitleLineLimit()
+    }
+
+    var titleFontSize: Float {
+        userDefaultsRepository.getTitleFontSize()
+    }
+
+    var titleLineSpacing: Float {
+        userDefaultsRepository.getTitleLineSpacing()
+    }
+
+    func saveButtonDisabled(
+        originalTitle: String,
+        editingTitle: String,
+        originalTags: [Tag],
+        editingTags: [Tag]
+    ) -> Bool {
+        if originalTags.sortedByOrder != editingTags.sortedByOrder { return false }
+        if originalTitle != editingTitle { return false }
+        return true
+    }
+
+    func hasFilteringCondition(title: String, tags: [Tag]) -> Bool {
+        !title.isEmpty || !tags.isEmpty
     }
 }

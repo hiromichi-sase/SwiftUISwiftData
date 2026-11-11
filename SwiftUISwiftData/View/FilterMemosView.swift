@@ -15,17 +15,13 @@ struct FilterMemosView: View {
     }
 
     /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = FilterMemosViewModel(
-        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-        userDefaultsRepository: UserDefaultsRepository()
-    )
+    @State
+    private var viewModel: FilterMemosViewModel
     /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
     @Binding
     private var isFiltering: Bool
-    /// タイトルの状態変数。
     @Binding
     private var title: String
     @State
@@ -44,7 +40,7 @@ struct FilterMemosView: View {
     private var showSelectTagView = false
     /// ナビゲーションパスの状態変数。
     @State
-    var path = NavigationPath()
+    private var path = NavigationPath()
 
     init(
         isFiltering: Binding<Bool>,
@@ -58,6 +54,13 @@ struct FilterMemosView: View {
         _tagsForFiltering = tagsForFiltering
         _selectedTags = State(initialValue: tagsForFiltering.wrappedValue)
         _selectedMemo = selectedMemo
+
+        _viewModel = State(
+            wrappedValue: FilterMemosViewModel(
+                tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
     }
 
     var body: some View {
@@ -138,19 +141,21 @@ struct FilterMemosView: View {
     }
 
     private var saveButtonDisabled: Bool {
-        if tagsForFiltering.sortedByOrder != selectedTags.sortedByOrder { return false }
-        if title != titleToStore { return false }
-        return true
-    }
-
-    private var hasFilteringCondition: Bool {
-        !title.isEmpty || !tagsForFiltering.isEmpty
+        viewModel.saveButtonDisabled(
+            originalTitle: title,
+            editingTitle: titleToStore,
+            originalTags: tagsForFiltering,
+            editingTags: selectedTags
+        )
     }
 
     private func saveFiltering() {
         title = titleToStore
         tagsForFiltering = selectedTags
-        isFiltering = hasFilteringCondition
+        isFiltering = viewModel.hasFilteringCondition(
+            title: titleToStore,
+            tags: selectedTags
+        )
         dismiss()
     }
 
