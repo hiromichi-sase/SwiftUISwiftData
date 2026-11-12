@@ -53,10 +53,8 @@ struct SettingsView: View {
     }
 
     /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = SettingsViewModel(
-        userDefaultsRepository: UserDefaultsRepository()
-    )
+    @State
+    private var viewModel: SettingsViewModel
     @State
     private var hasLink: Bool = false
     @State
@@ -93,18 +91,21 @@ struct SettingsView: View {
 
     @State
     private var color: Color = .clear
-
-    /// トーストメッセージの状態変数。
     @State
     private var toastMessage = ""
     @State
     private var showResetAlert = false
-    /// ビューを閉じるための環境変数。
+
     @Environment(\.dismiss)
     private var dismiss
 
     init() {
-        let snapshot = SettingsSnapshot(viewModel: viewModel)
+        let vm = SettingsViewModel(
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+        _viewModel = State(wrappedValue: vm)
+
+        let snapshot = SettingsSnapshot(viewModel: vm)
         _hasLink = State(initialValue: snapshot.hasLink)
         _contentFontSize = State(initialValue: snapshot.contentFontSize)
         _contentLineSpacing = State(initialValue: snapshot.contentLineSpacing)
@@ -283,6 +284,7 @@ struct SettingsView: View {
                 titleLineSpacing = snapshot.titleLineSpacing
                 showInfo = snapshot.showInfo
                 defaultTagColor = snapshot.defaultTagColor
+                color = snapshot.defaultTagColor.color()
 
                 hasLinkToStore = snapshot.hasLink
                 contentFontSizeToStore = snapshot.contentFontSize
@@ -298,7 +300,6 @@ struct SettingsView: View {
         )
     }
 
-    /// ツールバーの右側のアイテムを生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Reset", systemImage: "xmark.circle.fill") {
@@ -323,7 +324,6 @@ struct SettingsView: View {
         .keyboardShortcut("s", modifiers: [.command])
     }
 
-    /// 設定が更新されたかどうかを判定するプロパティ。
     private var settingsUpdated: Bool {
         storeSnapshot != currentSnapshot
     }

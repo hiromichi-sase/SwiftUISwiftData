@@ -5,14 +5,11 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-internal import Combine
-import SwiftData
+import Observation
 
-/// SettingsViewModel is an observable object that manages the state and interactions for the SettingsView, including setting values in the UserDefaultRepository.
-final class SettingsViewModel: ObservableObject {
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
+@Observable
+@MainActor
+final class SettingsViewModel {
     private let userDefaultsRepository: UserDefaultsRepository
     private let suiteName: String?
 
@@ -36,97 +33,40 @@ final class SettingsViewModel: ObservableObject {
         checker(userDefaultsRepository)(value)
     }
 
-    var settingsChanged: Bool {
-        userDefaultsRepository.settingsChanged
-    }
-
-    var contentFontSizeRange: ClosedRange<Float> {
-        userDefaultsRepository.contentFontSizeRange
-    }
-
-    var contentLineSpacingRange: ClosedRange<Float> {
-        userDefaultsRepository.contentLineSpacingRange
-    }
-
-    var titleLineLimitRange: ClosedRange<Int> {
-        userDefaultsRepository.titleLineLimitRange
-    }
-
-    var titleFontSizeRange: ClosedRange<Float> {
-        userDefaultsRepository.titleFontSizeRange
-    }
-
-    var titleLineSpacingRange: ClosedRange<Float> {
-        userDefaultsRepository.titleLineSpacingRange
-    }
+    var settingsChanged: Bool { userDefaultsRepository.settingsChanged }
+    var contentFontSizeRange: ClosedRange<Float> { userDefaultsRepository.contentFontSizeRange }
+    var contentLineSpacingRange: ClosedRange<Float> { userDefaultsRepository.contentLineSpacingRange }
+    var titleLineLimitRange: ClosedRange<Int> { userDefaultsRepository.titleLineLimitRange }
+    var titleFontSizeRange: ClosedRange<Float> { userDefaultsRepository.titleFontSizeRange }
+    var titleLineSpacingRange: ClosedRange<Float> { userDefaultsRepository.titleLineSpacingRange }
 
     func reset() {
         userDefaultsRepository.reset(suiteName: suiteName)
     }
 
-    func getHasLink() -> Bool {
-        value(UserDefaultsRepository.getHasLink)
-    }
+    func getHasLink() -> Bool { value(UserDefaultsRepository.getHasLink) }
+    func setHasLink(_ value: Bool) { setValue(value, with: UserDefaultsRepository.setHasLink) }
 
-    func setHasLink(_ value: Bool) {
-        setValue(value, with: UserDefaultsRepository.setHasLink)
-    }
+    func getContentFontSize() -> Float { value(UserDefaultsRepository.getContentFontSize) }
+    func setContentFontSize(_ value: Float) { setValue(value, with: UserDefaultsRepository.setContentFontSize) }
 
-    func getContentFontSize() -> Float {
-        value(UserDefaultsRepository.getContentFontSize)
-    }
+    func getContentLineSpacing() -> Float { value(UserDefaultsRepository.getContentLineSpacing) }
+    func setContentLineSpacing(_ value: Float) { setValue(value, with: UserDefaultsRepository.setContentLineSpacing) }
 
-    func setContentFontSize(_ value: Float) {
-        setValue(value, with: UserDefaultsRepository.setContentFontSize)
-    }
+    func getTitleLineLimit() -> Int { value(UserDefaultsRepository.getTitleLineLimit) }
+    func setTitleLineLimit(_ value: Int) { setValue(value, with: UserDefaultsRepository.setTitleLineLimit) }
 
-    func getContentLineSpacing() -> Float {
-        value(UserDefaultsRepository.getContentLineSpacing)
-    }
+    func getTitleFontSize() -> Float { value(UserDefaultsRepository.getTitleFontSize) }
+    func setTitleFontSize(_ value: Float) { setValue(value, with: UserDefaultsRepository.setTitleFontSize) }
 
-    func setContentLineSpacing(_ value: Float) {
-        setValue(value, with: UserDefaultsRepository.setContentLineSpacing)
-    }
+    func getTitleLineSpacing() -> Float { value(UserDefaultsRepository.getTitleLineSpacing) }
+    func setTitleLineSpacing(_ value: Float) { setValue(value, with: UserDefaultsRepository.setTitleLineSpacing) }
 
-    func getTitleLineLimit() -> Int {
-        value(UserDefaultsRepository.getTitleLineLimit)
-    }
+    func getShowInfo() -> Bool { value(UserDefaultsRepository.getShowInfo) }
+    func setShowInfo(_ value: Bool) { setValue(value, with: UserDefaultsRepository.setShowInfo) }
 
-    func setTitleLineLimit(_ value: Int) {
-        setValue(value, with: UserDefaultsRepository.setTitleLineLimit)
-    }
-
-    func getTitleFontSize() -> Float {
-        value(UserDefaultsRepository.getTitleFontSize)
-    }
-
-    func setTitleFontSize(_ value: Float) {
-        setValue(value, with: UserDefaultsRepository.setTitleFontSize)
-    }
-
-    func getTitleLineSpacing() -> Float {
-        value(UserDefaultsRepository.getTitleLineSpacing)
-    }
-
-    func setTitleLineSpacing(_ value: Float) {
-        setValue(value, with: UserDefaultsRepository.setTitleLineSpacing)
-    }
-
-    func getShowInfo() -> Bool {
-        value(UserDefaultsRepository.getShowInfo)
-    }
-
-    func setShowInfo(_ value: Bool) {
-        setValue(value, with: UserDefaultsRepository.setShowInfo)
-    }
-
-    func getDefaultTagColor() -> String {
-        value(UserDefaultsRepository.getDefaultTagColor)
-    }
-
-    func setDefaultTagColor(_ value: String) {
-        setValue(value, with: UserDefaultsRepository.setDefaultTagColor)
-    }
+    func getDefaultTagColor() -> String { value(UserDefaultsRepository.getDefaultTagColor) }
+    func setDefaultTagColor(_ value: String) { setValue(value, with: UserDefaultsRepository.setDefaultTagColor) }
 
     func hasLinkChanged(_ hasLink: Bool) -> Bool {
         hasChanged(hasLink, with: UserDefaultsRepository.hasLinkChanged)

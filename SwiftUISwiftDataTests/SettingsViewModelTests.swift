@@ -15,9 +15,7 @@ struct SettingsViewModelTests {
     @Test
     func hasLink() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Bool = true
         let changed = dependency.testTarget.hasLinkChanged(defaultValue)
@@ -31,9 +29,7 @@ struct SettingsViewModelTests {
     @Test
     func contentFontSize() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Float = 16.0
         let changed = dependency.testTarget.contentFontSizeChanged(defaultValue)
@@ -51,9 +47,7 @@ struct SettingsViewModelTests {
     @Test
     func contentLineSpacing() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Float = .zero
         let changed = dependency.testTarget.contentLineSpacingChanged(defaultValue)
@@ -71,9 +65,7 @@ struct SettingsViewModelTests {
     @Test
     func titleLineLimit() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Int = 3
         let changed = dependency.testTarget.titleLineLimitChanged(defaultValue)
@@ -91,9 +83,7 @@ struct SettingsViewModelTests {
     @Test
     func titleFontSize() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Float = 16.0
         let changed = dependency.testTarget.titleFontSizeChanged(defaultValue)
@@ -111,9 +101,7 @@ struct SettingsViewModelTests {
     @Test
     func titleLineSpacing() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Float = .zero
         let changed = dependency.testTarget.titleLineSpacingChanged(defaultValue)
@@ -131,9 +119,7 @@ struct SettingsViewModelTests {
     @Test
     func showInfo() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: Bool = false
         let changed = dependency.testTarget.showInfoChanged(defaultValue)
@@ -147,9 +133,7 @@ struct SettingsViewModelTests {
     @Test
     func defaultTagColor() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         let defaultValue: String = "#000000"
         let changed = dependency.testTarget.defaultTagColorChanged(defaultValue)
@@ -161,11 +145,9 @@ struct SettingsViewModelTests {
 
     @MainActor
     @Test
-    func reset() {
+    func reset_restoresAllDefaults() {
         let dependency = Dependency()
-        defer {
-            dependency.removeUserDefaults()
-        }
+        defer { dependency.removeUserDefaults() }
 
         dependency.testTarget.setHasLink(false)
         dependency.testTarget.setContentFontSize(30.0)
@@ -178,6 +160,15 @@ struct SettingsViewModelTests {
         #expect(dependency.testTarget.settingsChanged)
 
         dependency.testTarget.reset()
+
+        #expect(dependency.testTarget.getHasLink() == true)
+        #expect(dependency.testTarget.getContentFontSize() == Float(16.0))
+        #expect(dependency.testTarget.getContentLineSpacing() == Float.zero)
+        #expect(dependency.testTarget.getTitleLineLimit() == 3)
+        #expect(dependency.testTarget.getTitleFontSize() == Float(16.0))
+        #expect(dependency.testTarget.getTitleLineSpacing() == Float.zero)
+        #expect(dependency.testTarget.getShowInfo() == false)
+        #expect(dependency.testTarget.getDefaultTagColor() == "#000000")
         #expect(!dependency.testTarget.settingsChanged)
     }
 }
