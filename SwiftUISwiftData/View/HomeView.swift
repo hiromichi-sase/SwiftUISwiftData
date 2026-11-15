@@ -8,57 +8,35 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Binding
-    var section: Section?
-    private let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? ""
+    @Bindable
+    var viewModel: HomeViewModel
 
-    enum Section: CaseIterable, Identifiable {
-        case memosView
-        case tagsView
-        case settingsView
-        var id: Section { self }
-
-        private var item: (title: String, icon: String) {
-            switch self {
-                case .memosView:
-                    ("Memos", "long.text.page.and.pencil")
-                case .tagsView:
-                    ("Tags", "tag")
-                case .settingsView:
-                    ("Settings", "gearshape")
-            }
-        }
-
-        var title: String {
-            item.title
-        }
-
-        var icon: String {
-            item.icon
-        }
-    }
-
-    init(section: Binding<Section?>) {
-        _section = section
+    init(viewModel: HomeViewModel) {
+        self.viewModel = viewModel
     }
 
     var body: some View {
-        VStack {
-            List(Section.allCases, selection: $section) { section in
-                HStack {
-                    Image(systemName: section.icon)
-                        .frame(maxWidth: 24.0)
-                    Text(section.title)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
+        List(viewModel.menuItems, selection: $viewModel.selectedSection) { item in
+            HStack {
+                Image(systemName: item.icon)
+                    .frame(maxWidth: 24.0)
+                Text(item.title)
+                Spacer()
+                Image(systemName: "chevron.right")
             }
-            .navigationTitle(appName)
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle(viewModel.appName)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    HomeView(section: .constant(.memosView))
+    NavigationStack {
+        HomeView(
+            viewModel: HomeViewModel(
+                selectedSection: .memos,
+                appNameProvider: { "SwiftUISwiftData" }
+            )
+        )
+    }
 }

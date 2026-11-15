@@ -16,8 +16,10 @@ struct ContentView: View {
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext)
     )
 
+    /// HomeView の表示状態を管理する ViewModel。
     @State
-    var selectedSection: HomeView.Section?
+    private var homeViewModel = HomeViewModel(selectedSection: nil)
+
     /// 編集モードの状態を管理する状態変数。
     @State
     var memosViewEditMode: EditMode = .inactive
@@ -33,21 +35,21 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            HomeView(section: $selectedSection)
+            HomeView(viewModel: homeViewModel)
         } content: {
-            switch selectedSection {
-                case .memosView:
+            switch homeViewModel.selectedSection {
+                case .memos:
                     MemosView(
                         editMode: $memosViewEditMode,
                         selectedMemo: $selectedMemo,
                         showingAddMemo: $showingAddMemo,
                     )
-                case .tagsView:
+                case .tags:
                     TagsView(
                         editMode: $tagsViewEditMode,
                         selectedTag: $selectedTag,
                     )
-                case .settingsView:
+                case .settings:
                     SettingsView()
                 default:
                     EmptyView()
@@ -58,19 +60,19 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openAddMemoFromShortcut)) { _ in
             openNewMemoFlowFromShortcut()
         }
-        .onChange(of: selectedSection) { _, newValue in
+        .onChange(of: homeViewModel.selectedSection) { _, newValue in
             resetStateForSectionChange(newValue)
         }
     }
 
     @ViewBuilder
     private var detailView: some View {
-        switch selectedSection {
-            case .memosView:
+        switch homeViewModel.selectedSection {
+            case .memos:
                 memosDetailView
-            case .tagsView:
+            case .tags:
                 tagsDetailView
-            case .settingsView:
+            case .settings:
                 EmptyView()
             default:
                 EmptyView()
@@ -112,7 +114,7 @@ extension ContentView {
     func openNewMemoFlowFromShortcut() {
         resetNavigationState()
 
-        selectedSection = .memosView
+        homeViewModel.selectedSection = .memos
         showingAddMemo = true
     }
 
@@ -122,12 +124,12 @@ extension ContentView {
         NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
     }
 
-    func resetStateForSectionChange(_ section: HomeView.Section?) {
-        if section != .memosView {
+    func resetStateForSectionChange(_ section: HomeViewModel.Section?) {
+        if section != .memos {
             clearMemoSelectionState()
         }
 
-        if section != .tagsView {
+        if section != .tags {
             clearTagSelectionState()
         }
     }
