@@ -10,28 +10,13 @@ import SwiftUI
 
 /// メモのリストを表示するビュー。
 struct ContentView: View {
-    /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = ContentViewModel(
+    @StateObject
+    private var viewModel = ContentViewModel(
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext)
     )
 
-    /// HomeView の表示状態を管理する ViewModel。
     @State
     private var homeViewModel = HomeViewModel(selectedSection: nil)
-
-    /// 編集モードの状態を管理する状態変数。
-    @State
-    var memosViewEditMode: EditMode = .inactive
-    @State
-    var selectedMemo: Memo?
-    @State
-    var tagsViewEditMode: EditMode = .inactive
-    @State
-    var selectedTag: Tag?
-    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
-    @State
-    var showingAddMemo: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -40,14 +25,14 @@ struct ContentView: View {
             switch homeViewModel.selectedSection {
                 case .memos:
                     MemosView(
-                        editMode: $memosViewEditMode,
-                        selectedMemo: $selectedMemo,
-                        showingAddMemo: $showingAddMemo,
+                        editMode: $viewModel.state.memosViewEditMode,
+                        selectedMemo: $viewModel.state.selectedMemo,
+                        showingAddMemo: $viewModel.state.showingAddMemo
                     )
                 case .tags:
                     TagsView(
-                        editMode: $tagsViewEditMode,
-                        selectedTag: $selectedTag,
+                        editMode: $viewModel.state.tagsViewEditMode,
+                        selectedTag: $viewModel.state.selectedTag
                     )
                 case .settings:
                     SettingsView()
@@ -62,6 +47,9 @@ struct ContentView: View {
         }
         .onChange(of: homeViewModel.selectedSection) { _, newValue in
             resetStateForSectionChange(newValue)
+        }
+        .onAppear {
+            viewModel.resetStateForSectionChange(homeViewModel.selectedSection)
         }
     }
 
@@ -81,10 +69,10 @@ struct ContentView: View {
 
     @ViewBuilder
     private var memosDetailView: some View {
-        if memosViewEditMode.isEditing {
+        if viewModel.state.memosViewEditMode.isEditing {
             Text("Select memos to edit or delete")
         }
-        else if let selectedMemo {
+        else if let selectedMemo = viewModel.state.selectedMemo {
             BrowseMemoView(memo: selectedMemo)
                 .modelContext(viewModel.modelContext)
                 .id(selectedMemo.id)
@@ -96,10 +84,10 @@ struct ContentView: View {
 
     @ViewBuilder
     private var tagsDetailView: some View {
-        if tagsViewEditMode.isEditing {
+        if viewModel.state.tagsViewEditMode.isEditing {
             Text("Select tags to edit or delete")
         }
-        else if let selectedTag {
+        else if let selectedTag = viewModel.state.selectedTag {
             BrowseTagView(tag: selectedTag)
                 .modelContext(viewModel.modelContext)
                 .id(selectedTag.id)
@@ -112,36 +100,16 @@ struct ContentView: View {
 
 extension ContentView {
     func openNewMemoFlowFromShortcut() {
-        resetNavigationState()
-
-        homeViewModel.selectedSection = .memos
-        showingAddMemo = true
+        viewModel.openNewMemoFlowFromShortcut()
+        homeViewModel.selectedSection = viewModel.state.selectedSection
     }
 
     func resetNavigationState() {
-        clearMemoSelectionState()
-        clearTagSelectionState()
-        NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
+        viewModel.resetNavigationState()
     }
 
     func resetStateForSectionChange(_ section: HomeViewModel.Section?) {
-        if section != .memos {
-            clearMemoSelectionState()
-        }
-
-        if section != .tags {
-            clearTagSelectionState()
-        }
-    }
-
-    func clearMemoSelectionState() {
-        memosViewEditMode = .inactive
-        selectedMemo = nil
-    }
-
-    func clearTagSelectionState() {
-        tagsViewEditMode = .inactive
-        selectedTag = nil
+        viewModel.resetStateForSectionChange(section)
     }
 }
 

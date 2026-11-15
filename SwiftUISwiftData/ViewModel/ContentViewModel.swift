@@ -7,22 +7,67 @@
 
 internal import Combine
 import SwiftData
+import SwiftUI
 
-/// ContentViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
+struct ContentViewState: Equatable {
+    var selectedSection: HomeViewModel.Section? = nil
+    var memosViewEditMode: EditMode = .inactive
+    var selectedMemo: Memo? = nil
+    var tagsViewEditMode: EditMode = .inactive
+    var selectedTag: Tag? = nil
+    var showingAddMemo: Bool = false
+}
+
+@MainActor
 final class ContentViewModel: ObservableObject {
-    /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
-    ///
-    /// It provides functions to add and update memos in the memoRepository.
+    @Published
+    var state: ContentViewState
+
     private let memoRepository: MemoRepository
 
     init(
-        memoRepository: MemoRepository
+        memoRepository: MemoRepository,
+        initialState: ContentViewState = ContentViewState()
     ) {
         self.memoRepository = memoRepository
+        self.state = initialState
     }
 
-    /// The model context used for performing SwiftData operations, accessed from the memoRepository.
     var modelContext: ModelContext {
         memoRepository.modelContext
+    }
+
+    func openNewMemoFlowFromShortcut() {
+        resetNavigationState()
+        state.selectedSection = .memos
+        state.showingAddMemo = true
+    }
+
+    func resetNavigationState() {
+        clearMemoSelectionState()
+        clearTagSelectionState()
+        NotificationCenter.default.post(name: .closeAllPresentedViewsFromShortcut, object: nil)
+    }
+
+    func resetStateForSectionChange(_ section: HomeViewModel.Section?) {
+        state.selectedSection = section
+
+        if section != .memos {
+            clearMemoSelectionState()
+        }
+
+        if section != .tags {
+            clearTagSelectionState()
+        }
+    }
+
+    func clearMemoSelectionState() {
+        state.memosViewEditMode = .inactive
+        state.selectedMemo = nil
+    }
+
+    func clearTagSelectionState() {
+        state.tagsViewEditMode = .inactive
+        state.selectedTag = nil
     }
 }
