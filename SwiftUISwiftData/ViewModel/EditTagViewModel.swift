@@ -6,59 +6,128 @@
 //
 
 internal import Combine
-import SwiftData
+import Foundation
 
-/// EditTagViewModel is responsible for handling the logic related to adding and updating tags.
-///
-/// It interacts with the TagRepository to perform these operations.
+protocol TagRepositoryProtocol {
+    func add(_ tag: Tag) throws
+    func update(_ tag: Tag, title: String, color: String) throws
+}
+
+protocol UserDefaultsRepositoryProtocol {
+    func getShowInfo() -> Bool
+    func getDefaultTagColor() -> String
+}
+
+extension TagRepository: TagRepositoryProtocol {}
+extension UserDefaultsRepository: UserDefaultsRepositoryProtocol {}
+
+@MainActor
 final class EditTagViewModel: ObservableObject {
-    /// The tagRepository property is an instance of TagRepository, which is used to manage the tags in the application.
-    ///
-    /// It provides functions to add and update tags in the tagRepository.
-    private let tagRepository: TagRepository
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
-    private let userDefaultsRepository: UserDefaultsRepository
+    enum AlertType: Identifiable, Equatable {
+        case close
+        case error
+
+        var id: Self { self }
+    }
+
+    // Input
+    @Published
+    var title: String
+    @Published
+    var colorString: String
+
+    // UI state
+    @Published
+    var toastMessage: String = ""
+    @Published
+    var currentAlert: AlertType?
+    @Published
+    var errorMessage: String = ""
+    @Published
+    var shouldDismiss: Bool = false
+    @Published
+    private(set) var isSaving: Bool = false
+
+    private let tagRepository: TagRepositoryProtocol
+    private let userDefaultsRepository: UserDefaultsRepositoryProtocol
+
+    private(set) var tag: Tag?
+
+    private var initialTitle: String
+    private var initialColor: String
 
     init(
-        tagRepository: TagRepository,
-        userDefaultsRepository: UserDefaultsRepository
+        tag: Tag? = nil,
+        tagRepository: TagRepositoryProtocol,
+        userDefaultsRepository: UserDefaultsRepositoryProtocol
     ) {
         self.tagRepository = tagRepository
         self.userDefaultsRepository = userDefaultsRepository
+        self.tag = tag
+
+        let defaultColor = userDefaultsRepository.getDefaultTagColor()
+        let startTitle = tag?.title ?? ""
+        let startColor = tag?.color ?? defaultColor
+
+        self.title = startTitle
+        self.colorString = startColor
+        self.initialTitle = startTitle
+        self.initialColor = startColor
     }
 
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
+    var navigationTitle: String {
+        tag?.title ?? "Add Tag"
     }
 
-    /// Adds a new tag to the tagRepository.
-    ///
-    /// This function takes a Tag object as a parameter and attempts to add it to the tagRepository. If an error occurs during the addition, it throws an error.
-    /// - Parameter tag: The Tag object that needs to be added to the tagRepository.
-    /// - throws: An error.
-    func add(_ tag: Tag) throws {
-        try tagRepository.add(tag)
+    var showInfo: Bool {
+        userDefaultsRepository.getShowInfo() && tag != nil
     }
 
-    /// Updates an existing tag in the tagRepository.
-    ///
-    /// This function takes a Tag object as a parameter and attempts to update it in the tagRepository. If an error occurs during the update, it throws an error.
-    /// - Parameters:
-    ///   - tag: The Tag object that needs to be updated in the tagRepository.
-    ///   - title: The title that needs to be updated.
-    ///   - color: The color that needs to be updated.
-    /// - throws: An error.
-    func update(_ tag: Tag, title: String, color: String) throws {
-        try tagRepository.update(tag, title: title, color: color)
+    var isTagUpdated: Bool {
+        title != initialTitle || colorString != initialColor
     }
 
-    func getShowInfo() -> Bool {
-        value(UserDefaultsRepository.getShowInfo)
+    var canSave: Bool {
+        !isSaving && !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && isTagUpdated
     }
 
-    func getDefaultTagColor() -> String {
-        value(UserDefaultsRepository.getDefaultTagColor)
+    func onTapClose() {
+        if isTagUpdated {
+            currentAlert = .close
+        }
+        else {
+            shouldDismiss = true
+        }
+    }
+
+    func onConfirmClose() {
+        shouldDismiss = true
+    }
+
+    func saveTag() {
+        guard canSave else { return }
+
+        isSaving = true
+        defer { isSaving = false }
+
+        do {
+            if let tag {
+                try tagRepository.update(tag, title: title, color: colorString)
+            }
+            else {
+                let newTag = Tag(title: title, color: colorString)
+                try tagRepository.add(newTag)
+                self.tag = newTag
+            }
+
+            initialTitle = title
+            initialColor = colorString
+
+            toastMessage = "Successfully saved!"
+        }
+        catch {
+            errorMessage = error.localizedDescription
+            currentAlert = .error
+        }
     }
 }

@@ -10,64 +10,37 @@ import SwiftUI
 
 /// タグの内容を編集するビュー。
 struct EditTagView: View {
-    enum AlertType: Identifiable {
-        case close
-        case error
-        var id: AlertType { self }
-    }
+    @StateObject
+    private var viewModel: EditTagViewModel
 
-    /// ビューモデルの状態変数。
-    @ObservedObject
-    var viewModel = EditTagViewModel(
-        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-        userDefaultsRepository: UserDefaultsRepository()
-    )
-    /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
-    /// 編集中のタグ。
-    @State
-    private var tag: Tag?
-    /// タイトルの状態変数。
-    @State
-    private var title: String
-    /// 色の状態変数。
-    @State
-    private var colorString: String = ""
-    @State
-    private var color: Color = .clear
-    /// トーストメッセージの状態変数。
-    @State
-    private var toastMessage = ""
-    /// テキストフィールドのフォーカス状態。
+
     @FocusState
     private var textFieldFocus: Bool
-    @State
-    private var error: any Error?
-    @State
-    private var currentAlert: AlertType?
-    /// ナビゲーションパスの状態変数。
-    @State
-    var path = NavigationPath()
 
-    private var defaultTagColor: String {
-        viewModel.getDefaultTagColor()
-    }
+    @State
+    private var color: Color = .clear
 
-    /// イニシャライザ。
+    @State
+    private var path = NavigationPath()
+
     /// - Parameter tag: 編集するタグ（デフォルトはnilで新規作成）
     init(tag: Tag? = nil) {
-        self.tag = tag
-        _title = State(initialValue: tag?.title ?? "")
-        _colorString = State(initialValue: tag?.color ?? viewModel.getDefaultTagColor())
-        _color = State(initialValue: tag?.color.color() ?? viewModel.getDefaultTagColor().color())
+        let vm = EditTagViewModel(
+            tag: tag,
+            tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+        _viewModel = StateObject(wrappedValue: vm)
+        _color = State(initialValue: vm.colorString.color())
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 4) {
                 CustomTextField(
-                    text: $title,
+                    text: $viewModel.title,
                     focus: _textFieldFocus,
                     placeholder: "Input Title",
                     background: Color(uiColor: .secondarySystemBackground),
@@ -75,28 +48,30 @@ struct EditTagView: View {
                     submitButtonTapped: nil
                 )
                 .padding(.bottom, 20)
+
                 HStack {
-                    ColorPicker(
-                        selection: $color,
-                        supportsOpacity: false
-                    ) {
+                    ColorPicker(selection: $color, supportsOpacity: false) {
                         HStack {
                             Text("Select Color")
                             Image(systemName: "paintpalette")
                         }
                     }
                     .onChange(of: color) {
-                        colorString = color.hexString()
+                        viewModel.colorString = color.hexString()
                     }
                     .frame(width: 170)
+
                     Spacer()
+
                     TagColorView(
-                        colorString: colorString,
+                        colorString: viewModel.colorString,
                         showColorString: true
                     )
                 }
+
                 Spacer()
-                if viewModel.getShowInfo(), let tag {
+
+                if viewModel.showInfo, let tag = viewModel.tag {
                     InfoText.dateView(for: tag)
                 }
             }
@@ -105,118 +80,50 @@ struct EditTagView: View {
             .padding(.bottom, 8)
             .onAppear {
                 textFieldFocus = true
+                color = viewModel.colorString.color()
             }
-            .alert(item: $currentAlert) { alertType in
-                switch alertType {
-                    case .close:
-                        closeAlert
-                    case .error:
-                        errorAlert
+            .onChange(of: viewModel.shouldDismiss) {
+                if viewModel.shouldDismiss {
+                    dismiss()
                 }
             }
-            .navigationTitle(tag?.title ?? "Add Tag")
+            .alert(item: $viewModel.currentAlert) { alertType in
+                switch alertType {
+                    case .close:
+                        Alert(
+                            title: Text("Close without saving?"),
+                            primaryButton: .destructive(Text("Close")) {
+                                viewModel.onConfirmClose()
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    case .error:
+                        Alert(
+                            title: Text("The Error occured."),
+                            message: Text(viewModel.errorMessage),
+                            dismissButton: .default(Text("OK"))
+                        )
+                }
+            }
+            .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
-                    toolbarItemTopBarLeading
+                    Button("Close", systemImage: "xmark") {
+                        viewModel.onTapClose()
+                    }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    toolbarItemTopBarTrailing
+                    Button("Save", systemImage: "checkmark.circle.fill") {
+                        viewModel.saveTag()
+                    }
+                    .disabled(!viewModel.canSave)
+                    .keyboardShortcut("s", modifiers: [.command])
                 }
             }
-            .toast(message: $toastMessage)
+            .toast(message: $viewModel.toastMessage)
         }
-    }
-
-    private var closeAlert: Alert {
-        Alert(
-            title: Text("Close without saving?"),
-            primaryButton: .destructive(Text("Close")) {
-                dismiss()
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
-    private var errorAlert: Alert {
-        .init(
-            title: Text("The Error occured."),
-            message: Text(error?.localizedDescription ?? ""),
-            dismissButton: .default(Text("OK"))
-        )
-    }
-
-    /// ツールバーの左側のアイテムを定義するビュー。
-    ///
-    /// 変更がある場合は確認アラートを表示し、変更がない場合はビューを閉じる。
-    @ViewBuilder
-    private var toolbarItemTopBarLeading: some View {
-        Button("Close", systemImage: "xmark") {
-            if tagUpdated {
-                currentAlert = .close
-            }
-            else {
-                dismiss()
-            }
-        }
-    }
-
-    /// ツールバーの右側のアイテムを定義するビュー。
-    ///
-    /// タイトルが空でない場合はリネームのボタンを表示し、常に保存のボタンを表示する。保存のボタンは変更がある場合のみ有効になる。
-    @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
-        Button("Save", systemImage: "checkmark.circle.fill") {
-            saveTag()
-        }
-        .disabled(!tagUpdated || title.isEmpty)
-        .keyboardShortcut("s", modifiers: [.command])
-    }
-
-    private func saveTag() {
-        if let tag {
-            let oldTitle = tag.title
-            let oldColor = tag.color
-
-            do {
-                try viewModel.update(tag, title: title, color: colorString)
-                toastMessage = "Successfully saved!"
-            }
-            catch {
-                self.error = error
-                currentAlert = .error
-
-                tag.title = oldTitle
-                tag.color = oldColor
-                print("Failed to update tag: \(error)")
-            }
-        }
-        else {
-            let tag = Tag(title: title, color: colorString)
-
-            do {
-                try viewModel.add(tag)
-                self.tag = tag
-                toastMessage = "Successfully saved!"
-            }
-            catch {
-                self.error = error
-                currentAlert = .error
-                print("Failed to add tag: \(error)")
-            }
-        }
-    }
-
-    /// タグが更新されたかどうかを判定するプロパティ。
-    ///
-    /// 既存のタグがある場合はタイトルまたは色が変更されたかどうかを確認し、既存のタグがない場合はタイトルまたは色が空でないかどうかを確認する。
-    private var tagUpdated: Bool {
-        if let tag {
-            return tag.title != title || tag.color != colorString
-        }
-
-        return !title.isEmpty || colorString != defaultTagColor
     }
 }
 
