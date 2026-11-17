@@ -5,70 +5,160 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-internal import Combine
-import SwiftData
+import SwiftUI
 
-/// EditMemoViewModel is responsible for handling the logic related to adding and updating memos.
-///
-/// It interacts with the MemoRepository to perform these operations.
-final class EditMemoViewModel: ObservableObject {
-    /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
-    ///
-    /// It provides functions to add and update memos in the memoRepository.
+@MainActor
+@Observable
+final class EditMemoViewModel {
+    enum AlertType: Identifiable, Equatable {
+        case close
+        case error
+
+        var id: Self { self }
+    }
+
     private let memoRepository: MemoRepository
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
-    /// An array of Tag objects that are published to update the UI when changes occur.
-    @Published
+
+    private(set) var memo: Memo?
+
+    var title: String
+    var titleToStore: String
+    var content: String
+    var selectedTags: [Tag]
     private(set) var tags: [Tag] = []
 
+    var showTitleView = false
+    var showSelectTagView = false
+    var toastMessage = ""
+    var error: (any Error)?
+    var currentAlert: AlertType?
+
     init(
+        memo: Memo? = nil,
         memoRepository: MemoRepository,
         tagRepository: TagRepository,
         userDefaultsRepository: UserDefaultsRepository
     ) {
+        self.memo = memo
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
-        tags = (try? tagRepository.tags()) ?? []
+
+        self.title = memo?.title ?? ""
+        self.titleToStore = memo?.title ?? ""
+        self.content = memo?.content ?? ""
+        self.selectedTags = memo?.tags ?? []
+        self.tags = (try? tagRepository.tags()) ?? []
     }
 
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
+    // MARK: - Derived
+
+    var navigationTitle: String {
+        title
     }
 
-    /// Adds a new memo to the memoRepository.
-    ///
-    /// This function takes a Memo object as a parameter and attempts to add it to the memoRepository. If an error occurs during the addition, it throws an error.
-    /// - Parameter memo: The Memo object that needs to be added to the memoRepository.
-    /// - throws: An error.
-    func add(_ memo: Memo) throws {
-        try memoRepository.add(memo)
+    var memoUpdated: Bool {
+        guard let memo else {
+            return !title.isEmpty || !content.isEmpty || !selectedTags.isEmpty
+        }
+
+        return memo.title != title
+            || memo.content != content
+            || memo.tags.sortedByOrder != selectedTags.sortedByOrder
     }
 
-    /// Updates an existing memo in the memoRepository.
-    ///
-    /// This function takes a Memo object as a parameter and attempts to update it in the memoRepository. If an error occurs during the update, it throws an error.
-    /// - Parameters:
-    ///   - memo: The Memo object that needs to be updated in the memoRepository.
-    ///   - title: The title that needs to be updated.
-    ///   - content: The content that needs to be updated.
-    ///   - tags: The tags that needs to be updated.
-    /// - throws: An error.
-    func update(_ memo: Memo, title: String, content: String, tags: [Tag]) throws {
-        try memoRepository.update(memo, title: title, content: content, tags: tags)
+    var canSave: Bool {
+        memoUpdated && !showTitleView
     }
+
+    var canOpenTagSelector: Bool {
+        !showTitleView && !tags.isEmpty
+    }
+
+    // MARK: - Intents
+
+    func onTapClose() {
+        currentAlert = memoUpdated ? .close : nil
+    }
+
+    func onTapRename() {
+        showTitleView = true
+    }
+
+    func submitRename() {
+        showTitleView = false
+        title = titleToStore
+    }
+
+    func cancelRename() {
+        showTitleView = false
+        titleToStore = title
+    }
+
+    func onTapTag() {
+        showSelectTagView = true
+    }
+
+    func onReceiveCloseAllPresentedViews() {
+        showSelectTagView = false
+        showTitleView = false
+        currentAlert = nil
+    }
+
+    func save() {
+        if let memo {
+            updateMemo(memo)
+        }
+        else {
+            addMemo()
+        }
+    }
+
+    // MARK: - UseCases
+
+    private func addMemo() {
+        let newMemo = Memo(title: title, content: content, tags: selectedTags)
+        do {
+            try memoRepository.add(newMemo)
+            memo = newMemo
+            toastMessage = "Successfully saved!"
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+        }
+    }
+
+    private func updateMemo(_ memo: Memo) {
+        let oldTitle = memo.title
+        let oldContent = memo.content
+        let oldTags = memo.tags
+
+        do {
+            try memoRepository.update(memo, title: title, content: content, tags: selectedTags)
+            toastMessage = "Successfully saved!"
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+
+            memo.title = oldTitle
+            memo.content = oldContent
+            memo.tags = oldTags
+        }
+    }
+
+    // MARK: - Preferences
 
     func getContentFontSize() -> Float {
-        value(UserDefaultsRepository.getContentFontSize)
+        userDefaultsRepository.getContentFontSize()
     }
 
     func getContentLineSpacing() -> Float {
-        value(UserDefaultsRepository.getContentLineSpacing)
+        userDefaultsRepository.getContentLineSpacing()
     }
 
     func getShowInfo() -> Bool {
-        value(UserDefaultsRepository.getShowInfo)
+        userDefaultsRepository.getShowInfo()
     }
 }
