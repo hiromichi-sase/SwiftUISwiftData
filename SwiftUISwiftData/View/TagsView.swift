@@ -9,107 +9,113 @@ import SwiftData
 import SwiftUI
 
 struct TagsView: View {
-    enum AlertType: Identifiable {
-        case delete
-        case error
-        var id: AlertType { self }
-    }
-
-    /// ビューの状態を管理するViewModel。
-    @ObservedObject
-    var viewModel = TagsViewModel(
-        tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-        userDefaultsRepository: UserDefaultsRepository()
-    )
-    /// 編集モードの状態を管理する状態変数。
+    @StateObject
+    var viewModel: TagsViewModel
+    @State
+    var scrollViewProxy: ScrollViewProxy?
+    @State
+    private var didSyncInitialExternalState = false
     @Binding
     var editMode: EditMode
-    /// 削除するタグを保持する状態変数。
-    @State
-    var tagToDelete: Tag?
-    /// 選択されたタグのIDを保持する状態変数。
     @Binding
     var selectedTag: Tag?
-    /// 複数選択されたタグのIDを保持する状態変数。
-    @State
-    var selection: Set<UUID> = []
-    /// スクロールビューのプロキシを保持する状態変数。
-    @State
-    private var scrollViewProxy: ScrollViewProxy?
-    /// 新しいタグを追加するためのフルスクリーンカバーを表示するフラグ。
-    @State
-    private var showingAddTag = false
-    /// トーストメッセージの状態変数。
-    @State
-    var toastMessage = ""
-    @State
-    var error: any Error?
-    @State
-    var currentAlert: AlertType?
 
-    /// イニシャライザ。
     init(
         editMode: Binding<EditMode>,
-        selectedTag: Binding<Tag?>,
+        selectedTag: Binding<Tag?>
     ) {
         _editMode = editMode
         _selectedTag = selectedTag
+        _viewModel = StateObject(
+            wrappedValue: TagsViewModel(
+                tagRepository: TagRepository(
+                    modelContext: ModelContainerManager.shared.modelContainer.mainContext
+                ),
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
     }
 
     var body: some View {
         VStack(spacing: 8.0) {
             list
-                .onChange(of: viewModel.tags) { oldTags, newTags in
-                    onChange(oldTags: oldTags, newTags: newTags)
+                .onAppear {
+                    guard !didSyncInitialExternalState else { return }
+                    didSyncInitialExternalState = true
+                    viewModel.editMode = editMode
+                    viewModel.selectedTag = selectedTag
                 }
-                .alert(item: $currentAlert) { alertType in
+                .onChange(of: viewModel.editMode) { _, newValue in
+                    editMode = newValue
+                }
+                .onChange(of: viewModel.selectedTag) { _, newValue in
+                    selectedTag = newValue
+                }
+                .onChange(of: viewModel.tags) { oldTags, newTags in
+                    viewModel.onTagsChanged(oldTags: oldTags, newTags: newTags)
+                    if let id = viewModel.consumeScrollTargetID(),
+                        let proxy = scrollViewProxy
+                    {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            proxy.scrollTo(id, anchor: .center)
+                        }
+                    }
+                }
+                .alert(item: $viewModel.currentAlert) { alertType in
                     switch alertType {
                         case .delete:
-                            deleteAlert
+                            Alert(
+                                title: Text("Delete"),
+                                message: Text("Are you sure you want to delete selected tag(s)?"),
+                                primaryButton: .destructive(Text("Delete")) {
+                                    viewModel.confirmDelete()
+                                },
+                                secondaryButton: .cancel()
+                            )
                         case .error:
-                            errorAlert
+                            Alert(
+                                title: Text("Error"),
+                                message: Text(viewModel.error?.localizedDescription ?? "Unknown error"),
+                                dismissButton: .default(Text("OK"))
+                            )
                     }
                 }
-                .navigationTitle(navigationTitle)
+                .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(editMode.isEditing)
+                .navigationBarBackButtonHidden(viewModel.editMode.isEditing)
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
-                        toolbarItemTopBarTrailing
+                        toolbarTopTrailing
                     }
                     ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarItemBottomBar
+                        toolbarBottomBar
                     }
                 }
-                .environment(\.editMode, $editMode)
-                .sheet(isPresented: $showingAddTag) {
+                .environment(\.editMode, $viewModel.editMode)
+                .sheet(isPresented: $viewModel.showingAddTag) {
                     EditTagView()
                         .interactiveDismissDisabled(true)
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
-                    showingAddTag = false
-                    selectedTag = nil
-                    selection.removeAll()
-                    editMode = .inactive
-                    tagToDelete = nil
-                    currentAlert = nil
+                    viewModel.onCloseAllPresentedViews()
                 }
-                .toast(message: $toastMessage)
+                .toast(message: $viewModel.toastMessage)
         }
     }
 
-    /// タグのリストを表示するビュー。
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
-                if editMode.isEditing {
-                    List(selection: $selection) {
+                if viewModel.editMode.isEditing {
+                    List(selection: $viewModel.selection) {
                         ForEach(viewModel.tags) { tag in
                             activeRow(for: tag)
                                 .id(tag.id)
                                 .tag(tag.id)
                         }
-                        .onMove(perform: moveTag)
+                        .onMove(perform: viewModel.moveTag)
                     }
                 }
                 else {
@@ -117,32 +123,22 @@ struct TagsView: View {
                         EmptyListView(message: "No Tags")
                     }
                     else {
-                        List(selection: $selectedTag) {
+                        List(selection: $viewModel.selectedTag) {
                             ForEach(viewModel.tags) { tag in
                                 inactiveRow(for: tag)
                                     .id(tag.id)
                                     .tag(tag.id)
                                     .if(!tag.title.isEmpty) { view in
-                                        view.swipeActions(
-                                            edge: .leading,
-                                            allowsFullSwipe: false
-                                        ) {
-                                            Button(
-                                                "Copy",
-                                                systemImage: "doc.on.doc"
-                                            ) {
+                                        view.swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                            Button("Copy", systemImage: "doc.on.doc") {
                                                 UIPasteboard.general.string = tag.title
                                             }
                                             .tint(.green)
                                         }
                                     }
-                                    .swipeActions(
-                                        edge: .trailing,
-                                        allowsFullSwipe: false
-                                    ) {
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                         Button("Delete", systemImage: "trash", role: .destructive) {
-                                            tagToDelete = tag
-                                            currentAlert = .delete
+                                            viewModel.onTapDelete(tag: tag)
                                         }
                                     }
                             }
@@ -156,102 +152,50 @@ struct TagsView: View {
         }
     }
 
-    /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
-    private var navigationTitle: String {
-        var title = "Tags ("
-        if editMode.isEditing {
-            title = title + "\(selection.count)/\(viewModel.tags.count))"
-        }
-        else {
-            title = title + "\(viewModel.tags.count))"
-        }
-        return title
-    }
-
-    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
-    private var toolbarItemTopBarTrailing: some View {
-        if editMode.isEditing {
+    private var toolbarTopTrailing: some View {
+        if viewModel.editMode.isEditing {
             Button("Done", systemImage: "checkmark") {
-                selection.removeAll()
-                editMode = .inactive
+                viewModel.onTapDone()
             }
             .keyboardShortcut(.cancelAction)
         }
-        else {
-            if !viewModel.tags.isEmpty {
-                Button("Edit", systemImage: "pencil") {
-                    selectedTag = nil
-                    editMode = .active
-                }
-                .keyboardShortcut("e", modifiers: [.command])
+        else if !viewModel.tags.isEmpty {
+            Button("Edit", systemImage: "pencil") {
+                viewModel.onTapEdit()
             }
+            .keyboardShortcut("e", modifiers: [.command])
         }
     }
 
     @ViewBuilder
-    private var toolbarItemBottomBar: some View {
-        if editMode.isEditing {
-            Button(
-                "trash",
-                systemImage: "trash"
-            ) {
-                currentAlert = .delete
+    private var toolbarBottomBar: some View {
+        if viewModel.editMode.isEditing {
+            Button("trash", systemImage: "trash") {
+                viewModel.onTapDelete(tag: nil)
             }
-            .disabled(selection.isEmpty)
+            .disabled(!viewModel.canDeleteInEditMode)
+
             Spacer()
+
             GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
                 Button("Deselect All", systemImage: "circle") {
-                    selection.removeAll()
+                    viewModel.onTapDeselectAll()
                 }
-                .disabled(selection.isEmpty)
+                .disabled(viewModel.selection.isEmpty)
+
                 Button("Select All", systemImage: "checkmark.circle") {
-                    selection = Set(viewModel.tags.map { $0.id })
+                    viewModel.onTapSelectAll()
                 }
-                .disabled(selection.count == viewModel.tags.count)
+                .disabled(!viewModel.canSelectAll)
             }
         }
         else {
             Spacer()
-            Button(
-                "Add",
-                systemImage: "plus.circle"
-            ) {
-                showingAddTag = true
+            Button("Add", systemImage: "plus.circle") {
+                viewModel.onTapAdd()
             }
             .keyboardShortcut("n", modifiers: [.command])
-        }
-    }
-
-    /// タグの配列が変更されたときに呼び出される関数。
-    ///
-    /// 編集モードの状態に応じて選択状態を更新したり、新しいタグが追加された場合にスクロールして表示するなどの処理を行う。
-    /// - Parameters:
-    ///   - oldTags: 以前のタグの配列
-    ///   - newTags: 新しいタグの配列
-    private func onChange(oldTags: [Tag], newTags: [Tag]) {
-        switch editMode {
-            case .active:
-                if newTags.isEmpty {
-                    selection.removeAll()
-                    editMode = .inactive
-                }
-            case .inactive:
-                if let newTag = newTags.first(where: { !oldTags.contains($0) }) {
-                    DispatchQueue.main.async {
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        withTransaction(transaction) {
-                            selection.removeAll()
-                            selectedTag = newTag
-                            if let proxy = scrollViewProxy {
-                                proxy.scrollTo(newTag.id, anchor: .center)
-                            }
-                        }
-                    }
-                }
-            default:
-                break
         }
     }
 
@@ -263,27 +207,13 @@ struct TagsView: View {
             titleLineSpacing: viewModel.getTitleLineSpacing(),
             showColorString: true,
             showInfo: viewModel.getShowInfo(),
-            showTagCount: true,
+            showTagCount: true
         )
     }
 
-    private func toggleSelection(for id: UUID) {
-        if selection.contains(id) {
-            selection.remove(id)
-        }
-        else {
-            selection.insert(id)
-        }
-    }
-
-    /// 編集モードで表示する行のビューを生成する関数。
-    ///
-    /// タグをタップすると選択状態が切り替わるようになっている。
-    /// - Parameter tag: 表示するタグ
-    /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for tag: Tag) -> some View {
         Button {
-            toggleSelection(for: tag.id)
+            viewModel.onTapRowInEditMode(tag)
         } label: {
             makeTagRow(for: tag)
         }
@@ -294,24 +224,21 @@ struct TagsView: View {
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
-    /// 非編集モードで表示する行のビューを生成する関数。
-    ///
-    /// タグをタップすると選択される。
-    /// - Parameter tag: 表示するタグ
-    /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for tag: Tag) -> some View {
         makeTagRow(for: tag)
             .contentShape(Rectangle())
             .onTapGesture {
-                selectedTag = tag
+                viewModel.onTapRowInNormalMode(tag)
             }
             .contextMenu {
                 Button("Preview", systemImage: "eye") {
-                    selectedTag = tag
+                    viewModel.onTapPreview(tag)
                 }
             }
             .listRowInsets(.init())
             .moveDisabled(true)
-            .listRowBackground(Color(uiColor: tag == selectedTag ? .quaternaryLabel : .systemBackground))
+            .listRowBackground(
+                Color(uiColor: tag == viewModel.selectedTag ? .quaternaryLabel : .systemBackground)
+            )
     }
 }

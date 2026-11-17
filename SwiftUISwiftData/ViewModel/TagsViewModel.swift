@@ -2,25 +2,45 @@
 //  TagsViewModel.swift
 //  SwiftUISwiftData
 //
-//  Created by Hiromichi Sase on 2026/07/16.
-//
 
 internal import Combine
-import Foundation
 import SwiftData
+import SwiftUI
 
-/// TagsViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving tags using the TagRepository.
+@MainActor
 final class TagsViewModel: ObservableObject {
-    /// An array of Tag objects that are published to update the UI when changes occur.
+    enum AlertType: Identifiable {
+        case delete
+        case error
+
+        var id: Self { self }
+    }
+
     @Published
     private(set) var tags: [Tag] = []
-    /// The tagRepository property is an instance of TagRepository, which is used to manage the tags in the application.
-    ///
-    /// It provides functions to add and update tags in the tagRepository.
+
+    @Published
+    var editMode: EditMode = .inactive
+    @Published
+    var selectedTag: Tag?
+    @Published
+    var selection: Set<UUID> = []
+    @Published
+    var showingAddTag = false
+    @Published
+    var tagToDelete: Tag?
+    @Published
+    var toastMessage = ""
+    @Published
+    var error: (any Error)?
+    @Published
+    var currentAlert: AlertType?
+
+    // View側でscrollToした後にconsumeする
+    @Published
+    private(set) var scrollTargetID: UUID?
+
     private let tagRepository: TagRepository
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
     private var cancellables = Set<AnyCancellable>()
 
@@ -34,6 +54,166 @@ final class TagsViewModel: ObservableObject {
         setupNotification()
     }
 
+    // MARK: - Derived State
+
+    var navigationTitle: String {
+        if editMode.isEditing {
+            return "Tags (\(selection.count)/\(tags.count))"
+        }
+        return "Tags (\(tags.count))"
+    }
+
+    var canDeleteInEditMode: Bool {
+        !selection.isEmpty
+    }
+
+    var canSelectAll: Bool {
+        selection.count != tags.count
+    }
+
+    // MARK: - UserDefaults
+
+    func getTitleLineLimit() -> Int {
+        userDefaultsRepository.getTitleLineLimit()
+    }
+
+    func getTitleFontSize() -> Float {
+        userDefaultsRepository.getTitleFontSize()
+    }
+
+    func getTitleLineSpacing() -> Float {
+        userDefaultsRepository.getTitleLineSpacing()
+    }
+
+    func getShowInfo() -> Bool {
+        userDefaultsRepository.getShowInfo()
+    }
+
+    // MARK: - Intents
+
+    func onTapEdit() {
+        selectedTag = nil
+        editMode = .active
+    }
+
+    func onTapDone() {
+        selection.removeAll()
+        editMode = .inactive
+    }
+
+    func onTapAdd() {
+        showingAddTag = true
+    }
+
+    func onTapDelete(tag: Tag?) {
+        tagToDelete = tag
+        currentAlert = .delete
+    }
+
+    func onTapRowInEditMode(_ tag: Tag) {
+        if selection.contains(tag.id) {
+            selection.remove(tag.id)
+        }
+        else {
+            selection.insert(tag.id)
+        }
+    }
+
+    func onTapRowInNormalMode(_ tag: Tag) {
+        selectedTag = tag
+    }
+
+    func onTapPreview(_ tag: Tag) {
+        selectedTag = tag
+    }
+
+    func onTapSelectAll() {
+        selection = Set(tags.map(\.id))
+    }
+
+    func onTapDeselectAll() {
+        selection.removeAll()
+    }
+
+    func onCloseAllPresentedViews() {
+        showingAddTag = false
+        selectedTag = nil
+        selection.removeAll()
+        editMode = .inactive
+        tagToDelete = nil
+        currentAlert = nil
+    }
+
+    func confirmDelete() {
+        let targets: [Tag]
+        if editMode.isEditing {
+            targets = tags.filter { selection.contains($0.id) }
+        }
+        else if let tagToDelete {
+            targets = [tagToDelete]
+        }
+        else {
+            targets = []
+        }
+
+        guard !targets.isEmpty else { return }
+
+        do {
+            try tagRepository.delete(targets)
+
+            if let selected = selectedTag, targets.contains(where: { $0.id == selected.id }) {
+                selectedTag = nil
+            }
+
+            selection.removeAll()
+            tagToDelete = nil
+            toastMessage = "Successfully deleted!"
+            fetchTags()
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+        }
+    }
+
+    func moveTag(from source: IndexSet, to destination: Int) {
+        do {
+            try tagRepository.moveTag(from: Array(source), to: destination)
+            fetchTags()
+        }
+        catch {
+            self.error = error
+            currentAlert = .error
+        }
+    }
+
+    func onTagsChanged(oldTags: [Tag], newTags: [Tag]) {
+        switch editMode {
+            case .active:
+                if newTags.isEmpty {
+                    selection.removeAll()
+                    editMode = .inactive
+                }
+            case .inactive:
+                // id差分で新規追加を検出
+                let oldIDs = Set(oldTags.map(\.id))
+                if let newTag = newTags.first(where: { !oldIDs.contains($0.id) }) {
+                    selection.removeAll()
+                    selectedTag = newTag
+                    scrollTargetID = newTag.id
+                }
+            default:
+                break
+        }
+    }
+
+    func consumeScrollTargetID() -> UUID? {
+        defer { scrollTargetID = nil }
+        return scrollTargetID
+    }
+
+    // MARK: - Private
+
     private func setupNotification() {
         NotificationCenter.default
             .publisher(for: ModelContext.willSave)
@@ -43,48 +223,7 @@ final class TagsViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    /// Fetches tags from the tagRepository and updates the published tags array.
     private func fetchTags() {
         tags = (try? tagRepository.tags()) ?? []
-    }
-
-    private func value<T>(_ getter: (UserDefaultsRepository) -> () -> T) -> T {
-        getter(userDefaultsRepository)()
-    }
-
-    /// Deletes the specified tags from the tagRepository and refreshes the tags list, and renumbers the order of tags in the tagRepository and refreshes the tags list.
-    ///
-    /// If an error occurs during the deletion, it throws an error.
-    /// - Parameter tags: An array of Tag objects to be deleted.
-    /// - throws: An error.
-    func delete(_ tags: [Tag]) throws {
-        try tagRepository.delete(tags)
-    }
-
-    /// Moves tags from the specified source indices to the destination index in the tagRepository, and refreshes the tags list after a short delay to ensure the changes are reflected in the UI.
-    ///
-    /// If an error occurs during the moving, it throws an error.
-    /// - Parameters:
-    ///   - source: An integer array representing the indices of the tag to be moved.
-    ///   - destination: An integer representing the index to which the tags should be moved.
-    /// - throws: An error.
-    func moveTag(from source: [Int], to destination: Int) throws {
-        try tagRepository.moveTag(from: source, to: destination)
-    }
-
-    func getTitleLineLimit() -> Int {
-        value(UserDefaultsRepository.getTitleLineLimit)
-    }
-
-    func getTitleFontSize() -> Float {
-        value(UserDefaultsRepository.getTitleFontSize)
-    }
-
-    func getTitleLineSpacing() -> Float {
-        value(UserDefaultsRepository.getTitleLineSpacing)
-    }
-
-    func getShowInfo() -> Bool {
-        value(UserDefaultsRepository.getShowInfo)
     }
 }
