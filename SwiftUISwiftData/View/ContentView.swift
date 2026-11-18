@@ -10,7 +10,7 @@ import SwiftUI
 
 /// メモのリストを表示するビュー。
 struct ContentView: View {
-    @StateObject
+    @State
     private var viewModel = ContentViewModel(
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext)
     )

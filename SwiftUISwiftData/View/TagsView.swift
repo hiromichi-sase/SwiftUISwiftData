@@ -9,7 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct TagsView: View {
-    @StateObject
+    @State
     var viewModel: TagsViewModel
     @State
     var scrollViewProxy: ScrollViewProxy?
@@ -26,7 +26,7 @@ struct TagsView: View {
     ) {
         _editMode = editMode
         _selectedTag = selectedTag
-        _viewModel = StateObject(
+        _viewModel = State(
             wrappedValue: TagsViewModel(
                 tagRepository: TagRepository(
                     modelContext: ModelContainerManager.shared.modelContainer.mainContext

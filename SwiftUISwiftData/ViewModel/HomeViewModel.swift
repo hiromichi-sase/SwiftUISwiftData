@@ -8,6 +8,7 @@
 import Foundation
 
 @Observable
+@MainActor
 final class HomeViewModel {
     // MARK: - Nested Types
 

@@ -5,37 +5,43 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-internal import Combine
 import SwiftData
 import SwiftUI
 
+@Observable
 @MainActor
-final class MemosViewModel: ObservableObject {
+final class MemosViewModel {
     enum MoveMemoValidationError: Error {
         case invalidSource
         case invalidDestination
     }
 
-    @Published
     private(set) var memos: [Memo] = []
-    @Published
     private(set) var filteredMemos: [Memo] = []
-    @Published
     private(set) var keywordsForFiltering: [String] = []
-    @Published
-    var filterQuery: String = ""
-    @Published
-    var filterTags: [Tag] = []
-    @Published
+
+    var filterQuery: String = "" {
+        didSet { applyFilter() }
+    }
+
+    var filterTags: [Tag] = [] {
+        didSet { applyFilter() }
+    }
+
     private(set) var isFiltering = false
-    @Published
     var selectedMemo: Memo?
-    @Published
     var selection: Set<UUID> = []
 
+    @ObservationIgnored
     private let memoRepository: MemoRepository
+
+    @ObservationIgnored
     private let userDefaultsRepository: UserDefaultsRepository
-    private var cancellables = Set<AnyCancellable>()
+
+    @ObservationIgnored
+    private var saveNotificationToken: NSObjectProtocol?
+
+    @ObservationIgnored
     private var memoDuplicateSource: Memo?
 
     init(
@@ -48,30 +54,30 @@ final class MemosViewModel: ObservableObject {
         fetchMemos()
         applyFilter()
         setupNotification()
-        setupFilterObservers()
     }
 
     private func setupNotification() {
-        NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: memoRepository.modelContext)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.fetchMemos()
-                self.applyFilter()
-            }
-            .store(in: &cancellables)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleModelContextWillSave(_:)),
+            name: ModelContext.willSave,
+            object: memoRepository.modelContext
+        )
     }
 
-    private func setupFilterObservers() {
-        Publishers.CombineLatest($filterQuery, $filterTags)
-            .sink { [weak self] _, _ in
-                self?.applyFilter()
-            }
-            .store(in: &cancellables)
+    @objc
+    private func handleModelContextWillSave(_ notification: Notification) {
+        fetchMemos()
+        applyFilter()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     private func hasAnyMatch(_ memo: Memo, keywords: [String], tags: [Tag]) -> Bool {
-        keywords.contains { memo.title.lowercased().contains($0.lowercased()) } || tags.contains { memo.tags.contains($0) }
+        keywords.contains { memo.title.lowercased().contains($0.lowercased()) }
+            || tags.contains { memo.tags.contains($0) }
     }
 
     func applyFilter() {
@@ -91,18 +97,18 @@ final class MemosViewModel: ObservableObject {
     }
 
     func clearFilter() {
-        filterQuery = ""
+        // didSet で applyFilter が走るため、最後に query をクリア
         filterTags = []
         keywordsForFiltering = []
         isFiltering = false
         filteredMemos = memos
+        filterQuery = ""
     }
 
     // Backward-compatible helper
     func filteredMemos(by keywords: String, and tags: [Tag]) -> [Memo] {
-        filterQuery = keywords
         filterTags = tags
-        applyFilter()
+        filterQuery = keywords
         return filteredMemos
     }
 
@@ -160,6 +166,7 @@ final class MemosViewModel: ObservableObject {
                 if newMemos.isEmpty {
                     selection.removeAll()
                 }
+
             case .inactive:
                 if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
                     if let memoDuplicateSource, memoDuplicateSource.order + 1 == newMemo.order {
@@ -173,6 +180,7 @@ final class MemosViewModel: ObservableObject {
                     selectedMemo = nil
                     clearFilter()
                 }
+
             default:
                 break
         }

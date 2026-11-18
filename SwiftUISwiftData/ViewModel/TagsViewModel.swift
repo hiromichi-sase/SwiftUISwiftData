@@ -4,11 +4,13 @@
 //
 
 internal import Combine
+import Foundation
 import SwiftData
 import SwiftUI
 
+@Observable
 @MainActor
-final class TagsViewModel: ObservableObject {
+final class TagsViewModel {
     enum AlertType: Identifiable {
         case delete
         case error
@@ -16,28 +18,15 @@ final class TagsViewModel: ObservableObject {
         var id: Self { self }
     }
 
-    @Published
     private(set) var tags: [Tag] = []
-
-    @Published
     var editMode: EditMode = .inactive
-    @Published
     var selectedTag: Tag?
-    @Published
     var selection: Set<UUID> = []
-    @Published
     var showingAddTag = false
-    @Published
     var tagToDelete: Tag?
-    @Published
     var toastMessage = ""
-    @Published
     var error: (any Error)?
-    @Published
     var currentAlert: AlertType?
-
-    // View側でscrollToした後にconsumeする
-    @Published
     private(set) var scrollTargetID: UUID?
 
     private let tagRepository: TagRepository

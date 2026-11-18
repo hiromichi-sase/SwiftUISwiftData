@@ -5,7 +5,6 @@
 //  Created by Hiromichi Sase on 2026/07/16.
 //
 
-internal import Combine
 import Foundation
 
 protocol TagRepositoryProtocol {
@@ -21,8 +20,9 @@ protocol UserDefaultsRepositoryProtocol {
 extension TagRepository: TagRepositoryProtocol {}
 extension UserDefaultsRepository: UserDefaultsRepositoryProtocol {}
 
+@Observable
 @MainActor
-final class EditTagViewModel: ObservableObject {
+final class EditTagViewModel {
     enum AlertType: Identifiable, Equatable {
         case close
         case error
@@ -30,22 +30,13 @@ final class EditTagViewModel: ObservableObject {
         var id: Self { self }
     }
 
-    // Input
-    @Published
     var title: String
-    @Published
     var colorString: String
 
-    // UI state
-    @Published
     var toastMessage: String = ""
-    @Published
     var currentAlert: AlertType?
-    @Published
     var errorMessage: String = ""
-    @Published
     var shouldDismiss: Bool = false
-    @Published
     private(set) var isSaving: Bool = false
 
     private let tagRepository: TagRepositoryProtocol

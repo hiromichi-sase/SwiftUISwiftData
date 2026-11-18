@@ -5,7 +5,6 @@
 //  Created by Hiromichi Sase on 2026/07/21.
 //
 
-import Observation
 import SwiftData
 
 @Observable

@@ -5,7 +5,6 @@
 //  Created by Hiromichi Sase on 2026/07/04.
 //
 
-internal import Combine
 import SwiftData
 import SwiftUI
 
@@ -18,9 +17,9 @@ struct ContentViewState: Equatable {
     var showingAddMemo: Bool = false
 }
 
+@Observable
 @MainActor
-final class ContentViewModel: ObservableObject {
-    @Published
+final class ContentViewModel {
     var state: ContentViewState
 
     private let memoRepository: MemoRepository

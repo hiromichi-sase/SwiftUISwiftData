@@ -16,7 +16,7 @@ struct MemosView: View {
         var id: AlertType { self }
     }
 
-    @ObservedObject
+    @State
     var viewModel = MemosViewModel(
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
@@ -66,12 +66,6 @@ struct MemosView: View {
                     if selectedMemo != newValue {
                         selectedMemo = newValue
                     }
-                }
-                .onChange(of: viewModel.filterQuery) { _, _ in
-                    viewModel.applyFilter()
-                }
-                .onChange(of: viewModel.filterTags) { _, _ in
-                    viewModel.applyFilter()
                 }
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
                     viewModel.handleMemosChanged(oldMemos: oldMemos, newMemos: newMemos, editMode: editMode)

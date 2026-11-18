@@ -10,7 +10,7 @@ import SwiftUI
 
 /// タグの内容を編集するビュー。
 struct EditTagView: View {
-    @StateObject
+    @State
     private var viewModel: EditTagViewModel
 
     @Environment(\.dismiss)
@@ -32,7 +32,7 @@ struct EditTagView: View {
             tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
             userDefaultsRepository: UserDefaultsRepository()
         )
-        _viewModel = StateObject(wrappedValue: vm)
+        _viewModel = State(wrappedValue: vm)
         _color = State(initialValue: vm.colorString.color())
     }
 
