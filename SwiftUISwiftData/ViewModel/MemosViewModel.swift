@@ -6,23 +6,37 @@
 //
 
 internal import Combine
-import Foundation
 import SwiftData
+import SwiftUI
 
-/// MemosViewModel is an observable object that manages the state and interactions for the ContentView, including fetching, deleting, renumbering, and moving memos using the MemoRepository.
+@MainActor
 final class MemosViewModel: ObservableObject {
-    /// An array of Memo objects that are published to update the UI when changes occur.
+    enum MoveMemoValidationError: Error {
+        case invalidSource
+        case invalidDestination
+    }
+
     @Published
     private(set) var memos: [Memo] = []
-    /// The memoRepository property is an instance of MemoRepository, which is used to manage the memos in the application.
-    ///
-    /// It provides functions to add and update memos in the memoRepository.
+    @Published
+    private(set) var filteredMemos: [Memo] = []
+    @Published
+    private(set) var keywordsForFiltering: [String] = []
+    @Published
+    var filterQuery: String = ""
+    @Published
+    var filterTags: [Tag] = []
+    @Published
+    private(set) var isFiltering = false
+    @Published
+    var selectedMemo: Memo?
+    @Published
+    var selection: Set<UUID> = []
+
     private let memoRepository: MemoRepository
-    /// The userDefaultsRepository property is an instance of UserDefaultsRepository, which is used to manage the UserDefaults in the application.
-    ///
-    /// It provides functions in the userDefaultsRepository.
     private let userDefaultsRepository: UserDefaultsRepository
     private var cancellables = Set<AnyCancellable>()
+    private var memoDuplicateSource: Memo?
 
     init(
         memoRepository: MemoRepository,
@@ -30,28 +44,68 @@ final class MemosViewModel: ObservableObject {
     ) {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
+
         fetchMemos()
+        applyFilter()
         setupNotification()
+        setupFilterObservers()
     }
 
     private func setupNotification() {
         NotificationCenter.default
-            .publisher(for: ModelContext.willSave)
+            .publisher(for: ModelContext.willSave, object: memoRepository.modelContext)
             .sink { [weak self] _ in
-                Task { @MainActor in self?.fetchMemos() }
+                guard let self else { return }
+                self.fetchMemos()
+                self.applyFilter()
             }
             .store(in: &cancellables)
     }
 
-    private(set) var keywordsForFiltering: [String] = []
-
-    private func hasAnyMatch(_ memo: Memo, keywords: [String], tags: [Tag]) -> Bool {
-        keywords.contains { memo.title.lowercased().contains($0.lowercased()) }
-            || tags.contains { memo.tags.contains($0) }
+    private func setupFilterObservers() {
+        Publishers.CombineLatest($filterQuery, $filterTags)
+            .sink { [weak self] _, _ in
+                self?.applyFilter()
+            }
+            .store(in: &cancellables)
     }
 
-    /// Fetches memos from the memoRepository and updates the published memos array.
-    @MainActor
+    private func hasAnyMatch(_ memo: Memo, keywords: [String], tags: [Tag]) -> Bool {
+        keywords.contains { memo.title.lowercased().contains($0.lowercased()) } || tags.contains { memo.tags.contains($0) }
+    }
+
+    func applyFilter() {
+        let trimmed = filterQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        let keywords = trimmed.split(separator: " ").map(String.init)
+        keywordsForFiltering = keywords
+
+        let active = !trimmed.isEmpty || !filterTags.isEmpty
+        isFiltering = active
+
+        guard active else {
+            filteredMemos = memos
+            return
+        }
+
+        filteredMemos = memos.filter { hasAnyMatch($0, keywords: keywords, tags: filterTags) }
+    }
+
+    func clearFilter() {
+        filterQuery = ""
+        filterTags = []
+        keywordsForFiltering = []
+        isFiltering = false
+        filteredMemos = memos
+    }
+
+    // Backward-compatible helper
+    func filteredMemos(by keywords: String, and tags: [Tag]) -> [Memo] {
+        filterQuery = keywords
+        filterTags = tags
+        applyFilter()
+        return filteredMemos
+    }
+
     private func fetchMemos() {
         do {
             memos = try memoRepository.memos()
@@ -61,47 +115,91 @@ final class MemosViewModel: ObservableObject {
         }
     }
 
-    func filteredMemos(
-        by keywords: String,
-        and tags: [Tag],
-    ) -> [Memo] {
-        guard !keywords.isEmpty || !tags.isEmpty else {
-            keywordsForFiltering = []
-            return memos
-        }
-
-        keywordsForFiltering = keywords.split(separator: " ").map { String($0) }
-
-        return memos.filter { hasAnyMatch($0, keywords: keywordsForFiltering, tags: tags) }
+    func displayedMemos(editMode: EditMode) -> [Memo] {
+        editMode.isEditing ? memos : filteredMemos
     }
 
-    /// Duplicated the specified memo in the model context.
-    ///
-    /// This function takes a Memo object as a parameter and attempts to duplicate it in the memoRepository.
-    /// If an error occurs during the duplication, it throws an error.
-    /// - Parameter memo: The Memo object that needs to be duplicated in the memoRepository.
-    /// - throws: An error.
+    func navigationTitle(editMode: EditMode) -> String {
+        if editMode.isEditing {
+            return "Memos (\(selection.count)/\(memos.count))"
+        }
+        if isFiltering {
+            return "Memos (\(filteredMemos.count)/\(memos.count))"
+        }
+        return "Memos (\(memos.count))"
+    }
+
+    func toggleSelection(for id: UUID) {
+        if selection.contains(id) {
+            selection.remove(id)
+        }
+        else {
+            selection.insert(id)
+        }
+    }
+
+    func selectAll() {
+        selection = Set(memos.map(\.id))
+    }
+
+    func deselectAll() {
+        selection.removeAll()
+    }
+
+    func selectedMemos() -> [Memo] {
+        memos.filter { selection.contains($0.id) }
+    }
+
+    func handleMemosChanged(
+        oldMemos: [Memo],
+        newMemos: [Memo],
+        editMode: EditMode
+    ) {
+        switch editMode {
+            case .active:
+                if newMemos.isEmpty {
+                    selection.removeAll()
+                }
+            case .inactive:
+                if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
+                    if let memoDuplicateSource, memoDuplicateSource.order + 1 == newMemo.order {
+                        self.memoDuplicateSource = nil
+                        return
+                    }
+                    selection.removeAll()
+                    selectedMemo = newMemo
+                }
+                else if newMemos.isEmpty {
+                    selectedMemo = nil
+                    clearFilter()
+                }
+            default:
+                break
+        }
+    }
+
     func duplicate(_ memo: Memo) throws {
+        memoDuplicateSource = memo
         try memoRepository.duplicate(memo)
     }
 
-    /// Deletes the specified memos from the memoRepository and refreshes the memos list, and renumbers the order of memos in the memoRepository and refreshes the memos list.
-    ///
-    /// If an error occurs during the deletion, it throws an error.
-    /// - Parameter memos: An array of Memo objects to be deleted.
-    /// - throws: An error.
     func delete(_ memos: [Memo]) throws {
         try memoRepository.delete(memos)
     }
 
-    /// Moves memos from the specified source indices to the destination index in the memoRepository, and refreshes the memos list after a short delay to ensure the changes are reflected in the UI.
-    ///
-    /// If an error occurs during the moving, it throws an error.
-    /// - Parameters:
-    ///   - source: An integer array representing the indices of the memo to be moved.
-    ///   - destination: An integer representing the index to which the memos should be moved.
-    /// - throws: An error.
     func moveMemo(from source: [Int], to destination: Int) throws {
+        let count = memos.count
+        guard count > 0 else { return }
+        guard !source.isEmpty else { return }
+
+        guard source.allSatisfy({ $0 >= 0 && $0 < count }) else {
+            throw MoveMemoValidationError.invalidSource
+        }
+
+        guard destination >= 0 && destination <= count else {
+            throw MoveMemoValidationError.invalidDestination
+        }
+
         try memoRepository.moveMemo(from: source, to: destination)
     }
 

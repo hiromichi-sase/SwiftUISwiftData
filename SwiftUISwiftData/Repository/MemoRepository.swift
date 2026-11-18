@@ -16,6 +16,7 @@ final class MemoRepository {
         self.modelContext = modelContext
     }
 
+    @MainActor
     func memos() throws -> [Memo] {
         try modelContext.fetch(descriptor)
     }

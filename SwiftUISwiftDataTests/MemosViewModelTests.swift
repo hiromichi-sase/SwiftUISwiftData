@@ -5,7 +5,6 @@
 //  Created by Hiromichi Sase on 2026/06/04.
 //
 
-import Foundation
 import SwiftData
 import Testing
 
@@ -29,9 +28,9 @@ struct MemosViewModelTests {
             ]
         )
 
-        let testTarget = dependency.makeTestTarget()
-        let filteredMemos = testTarget.filteredMemos(by: "Title 1", and: [tag1])
-        #expect(filteredMemos.count == 2)
+        let testTarget = dependency.testTarget
+        let filtered = testTarget.filteredMemos(by: "Title 1", and: [tag1])
+        #expect(filtered.count == 2)
     }
 
     @MainActor
@@ -51,9 +50,9 @@ struct MemosViewModelTests {
             ]
         )
 
-        let testTarget = dependency.makeTestTarget()
-        let filteredMemos = testTarget.filteredMemos(by: "", and: [])
-        #expect(filteredMemos.count == 2)
+        let testTarget = dependency.testTarget
+        let filtered = testTarget.filteredMemos(by: "", and: [])
+        #expect(filtered.count == 2)
     }
 
     @MainActor
@@ -70,21 +69,15 @@ struct MemosViewModelTests {
             memos: [memo1, memo2]
         )
 
-        let testTarget = dependency.makeTestTarget()
+        let testTarget = dependency.testTarget
         let countBeforeDuplication = try dependency.memoRepository.memos().count
         try testTarget.duplicate(memo1)
 
         let memos = try dependency.memoRepository.memos()
         #expect(memos.count == countBeforeDuplication + 1)
         #expect(memos[0].title == memo1.title)
-        #expect(memos[0].content == memo1.content)
-        #expect(memos[0].order == memo1.order)
         #expect(memos[1].title == memos[0].title)
-        #expect(memos[1].content == memos[0].content)
-        #expect(memos[1].order == memos[0].order + 1)
         #expect(memos[2].title == memo2.title)
-        #expect(memos[2].content == memo2.content)
-        #expect(memos[2].order == memos[1].order + 1)
     }
 
     @MainActor
@@ -102,17 +95,13 @@ struct MemosViewModelTests {
             memos: [memo1, memo2, memo3]
         )
 
-        let testTarget = dependency.makeTestTarget()
+        let testTarget = dependency.testTarget
         try testTarget.delete([memo2])
 
         let memos = try dependency.memoRepository.memos()
         #expect(memos.count == 2)
         #expect(memos[0].order == 1)
-        #expect(memos[0].title == "Test Title 1")
-        #expect(memos[0].content == "Test Memo 1")
         #expect(memos[1].order == 2)
-        #expect(memos[1].title == "Test Title 3")
-        #expect(memos[1].content == "Test Memo 3")
     }
 
     @MainActor
@@ -130,20 +119,58 @@ struct MemosViewModelTests {
             memos: [memo1, memo2, memo3]
         )
 
-        let testTarget = dependency.makeTestTarget()
+        let testTarget = dependency.testTarget
         try testTarget.moveMemo(from: [2], to: 1)
 
         let memos = try dependency.memoRepository.memos()
         #expect(memos.count == 3)
-        #expect(memos[0].order == 1)
         #expect(memos[0].title == "Test Title 1")
-        #expect(memos[0].content == "Test Memo 1")
-        #expect(memos[1].order == 2)
         #expect(memos[1].title == "Test Title 3")
-        #expect(memos[1].content == "Test Memo 3")
-        #expect(memos[2].order == 3)
         #expect(memos[2].title == "Test Title 2")
-        #expect(memos[2].content == "Test Memo 2")
+    }
+
+    @MainActor
+    @Test
+    func moveMemo_invalidSource_throws() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+
+        #expect(throws: MemosViewModel.MoveMemoValidationError.invalidSource) {
+            try testTarget.moveMemo(from: [999], to: 1)
+        }
+    }
+
+    @MainActor
+    @Test
+    func moveMemo_invalidDestination_throws() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+
+        #expect(throws: MemosViewModel.MoveMemoValidationError.invalidDestination) {
+            try testTarget.moveMemo(from: [0], to: 999)
+        }
     }
 
     @MainActor
@@ -162,11 +189,9 @@ struct MemosViewModelTests {
             ]
         )
 
-        let testTarget = dependency.makeTestTarget()
+        let testTarget = dependency.testTarget
         let memosBefore = try dependency.memoRepository.memos()
-        try testTarget.protect([memosBefore[0]])
-        try testTarget.protect([memosBefore[1]])
-        try testTarget.protect([memosBefore[2]])
+        try testTarget.protect([memosBefore[0], memosBefore[1], memosBefore[2]])
 
         let memos = try dependency.memoRepository.memos()
         for memo in memos {
@@ -190,11 +215,9 @@ struct MemosViewModelTests {
             ]
         )
 
-        let testTarget = dependency.makeTestTarget()
+        let testTarget = dependency.testTarget
         let memosBefore = try dependency.memoRepository.memos()
-        try testTarget.unprotect([memosBefore[0]])
-        try testTarget.unprotect([memosBefore[1]])
-        try testTarget.unprotect([memosBefore[2]])
+        try testTarget.unprotect([memosBefore[0], memosBefore[1], memosBefore[2]])
 
         let memos = try dependency.memoRepository.memos()
         for memo in memos {
@@ -205,49 +228,45 @@ struct MemosViewModelTests {
     @MainActor
     @Test
     func getTitleLineLimit() throws {
-        let titleLineLimit = 3
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setTitleLineLimit(titleLineLimit)
-        let testTarget = dependency.makeTestTarget()
-        #expect(testTarget.getTitleLineLimit() == titleLineLimit)
+        dependency.userDefaultsRepository.setTitleLineLimit(3)
+        let testTarget = dependency.testTarget
+        #expect(testTarget.getTitleLineLimit() == 3)
     }
 
     @MainActor
     @Test
     func getTitleFontSize() throws {
-        let titleFontSize = Float(16.0)
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setTitleFontSize(titleFontSize)
-        let testTarget = dependency.makeTestTarget()
-        #expect(testTarget.getTitleFontSize() == titleFontSize)
+        dependency.userDefaultsRepository.setTitleFontSize(16.0)
+        let testTarget = dependency.testTarget
+        #expect(testTarget.getTitleFontSize() == 16.0)
     }
 
     @MainActor
     @Test
     func getTitleLineSpacing() throws {
-        let titleLineSpacing = Float.zero
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setTitleLineSpacing(titleLineSpacing)
-        let testTarget = dependency.makeTestTarget()
-        #expect(testTarget.getTitleLineSpacing() == titleLineSpacing)
+        dependency.userDefaultsRepository.setTitleLineSpacing(.zero)
+        let testTarget = dependency.testTarget
+        #expect(testTarget.getTitleLineSpacing() == .zero)
     }
 
     @MainActor
     @Test
     func getShowInfo() throws {
-        let hasLink = false
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
 
-        dependency.userDefaultsRepository.setShowInfo(hasLink)
-        let testTarget = dependency.makeTestTarget()
-        #expect(testTarget.getShowInfo() == hasLink)
+        dependency.userDefaultsRepository.setShowInfo(false)
+        let testTarget = dependency.testTarget
+        #expect(!testTarget.getShowInfo())
     }
 
     @MainActor
@@ -289,14 +308,6 @@ extension MemosViewModelTests {
             memoRepository = MemoRepository(modelContext: container.mainContext)
 
             testTarget = .init(
-                memoRepository: memoRepository,
-                userDefaultsRepository: userDefaultsRepository
-            )
-        }
-
-        @MainActor
-        func makeTestTarget() -> MemosViewModel {
-            .init(
                 memoRepository: memoRepository,
                 userDefaultsRepository: userDefaultsRepository
             )

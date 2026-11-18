@@ -16,49 +16,30 @@ struct MemosView: View {
         var id: AlertType { self }
     }
 
-    /// ビューの状態を管理するViewModel。
     @ObservedObject
     var viewModel = MemosViewModel(
         memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
         userDefaultsRepository: UserDefaultsRepository()
     )
-    /// 編集モードの状態を管理する状態変数。
     @Binding
     var editMode: EditMode
-    /// 削除するメモを保持する状態変数。
     @State
     var memoToDelete: Memo?
-    /// 選択されたメモのIDを保持する状態変数。
     @Binding
     var selectedMemo: Memo?
-    /// 複数選択されたメモのIDを保持する状態変数。
-    @State
-    var selection: Set<UUID> = []
-    /// スクロールビューのプロキシを保持する状態変数。
     @State
     private var scrollViewProxy: ScrollViewProxy?
-    /// 新しいメモを追加するためのフルスクリーンカバーを表示するフラグ。
     @Binding
     private var showingAddMemo: Bool
-    /// トーストメッセージの状態変数。
     @State
     var toastMessage = ""
     @State
     var error: any Error?
     @State
-    var memoDuplicateSource: Memo?
-    @State
     var currentAlert: AlertType?
-    @State
-    var keywordsForFiltering: String = ""
-    @State
-    var tagsForFiltering: [Tag] = []
-    @State
-    private var isFiltering: Bool = false
     @State
     private var openFilterMemosView = false
 
-    /// イニシャライザ。
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
@@ -72,8 +53,45 @@ struct MemosView: View {
     var body: some View {
         VStack(spacing: 8.0) {
             list
+                .onAppear {
+                    viewModel.selectedMemo = selectedMemo
+                    viewModel.applyFilter()
+                }
+                .onChange(of: selectedMemo) { _, newValue in
+                    if viewModel.selectedMemo != newValue {
+                        viewModel.selectedMemo = newValue
+                    }
+                }
+                .onChange(of: viewModel.selectedMemo) { _, newValue in
+                    if selectedMemo != newValue {
+                        selectedMemo = newValue
+                    }
+                }
+                .onChange(of: viewModel.filterQuery) { _, _ in
+                    viewModel.applyFilter()
+                }
+                .onChange(of: viewModel.filterTags) { _, _ in
+                    viewModel.applyFilter()
+                }
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                    onChange(oldMemos: oldMemos, newMemos: newMemos)
+                    viewModel.handleMemosChanged(oldMemos: oldMemos, newMemos: newMemos, editMode: editMode)
+
+                    if editMode == .inactive,
+                        let memo = selectedMemo,
+                        let proxy = scrollViewProxy
+                    {
+                        DispatchQueue.main.async {
+                            var transaction = Transaction()
+                            transaction.disablesAnimations = true
+                            withTransaction(transaction) {
+                                proxy.scrollTo(memo.id, anchor: .center)
+                            }
+                        }
+                    }
+
+                    if editMode == .active, newMemos.isEmpty {
+                        editMode = .inactive
+                    }
                 }
                 .alert(item: $currentAlert) { alertType in
                     switch alertType {
@@ -85,9 +103,9 @@ struct MemosView: View {
                             errorAlert
                     }
                 }
-                .navigationTitle(navigationTitle)
+                .navigationTitle(viewModel.navigationTitle(editMode: editMode))
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(editMode.isEditing || isFiltering)
+                .navigationBarBackButtonHidden(editMode.isEditing || viewModel.isFiltering)
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
@@ -99,18 +117,29 @@ struct MemosView: View {
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $openFilterMemosView) {
                     FilterMemosView(
-                        isFiltering: $isFiltering,
-                        title: $keywordsForFiltering,
-                        tagsForFiltering: $tagsForFiltering,
+                        isFiltering: Binding(
+                            get: { viewModel.isFiltering },
+                            set: { newValue in
+                                if newValue {
+                                    viewModel.applyFilter()
+                                }
+                                else {
+                                    viewModel.clearFilter()
+                                }
+                            }
+                        ),
+                        title: $viewModel.filterQuery,
+                        tagsForFiltering: $viewModel.filterTags,
                         selectedMemo: $selectedMemo
                     )
                     .interactiveDismissDisabled(true)
+                    .onDisappear {
+                        viewModel.applyFilter()
+                    }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
                     openFilterMemosView = false
-                    isFiltering = false
-                    keywordsForFiltering = ""
-                    tagsForFiltering = []
+                    viewModel.clearFilter()
                 }
                 .fullScreenCover(isPresented: $showingAddMemo) {
                     EditMemoView()
@@ -119,12 +148,11 @@ struct MemosView: View {
         }
     }
 
-    /// メモのリストを表示するビュー。
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
                 if editMode.isEditing {
-                    List(selection: $selection) {
+                    List(selection: $viewModel.selection) {
                         ForEach(viewModel.memos) { memo in
                             activeRow(for: memo)
                                 .id(memo.id)
@@ -137,47 +165,33 @@ struct MemosView: View {
                     if viewModel.memos.isEmpty {
                         EmptyListView(message: "No memos")
                     }
-                    else if filteredMemos.isEmpty {
+                    else if viewModel.filteredMemos.isEmpty {
                         EmptyListView(message: "No memos found")
                     }
                     else {
                         List(selection: $selectedMemo) {
-                            ForEach(filteredMemos) { memo in
+                            ForEach(viewModel.filteredMemos) { memo in
                                 inactiveRow(for: memo)
                                     .id(memo.id)
                                     .tag(memo.id)
-                                    .swipeActions(
-                                        edge: .leading,
-                                        allowsFullSwipe: false
-                                    ) {
+                                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
                                         if !memo.title.isEmpty {
-                                            Button(
-                                                "Copy",
-                                                systemImage: "doc.on.doc"
-                                            ) {
+                                            Button("Copy", systemImage: "doc.on.doc") {
                                                 UIPasteboard.general.string = memo.title
                                             }
                                             .tint(.green)
                                         }
                                         if !memo.protected {
-                                            Button(
-                                                "Duplicate",
-                                                systemImage: "plus.square"
-                                            ) {
+                                            Button("Duplicate", systemImage: "plus.square") {
                                                 duplicateMemo(memo)
                                             }
                                             .tint(.blue)
                                         }
                                     }
-                                    .swipeActions(
-                                        edge: .trailing,
-                                        allowsFullSwipe: false
-                                    ) {
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                         if memo.protected {
                                             Button("Unprotect", systemImage: "lock.open.fill") {
-                                                Task {
-                                                    await unprotect([memo])
-                                                }
+                                                Task { await unprotect([memo]) }
                                             }
                                         }
                                         else {
@@ -187,9 +201,7 @@ struct MemosView: View {
                                             }
                                             Divider()
                                             Button("Protect", systemImage: "lock.fill") {
-                                                Task {
-                                                    await protect([memo])
-                                                }
+                                                Task { await protect([memo]) }
                                             }
                                         }
                                     }
@@ -204,29 +216,11 @@ struct MemosView: View {
         }
     }
 
-    /// ナビゲーションタイトルを編集モードの状態に応じて動的に生成するプロパティ。
-    private var navigationTitle: String {
-        var title = "Memos ("
-        if editMode.isEditing {
-            title += "\(selection.count)/\(viewModel.memos.count))"
-        }
-        else {
-            if isFiltering {
-                title += "\(filteredMemos.count)/\(viewModel.memos.count))"
-            }
-            else {
-                title += "\(viewModel.memos.count))"
-            }
-        }
-        return title
-    }
-
-    /// ツールバーの右側のアイテムを編集モードの状態に応じて動的に生成するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode.isEditing {
             Button("Done", systemImage: "checkmark") {
-                selection.removeAll()
+                viewModel.deselectAll()
                 editMode = .inactive
             }
             .keyboardShortcut(.cancelAction)
@@ -234,9 +228,10 @@ struct MemosView: View {
         else if !viewModel.memos.isEmpty {
             Button("Edit", systemImage: "pencil") {
                 selectedMemo = nil
+                viewModel.selectedMemo = nil
                 editMode = .active
             }
-            .disabled(isFiltering)
+            .disabled(viewModel.isFiltering)
             .keyboardShortcut("e", modifiers: [.command])
         }
     }
@@ -245,19 +240,19 @@ struct MemosView: View {
     private var toolbarItemBottomBar: some View {
         if editMode.isEditing {
             Button("Delete", systemImage: "trash") {
-                if selectedMemos.filter({ $0.protected }).isEmpty {
+                if viewModel.selectedMemos().allSatisfy({ !$0.protected }) {
                     currentAlert = .delete
                 }
                 else {
                     currentAlert = .containsProtectedMemo
                 }
             }
-            .disabled(selection.isEmpty)
+            .disabled(viewModel.selection.isEmpty)
         }
         else {
             Button(
                 "Filter",
-                systemImage: isFiltering
+                systemImage: viewModel.isFiltering
                     ? "line.3.horizontal.decrease.circle.fill"
                     : "line.3.horizontal.decrease.circle"
             ) {
@@ -266,105 +261,46 @@ struct MemosView: View {
             .disabled(viewModel.memos.isEmpty)
             .keyboardShortcut("s", modifiers: [.command])
         }
+
         Spacer()
+
         if editMode.isEditing {
             GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
                 Button("Deselect All", systemImage: "circle") {
-                    selection.removeAll()
+                    viewModel.deselectAll()
                 }
-                .disabled(selection.isEmpty)
+                .disabled(viewModel.selection.isEmpty)
+
                 Button("Select All", systemImage: "checkmark.circle") {
-                    selection = Set(viewModel.memos.map(\.id))
+                    viewModel.selectAll()
                 }
-                .disabled(selection.count == viewModel.memos.count)
+                .disabled(viewModel.selection.count == viewModel.memos.count)
             }
         }
         else {
-            Button(
-                "Add",
-                systemImage: "plus.circle"
-            ) {
+            Button("Add", systemImage: "plus.circle") {
                 showingAddMemo = true
             }
-            .disabled(isFiltering)
+            .disabled(viewModel.isFiltering)
             .keyboardShortcut("n", modifiers: [.command])
         }
     }
 
-    /// メモの配列が変更されたときに呼び出される関数。
-    ///
-    /// 編集モードの状態に応じて選択状態を更新したり、新しいメモが追加された場合にスクロールして表示するなどの処理を行う。
-    /// - Parameters:
-    ///   - oldMemos: 以前のメモの配列
-    ///   - newMemos: 新しいメモの配列
-    private func onChange(oldMemos: [Memo], newMemos: [Memo]) {
-        switch editMode {
-            case .active:
-                if newMemos.isEmpty {
-                    selection.removeAll()
-                    editMode = .inactive
-                }
-            case .inactive:
-                if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
-                    if let memoDuplicateSource,
-                        memoDuplicateSource.order + 1 == newMemo.order
-                    {
-                        self.memoDuplicateSource = nil
-                        return
-                    }
-
-                    DispatchQueue.main.async {
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        withTransaction(transaction) {
-                            selection.removeAll()
-                            selectedMemo = newMemo
-                            if let proxy = scrollViewProxy {
-                                proxy.scrollTo(newMemo.id, anchor: .center)
-                            }
-                        }
-                    }
-                }
-                else if newMemos.isEmpty {
-                    selectedMemo = nil
-                    isFiltering = false
-                    keywordsForFiltering = ""
-                    tagsForFiltering = []
-                }
-            default:
-                break
-        }
-    }
-
-    private func makeMemoRow(for memo: Memo, keywordsForFiltering: [String] = []) -> MemoRow {
+    private func makeMemoRow(for memo: Memo) -> MemoRow {
         MemoRow(
             memo: memo,
             titleLineLimit: viewModel.getTitleLineLimit(),
             titleFontSize: viewModel.getTitleFontSize(),
             titleLineSpacing: viewModel.getTitleLineSpacing(),
             showInfo: viewModel.getShowInfo(),
-            keywordsForFiltering: keywordsForFiltering,
-            tagsForFiltering: tagsForFiltering,
+            keywordsForFiltering: viewModel.keywordsForFiltering,
+            tagsForFiltering: viewModel.filterTags
         )
     }
 
-    private func toggleSelection(for id: UUID) {
-        if selection.contains(id) {
-            selection.remove(id)
-        }
-        else {
-            selection.insert(id)
-        }
-    }
-
-    /// 編集モードで表示する行のビューを生成する関数。
-    ///
-    /// メモをタップすると選択状態が切り替わるようになっている。
-    /// - Parameter memo: 表示するメモ
-    /// - Returns: 編集モードで表示する行のビュー
     private func activeRow(for memo: Memo) -> some View {
         Button {
-            toggleSelection(for: memo.id)
+            viewModel.toggleSelection(for: memo.id)
         } label: {
             makeMemoRow(for: memo)
         }
@@ -375,29 +311,29 @@ struct MemosView: View {
         .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
     }
 
-    /// 非編集モードで表示する行のビューを生成する関数。
-    ///
-    /// メモをタップすると選択される。
-    /// - Parameter memo: 表示するメモ
-    /// - Returns: 非編集モードで表示する行のビュー
     private func inactiveRow(for memo: Memo) -> some View {
-        makeMemoRow(
-            for: memo,
-            keywordsForFiltering: viewModel.keywordsForFiltering
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            selectedMemo = memo
-        }
-        .contextMenu {
-            Button("Preview", systemImage: "eye") {
+        makeMemoRow(for: memo)
+            .contentShape(Rectangle())
+            .onTapGesture {
                 selectedMemo = memo
+                viewModel.selectedMemo = memo
             }
-        } preview: {
-            PreviewMemoView(memo: memo)
-        }
-        .listRowInsets(.init())
-        .moveDisabled(true)
-        .listRowBackground(Color(uiColor: memo == selectedMemo ? .quaternaryLabel : .systemBackground))
+            .contextMenu {
+                Button("Preview", systemImage: "eye") {
+                    selectedMemo = memo
+                    viewModel.selectedMemo = memo
+                }
+            } preview: {
+                PreviewMemoView(memo: memo)
+            }
+            .listRowInsets(.init())
+            .moveDisabled(true)
+            .listRowBackground(
+                Color(
+                    uiColor: memo == selectedMemo
+                        ? .quaternaryLabel
+                        : .systemBackground
+                )
+            )
     }
 }
