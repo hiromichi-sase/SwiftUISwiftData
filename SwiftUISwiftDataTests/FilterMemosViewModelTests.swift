@@ -48,53 +48,64 @@ struct FilterMemosViewModelTests {
 
     @MainActor
     @Test
-    func saveButtonDisabled_returnsTrue_whenTitleAndTagsAreSame() {
+    func setInitialFilter_setsOriginalAndEditingValues() {
         let dependency = Dependency()
-
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
         let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
-        let result = dependency.testTarget.saveButtonDisabled(
-            originalTitle: "keyword",
-            editingTitle: "keyword",
-            originalTags: [tagA, tagB],
-            editingTags: [tagA, tagB]
+        dependency.testTarget.setInitialFilter(
+            title: "keyword",
+            tags: [tagA, tagB]
         )
 
-        #expect(result == true)
+        #expect(dependency.testTarget.editingTitle == "keyword")
+        #expect(dependency.testTarget.editingTags.sortedByOrder == [tagA, tagB].sortedByOrder)
+        #expect(dependency.testTarget.saveButtonDisabled == true)
     }
 
     @MainActor
     @Test
-    func saveButtonDisabled_returnsFalse_whenTitleIsDifferent() {
+    func saveButtonDisabled_returnsTrue_whenTitleAndTagsAreSameAsInitial() {
         let dependency = Dependency()
+        let tagA = Tag(title: "A", color: "#FF0000", order: 1)
+        let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
-        let result = dependency.testTarget.saveButtonDisabled(
-            originalTitle: "keyword",
-            editingTitle: "keyword updated",
-            originalTags: [],
-            editingTags: []
+        dependency.testTarget.setInitialFilter(
+            title: "keyword",
+            tags: [tagA, tagB]
         )
 
-        #expect(result == false)
+        #expect(dependency.testTarget.saveButtonDisabled == true)
     }
 
     @MainActor
     @Test
-    func saveButtonDisabled_returnsFalse_whenTagsAreDifferent() {
+    func saveButtonDisabled_returnsFalse_whenTitleIsDifferentFromInitial() {
         let dependency = Dependency()
 
+        dependency.testTarget.setInitialFilter(
+            title: "keyword",
+            tags: []
+        )
+        dependency.testTarget.editingTitle = "keyword updated"
+
+        #expect(dependency.testTarget.saveButtonDisabled == false)
+    }
+
+    @MainActor
+    @Test
+    func saveButtonDisabled_returnsFalse_whenTagsAreDifferentFromInitial() {
+        let dependency = Dependency()
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
         let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
-        let result = dependency.testTarget.saveButtonDisabled(
-            originalTitle: "keyword",
-            editingTitle: "keyword",
-            originalTags: [tagA],
-            editingTags: [tagA, tagB]
+        dependency.testTarget.setInitialFilter(
+            title: "keyword",
+            tags: [tagA]
         )
+        dependency.testTarget.editingTags = [tagA, tagB]
 
-        #expect(result == false)
+        #expect(dependency.testTarget.saveButtonDisabled == false)
     }
 
     @MainActor
@@ -102,12 +113,12 @@ struct FilterMemosViewModelTests {
     func hasFilteringCondition_returnsFalse_whenTitleAndTagsAreEmpty() {
         let dependency = Dependency()
 
-        let result = dependency.testTarget.hasFilteringCondition(
+        dependency.testTarget.setInitialFilter(
             title: "",
             tags: []
         )
 
-        #expect(result == false)
+        #expect(dependency.testTarget.hasFilteringCondition == false)
     }
 
     @MainActor
@@ -115,26 +126,90 @@ struct FilterMemosViewModelTests {
     func hasFilteringCondition_returnsTrue_whenTitleExists() {
         let dependency = Dependency()
 
-        let result = dependency.testTarget.hasFilteringCondition(
-            title: "keyword",
+        dependency.testTarget.setInitialFilter(
+            title: "",
             tags: []
         )
+        dependency.testTarget.editingTitle = "keyword"
 
-        #expect(result == true)
+        #expect(dependency.testTarget.hasFilteringCondition == true)
     }
 
     @MainActor
     @Test
     func hasFilteringCondition_returnsTrue_whenTagsExist() {
         let dependency = Dependency()
-
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
-        let result = dependency.testTarget.hasFilteringCondition(
+
+        dependency.testTarget.setInitialFilter(
             title: "",
+            tags: []
+        )
+        dependency.testTarget.editingTags = [tagA]
+
+        #expect(dependency.testTarget.hasFilteringCondition == true)
+    }
+
+    @MainActor
+    @Test
+    func buildSaveResult_returnsEditingValuesAndFilteringState() {
+        let dependency = Dependency()
+        let tagA = Tag(title: "A", color: "#FF0000", order: 1)
+
+        dependency.testTarget.setInitialFilter(
+            title: "",
+            tags: []
+        )
+        dependency.testTarget.editingTitle = "keyword"
+        dependency.testTarget.editingTags = [tagA]
+
+        let result = dependency.testTarget.buildSaveResult()
+
+        #expect(result.isFiltering == true)
+        #expect(result.title == "keyword")
+        #expect(result.tags.sortedByOrder == [tagA].sortedByOrder)
+        #expect(result.selectedMemo == nil)
+    }
+
+    @MainActor
+    @Test
+    func buildSaveResult_returnsFilteringFalse_whenEditingIsEmpty() {
+        let dependency = Dependency()
+
+        dependency.testTarget.setInitialFilter(
+            title: "",
+            tags: []
+        )
+        dependency.testTarget.editingTitle = ""
+        dependency.testTarget.editingTags = []
+
+        let result = dependency.testTarget.buildSaveResult()
+
+        #expect(result.isFiltering == false)
+        #expect(result.title == "")
+        #expect(result.tags.isEmpty)
+        #expect(result.selectedMemo == nil)
+    }
+
+    @MainActor
+    @Test
+    func buildResetResult_returnsClearedValues() {
+        let dependency = Dependency()
+        let tagA = Tag(title: "A", color: "#FF0000", order: 1)
+
+        dependency.testTarget.setInitialFilter(
+            title: "keyword",
             tags: [tagA]
         )
+        dependency.testTarget.editingTitle = "keyword updated"
+        dependency.testTarget.editingTags = [tagA]
 
-        #expect(result == true)
+        let result = dependency.testTarget.buildResetResult()
+
+        #expect(result.isFiltering == false)
+        #expect(result.title == "")
+        #expect(result.tags.isEmpty)
+        #expect(result.selectedMemo == nil)
     }
 }
 

@@ -24,14 +24,10 @@ struct FilterMemosView: View {
     private var isFiltering: Bool
     @Binding
     private var title: String
-    @State
-    private var titleToStore: String
     @Binding
     private var tagsForFiltering: [Tag]
     @Binding
     private var selectedMemo: Memo?
-    @State
-    private var selectedTags: [Tag] = []
     @FocusState
     private var textFieldFocus: Bool
     @State
@@ -50,17 +46,18 @@ struct FilterMemosView: View {
     ) {
         _isFiltering = isFiltering
         _title = title
-        _titleToStore = State(initialValue: title.wrappedValue)
         _tagsForFiltering = tagsForFiltering
-        _selectedTags = State(initialValue: tagsForFiltering.wrappedValue)
         _selectedMemo = selectedMemo
 
-        _viewModel = State(
-            wrappedValue: FilterMemosViewModel(
-                tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-                userDefaultsRepository: UserDefaultsRepository()
-            )
+        let vm = FilterMemosViewModel(
+            tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+            userDefaultsRepository: UserDefaultsRepository()
         )
+        vm.setInitialFilter(
+            title: title.wrappedValue,
+            tags: tagsForFiltering.wrappedValue
+        )
+        _viewModel = State(wrappedValue: vm)
     }
 
     var body: some View {
@@ -68,7 +65,7 @@ struct FilterMemosView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     CustomTextField(
-                        text: $titleToStore,
+                        text: $viewModel.editingTitle,
                         focus: _textFieldFocus,
                         placeholder: "Divide Keywords By Space",
                         background: Color(uiColor: .secondarySystemBackground),
@@ -76,17 +73,19 @@ struct FilterMemosView: View {
                         submitButtonTapped: nil
                     )
                     .padding(.bottom, 8)
+
                     HStack(spacing: 12) {
                         Text(viewModel.tags.isEmpty ? "No Tags" : "Select Tags")
                         Button {
                             showSelectTagView = true
                         } label: {
-                            Image(systemName: selectedTags.isEmpty ? "tag" : "tag.fill")
+                            Image(systemName: viewModel.editingTags.isEmpty ? "tag" : "tag.fill")
                                 .font(.system(size: 24))
                                 .tint(.primary)
                         }
                         .disabled(viewModel.tags.isEmpty)
                     }
+
                     Spacer()
                 }
             }
@@ -114,7 +113,7 @@ struct FilterMemosView: View {
                 }
             }
             .navigationDestination(isPresented: $showSelectTagView) {
-                SelectTagView(selectedTags: $selectedTags)
+                SelectTagView(selectedTags: $viewModel.editingTags)
             }
         }
     }
@@ -133,37 +132,29 @@ struct FilterMemosView: View {
         }
         .disabled(!isFiltering)
         .keyboardShortcut("r", modifiers: [.command])
+
         Button("Save", systemImage: "checkmark") {
             saveFiltering()
         }
-        .disabled(saveButtonDisabled)
+        .disabled(viewModel.saveButtonDisabled)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
-    private var saveButtonDisabled: Bool {
-        viewModel.saveButtonDisabled(
-            originalTitle: title,
-            editingTitle: titleToStore,
-            originalTags: tagsForFiltering,
-            editingTags: selectedTags
-        )
-    }
-
     private func saveFiltering() {
-        title = titleToStore
-        tagsForFiltering = selectedTags
-        isFiltering = viewModel.hasFilteringCondition(
-            title: titleToStore,
-            tags: selectedTags
-        )
+        let result = viewModel.buildSaveResult()
+        isFiltering = result.isFiltering
+        title = result.title
+        tagsForFiltering = result.tags
+        selectedMemo = result.selectedMemo
         dismiss()
     }
 
     private func resetFiltering() {
-        isFiltering = false
-        title = ""
-        tagsForFiltering = []
-        selectedMemo = nil
+        let result = viewModel.buildResetResult()
+        isFiltering = result.isFiltering
+        title = result.title
+        tagsForFiltering = result.tags
+        selectedMemo = result.selectedMemo
         dismiss()
     }
 
