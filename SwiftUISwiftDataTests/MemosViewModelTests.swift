@@ -6,6 +6,7 @@
 //
 
 import SwiftData
+import SwiftUI
 import Testing
 
 @testable import SwiftUISwiftData
@@ -227,6 +228,475 @@ struct MemosViewModelTests {
 
     @MainActor
     @Test
+    func displayedMemos_active_returnsAllMemos() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A", order: 1),
+                Memo(title: "Banana", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        _ = testTarget.filteredMemos(by: "Apple", and: [])
+
+        let displayed = testTarget.displayedMemos(editMode: .active)
+        #expect(displayed.count == 2)
+    }
+
+    @MainActor
+    @Test
+    func displayedMemos_inactive_returnsFilteredMemos() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A", order: 1),
+                Memo(title: "Banana", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        _ = testTarget.filteredMemos(by: "Apple", and: [])
+
+        let displayed = testTarget.displayedMemos(editMode: .inactive)
+        #expect(displayed.count == 1)
+        #expect(displayed[0].title == "Apple")
+    }
+
+    @MainActor
+    @Test
+    func navigationTitle_active_returnsSelectionCount() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        testTarget.selectAll()
+        let title = testTarget.navigationTitle(editMode: .active)
+
+        #expect(title == "Memos (2/2)")
+    }
+
+    @MainActor
+    @Test
+    func navigationTitle_inactive_filtering_returnsFilteredCount() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A", order: 1),
+                Memo(title: "Banana", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        _ = testTarget.filteredMemos(by: "Apple", and: [])
+
+        let title = testTarget.navigationTitle(editMode: .inactive)
+        #expect(title == "Memos (1/2)")
+    }
+
+    @MainActor
+    @Test
+    func navigationTitle_inactive_noFilter_returnsTotalCount() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        let title = testTarget.navigationTitle(editMode: .inactive)
+
+        #expect(title == "Memos (2)")
+    }
+
+    @MainActor
+    @Test
+    func toggleSelection_togglesMembership() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let testTarget = dependency.testTarget
+        let id = UUID()
+
+        testTarget.toggleSelection(for: id)
+        #expect(testTarget.selection.contains(id))
+
+        testTarget.toggleSelection(for: id)
+        #expect(!testTarget.selection.contains(id))
+    }
+
+    @MainActor
+    @Test
+    func selectAllAndDeselectAll_workAsExpected() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        testTarget.selectAll()
+        #expect(testTarget.selection.count == 2)
+
+        testTarget.deselectAll()
+        #expect(testTarget.selection.isEmpty)
+    }
+
+    @MainActor
+    @Test
+    func selectedMemos_returnsSelectedOnly() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo1 = Memo(title: "A", content: "A", order: 1)
+        let memo2 = Memo(title: "B", content: "B", order: 2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
+
+        let testTarget = dependency.testTarget
+        testTarget.selection = [memo2.id]
+
+        let selected = testTarget.selectedMemos()
+        #expect(selected.count == 1)
+        #expect(selected[0].id == memo2.id)
+    }
+
+    @MainActor
+    @Test
+    func clearFilter_resetsFilteringState() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let tag = Tag(title: "Tag", color: "#000000")
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            tags: [tag],
+            memos: [
+                Memo(title: "Apple", content: "A", order: 1, tags: [tag]),
+                Memo(title: "Banana", content: "B", order: 2),
+            ]
+        )
+
+        let testTarget = dependency.testTarget
+        _ = testTarget.filteredMemos(by: "Apple", and: [tag])
+        #expect(testTarget.isFiltering)
+
+        testTarget.clearFilter()
+
+        #expect(!testTarget.isFiltering)
+        #expect(testTarget.filterQuery == "")
+        #expect(testTarget.filterTags.isEmpty)
+        #expect(testTarget.keywordsForFiltering.isEmpty)
+        #expect(testTarget.filteredMemos.count == testTarget.memos.count)
+    }
+
+    @MainActor
+    @Test
+    func handleMemosChanged_active_emptyNewMemos_clearsSelection() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let testTarget = dependency.testTarget
+        testTarget.selection = [UUID()]
+
+        testTarget.handleMemosChanged(
+            oldMemos: [Memo(title: "A", content: "A")],
+            newMemos: [],
+            editMode: .active
+        )
+
+        #expect(testTarget.selection.isEmpty)
+    }
+
+    @MainActor
+    @Test
+    func handleMemosChanged_inactive_newMemo_selectsNewMemo() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let testTarget = dependency.testTarget
+        let oldMemo = Memo(title: "Old", content: "Old", order: 1)
+        let newMemo = Memo(title: "New", content: "New", order: 2)
+
+        testTarget.handleMemosChanged(
+            oldMemos: [oldMemo],
+            newMemos: [oldMemo, newMemo],
+            editMode: .inactive
+        )
+
+        #expect(testTarget.selectedMemo?.id == newMemo.id)
+        #expect(testTarget.selection.isEmpty)
+    }
+
+    @MainActor
+    @Test
+    func handleMemosChanged_inactive_emptyNewMemos_clearsSelectedMemoAndFilter() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [Memo(title: "A", content: "A", order: 1)]
+        )
+
+        let testTarget = dependency.testTarget
+        testTarget.selectedMemo = Memo(title: "X", content: "X")
+        _ = testTarget.filteredMemos(by: "A", and: [])
+
+        testTarget.handleMemosChanged(
+            oldMemos: [Memo(title: "A", content: "A", order: 1)],
+            newMemos: [],
+            editMode: .inactive
+        )
+
+        #expect(testTarget.selectedMemo == nil)
+        #expect(testTarget.filterQuery == "")
+        #expect(!testTarget.isFiltering)
+    }
+
+    @MainActor
+    @Test
+    func onDuplicateMemo_success_returnsToast() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo = Memo(title: "A", content: "A", order: 1)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo]
+        )
+
+        let result = dependency.testTarget.onDuplicateMemo(memo)
+        #expect(result == .toast("Successfully duplicated!"))
+    }
+
+    @MainActor
+    @Test
+    func onDeleteMemos_selectedDeleted_returnsNilAndToast() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo1 = Memo(title: "A", content: "A", order: 1)
+        let memo2 = Memo(title: "B", content: "B", order: 2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
+
+        let output = dependency.testTarget.onDeleteMemos([memo1], currentSelectedMemo: memo1)
+
+        #expect(output.newSelectedMemo == nil)
+        #expect(output.result == .toast("Successfully deleted!"))
+    }
+
+    @MainActor
+    @Test
+    func onDeleteMemos_selectedNotDeleted_keepsSelectionAndToast() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo1 = Memo(title: "A", content: "A", order: 1)
+        let memo2 = Memo(title: "B", content: "B", order: 2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
+
+        let output = dependency.testTarget.onDeleteMemos([memo2], currentSelectedMemo: memo1)
+
+        #expect(output.newSelectedMemo?.id == memo1.id)
+        #expect(output.result == .toast("Successfully deleted!"))
+    }
+
+    @MainActor
+    @Test
+    func onMoveMemo_success_returnsNone() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+                Memo(title: "C", content: "C", order: 3),
+            ]
+        )
+
+        let result = dependency.testTarget.onMoveMemo(from: IndexSet(integer: 2), to: 1)
+        #expect(result == .none)
+    }
+
+    @MainActor
+    @Test
+    func onMoveMemo_invalidSource_returnsAlert() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", order: 1),
+                Memo(title: "B", content: "B", order: 2),
+            ]
+        )
+
+        let result = dependency.testTarget.onMoveMemo(from: IndexSet(integer: 999), to: 1)
+        if case .alert(.error, _) = result {
+            #expect(Bool(true))
+        }
+        else {
+            #expect(Bool(false))
+        }
+    }
+
+    @MainActor
+    @Test
+    func onProtectMemos_authSuccess_returnsNoneAndProtects() async throws {
+        let dependency = try Dependency(authenticateHandler: { true })
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", protected: false),
+                Memo(title: "B", content: "B", protected: false),
+            ]
+        )
+
+        let memosBefore = try dependency.memoRepository.memos()
+        let result = await dependency.testTarget.onProtectMemos(memosBefore)
+
+        #expect(result == .none)
+
+        let memosAfter = try dependency.memoRepository.memos()
+        for memo in memosAfter {
+            #expect(memo.protected)
+        }
+    }
+
+    @MainActor
+    @Test
+    func onProtectMemos_authFailure_returnsAlert() async throws {
+        enum DummyError: Error { case failed }
+
+        let dependency = try Dependency(authenticateHandler: { throw DummyError.failed })
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [Memo(title: "A", content: "A", protected: false)]
+        )
+
+        let memosBefore = try dependency.memoRepository.memos()
+        let result = await dependency.testTarget.onProtectMemos(memosBefore)
+
+        if case .alert(.error, _) = result {
+            #expect(Bool(true))
+        }
+        else {
+            #expect(Bool(false))
+        }
+    }
+
+    @MainActor
+    @Test
+    func onUnprotectMemos_authSuccess_returnsNoneAndUnprotects() async throws {
+        let dependency = try Dependency(authenticateHandler: { true })
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A", protected: true),
+                Memo(title: "B", content: "B", protected: true),
+            ]
+        )
+
+        let memosBefore = try dependency.memoRepository.memos()
+        let result = await dependency.testTarget.onUnprotectMemos(memosBefore)
+
+        #expect(result == .none)
+
+        let memosAfter = try dependency.memoRepository.memos()
+        for memo in memosAfter {
+            #expect(!memo.protected)
+        }
+    }
+
+    @MainActor
+    @Test
+    func onUnprotectMemos_authFailure_returnsAlert() async throws {
+        enum DummyError: Error { case failed }
+
+        let dependency = try Dependency(authenticateHandler: { throw DummyError.failed })
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [Memo(title: "A", content: "A", protected: true)]
+        )
+
+        let memosBefore = try dependency.memoRepository.memos()
+        let result = await dependency.testTarget.onUnprotectMemos(memosBefore)
+
+        if case .alert(.error, _) = result {
+            #expect(Bool(true))
+        }
+        else {
+            #expect(Bool(false))
+        }
+    }
+
+    @MainActor
+    @Test
     func getTitleLineLimit() throws {
         let dependency = try Dependency()
         defer { dependency.removeUserDefaults() }
@@ -270,6 +740,26 @@ struct MemosViewModelTests {
     }
 
     @MainActor
+    @Test
+    func onDeleteMemos_selectedDeleted_returnsNilSelectionAndToast() async throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo1 = Memo(title: "A", content: "A", order: 1)
+        let memo2 = Memo(title: "B", content: "B", order: 2)
+        try seed(
+            memoRepository: dependency.memoRepository,
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
+
+        let output = dependency.testTarget.onDeleteMemos([memo1], currentSelectedMemo: memo1)
+
+        #expect(output.newSelectedMemo == nil)
+        #expect(output.result == .toast("Successfully deleted!"))
+    }
+
+    @MainActor
     private func seed(
         memoRepository: MemoRepository,
         context: ModelContext,
@@ -294,7 +784,9 @@ extension MemosViewModelTests {
         private let support: TestDependencySupport
 
         @MainActor
-        init() throws {
+        init(
+            authenticateHandler: @escaping MemosViewModel.AuthenticateHandler = { true }
+        ) throws {
             let support = TestDependencySupport()
             self.support = support
             userDefaultsRepository = support.userDefaultsRepository
@@ -309,7 +801,8 @@ extension MemosViewModelTests {
 
             testTarget = .init(
                 memoRepository: memoRepository,
-                userDefaultsRepository: userDefaultsRepository
+                userDefaultsRepository: userDefaultsRepository,
+                authenticateHandler: authenticateHandler
             )
         }
 

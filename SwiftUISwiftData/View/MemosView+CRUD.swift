@@ -17,75 +17,45 @@ extension MemosView {
     }
 
     func duplicateMemo(_ memo: Memo) {
-        do {
-            try viewModel.duplicate(memo)
-            toastMessage = "Successfully duplicated!"
-        }
-        catch {
-            handleError(error, message: "Failed to duplicate memo: \(memo)")
-        }
+        apply(viewModel.onDuplicateMemo(memo))
     }
 
     func deleteMemos(_ memos: [Memo]) {
-        do {
-            try viewModel.delete(memos)
-
-            for memo in memos where viewModel.selectedMemo == memo {
-                viewModel.selectedMemo = nil
-            }
-
-            viewModel.deselectAll()
-            toastMessage = "Successfully deleted!"
-        }
-        catch {
-            handleError(error, message: "Failed to delete memos: \(error)")
-        }
+        let output = viewModel.onDeleteMemos(memos, currentSelectedMemo: selectedMemo)
+        selectedMemo = output.newSelectedMemo
+        apply(output.result)
     }
 
     func moveMemo(from source: IndexSet, to destination: Int) {
-        let indices = source.map { $0 }
-        do {
-            try viewModel.moveMemo(from: indices, to: destination)
-        }
-        catch {
-            handleError(error, message: "Failed to move memo: \(error)")
-        }
+        apply(viewModel.onMoveMemo(from: source, to: destination))
     }
 
     func protect(_ memos: [Memo]) async {
-        do {
-            guard try await authenticate() else { return }
-            try viewModel.protect(memos)
-        }
-        catch {
-            handleError(error, message: "Failed to protect memos: \(error)")
-        }
+        apply(await viewModel.onProtectMemos(memos))
     }
 
     func unprotect(_ memos: [Memo]) async {
-        do {
-            guard try await authenticate() else { return }
-            try viewModel.unprotect(memos)
-        }
-        catch {
-            handleError(error, message: "Failed to unprotect memos: \(error)")
-        }
+        apply(await viewModel.onUnprotectMemos(memos))
     }
 
-    private func authenticate() async throws -> Bool {
-        let result = try await AuthenticationManager.shared.authenticate()
-        guard result.success else {
-            guard let error = result.error else {
-                fatalError("Failed to get error from result.")
-            }
-            throw error
-        }
-        return result.success
-    }
+    private func apply(_ result: MemosViewModel.ActionResult) {
+        switch result {
+            case .none:
+                break
 
-    private func handleError(_ error: any Error, message: String) {
-        self.error = error
-        currentAlert = .error
-        print(message)
+            case .toast(let message):
+                toastMessage = message
+
+            case .alert(let alert, let message):
+                switch alert {
+                    case .error:
+                        error = NSError(
+                            domain: "MemosView",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: message ?? "Unknown error."]
+                        )
+                        currentAlert = .error
+                }
+        }
     }
 }

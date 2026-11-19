@@ -16,6 +16,18 @@ final class MemosViewModel {
         case invalidDestination
     }
 
+    enum ActionAlert: Equatable {
+        case error
+    }
+
+    enum ActionResult: Equatable {
+        case none
+        case toast(String)
+        case alert(ActionAlert, message: String?)
+    }
+
+    typealias AuthenticateHandler = @MainActor () async throws -> Bool
+
     private(set) var memos: [Memo] = []
     private(set) var filteredMemos: [Memo] = []
     private(set) var keywordsForFiltering: [String] = []
@@ -39,6 +51,9 @@ final class MemosViewModel {
     private let userDefaultsRepository: UserDefaultsRepository
 
     @ObservationIgnored
+    private let authenticateHandler: AuthenticateHandler
+
+    @ObservationIgnored
     private var saveNotificationToken: NSObjectProtocol?
 
     @ObservationIgnored
@@ -46,10 +61,25 @@ final class MemosViewModel {
 
     init(
         memoRepository: MemoRepository,
-        userDefaultsRepository: UserDefaultsRepository
+        userDefaultsRepository: UserDefaultsRepository,
+        authenticateHandler: @escaping AuthenticateHandler = {
+            let result = try await AuthenticationManager.shared.authenticate()
+            guard result.success else {
+                if let error = result.error {
+                    throw error
+                }
+                throw NSError(
+                    domain: "Authentication",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Authentication failed."]
+                )
+            }
+            return true
+        }
     ) {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
+        self.authenticateHandler = authenticateHandler
 
         fetchMemos()
         applyFilter()
@@ -166,7 +196,6 @@ final class MemosViewModel {
                 if newMemos.isEmpty {
                     selection.removeAll()
                 }
-
             case .inactive:
                 if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
                     if let memoDuplicateSource, memoDuplicateSource.order + 1 == newMemo.order {
@@ -180,7 +209,6 @@ final class MemosViewModel {
                     selectedMemo = nil
                     clearFilter()
                 }
-
             default:
                 break
         }
@@ -217,6 +245,75 @@ final class MemosViewModel {
 
     func unprotect(_ memos: [Memo]) throws {
         try memoRepository.unprotect(memos)
+    }
+
+    // MARK: - UI Action entry points (MVVM)
+
+    func onDuplicateMemo(_ memo: Memo) -> ActionResult {
+        do {
+            try duplicate(memo)
+            return .toast("Successfully duplicated!")
+        }
+        catch {
+            return .alert(.error, message: error.localizedDescription)
+        }
+    }
+
+    func onDeleteMemos(
+        _ memosToDelete: [Memo],
+        currentSelectedMemo: Memo?
+    ) -> (result: ActionResult, newSelectedMemo: Memo?) {
+        do {
+            try delete(memosToDelete)
+
+            var nextSelectedMemo = currentSelectedMemo
+            if let selected = currentSelectedMemo, memosToDelete.contains(selected) {
+                nextSelectedMemo = nil
+                selectedMemo = nil
+            }
+
+            deselectAll()
+            return (.toast("Successfully deleted!"), nextSelectedMemo)
+        }
+        catch {
+            return (.alert(.error, message: error.localizedDescription), currentSelectedMemo)
+        }
+    }
+
+    func onMoveMemo(from source: IndexSet, to destination: Int) -> ActionResult {
+        do {
+            try moveMemo(from: source.map { $0 }, to: destination)
+            return .none
+        }
+        catch {
+            return .alert(.error, message: error.localizedDescription)
+        }
+    }
+
+    func onProtectMemos(_ memosToProtect: [Memo]) async -> ActionResult {
+        do {
+            guard try await authenticateHandler() else {
+                return .none
+            }
+            try protect(memosToProtect)
+            return .none
+        }
+        catch {
+            return .alert(.error, message: error.localizedDescription)
+        }
+    }
+
+    func onUnprotectMemos(_ memosToUnprotect: [Memo]) async -> ActionResult {
+        do {
+            guard try await authenticateHandler() else {
+                return .none
+            }
+            try unprotect(memosToUnprotect)
+            return .none
+        }
+        catch {
+            return .alert(.error, message: error.localizedDescription)
+        }
     }
 
     func getTitleLineLimit() -> Int {
