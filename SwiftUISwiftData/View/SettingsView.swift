@@ -5,125 +5,20 @@
 //  Created by Hiromichi Sase on 2026/06/07.
 //
 
-import SwiftData
 import SwiftUI
 
 /// 設定画面を表示するビュー。
 struct SettingsView: View {
-    private struct SettingsSnapshot: Equatable {
-        var hasLink: Bool
-        var contentFontSize: Float
-        var contentLineSpacing: Float
-        var titleLineLimit: Int
-        var titleFontSize: Float
-        var titleLineSpacing: Float
-        var showInfo: Bool
-        var defaultTagColor: String
+    @State
+    private var viewModel = SettingsViewModel(
+        userDefaultsRepository: UserDefaultsRepository()
+    )
 
-        init(
-            hasLink: Bool,
-            contentFontSize: Float,
-            contentLineSpacing: Float,
-            titleLineLimit: Int,
-            titleFontSize: Float,
-            titleLineSpacing: Float,
-            showInfo: Bool,
-            defaultTagColor: String
-        ) {
-            self.hasLink = hasLink
-            self.contentFontSize = contentFontSize
-            self.contentLineSpacing = contentLineSpacing
-            self.titleLineLimit = titleLineLimit
-            self.titleFontSize = titleFontSize
-            self.titleLineSpacing = titleLineSpacing
-            self.showInfo = showInfo
-            self.defaultTagColor = defaultTagColor
-        }
-
-        init(viewModel: SettingsViewModel) {
-            hasLink = viewModel.getHasLink()
-            contentFontSize = viewModel.getContentFontSize()
-            contentLineSpacing = viewModel.getContentLineSpacing()
-            titleLineLimit = viewModel.getTitleLineLimit()
-            titleFontSize = viewModel.getTitleFontSize()
-            titleLineSpacing = viewModel.getTitleLineSpacing()
-            showInfo = viewModel.getShowInfo()
-            defaultTagColor = viewModel.getDefaultTagColor()
-        }
-    }
-
-    /// ビューの状態を管理するViewModel。
-    @State
-    private var viewModel: SettingsViewModel
-    @State
-    private var hasLink: Bool = false
-    @State
-    private var contentFontSize: Float = .zero
-    @State
-    private var contentLineSpacing: Float = .zero
-    @State
-    private var titleLineLimit: Int = .zero
-    @State
-    private var titleFontSize: Float = .zero
-    @State
-    private var titleLineSpacing: Float = .zero
-    @State
-    private var showInfo: Bool = false
-    @State
-    private var defaultTagColor: String = ""
-
-    @State
-    private var hasLinkToStore: Bool = false
-    @State
-    private var contentFontSizeToStore: Float = .zero
-    @State
-    private var contentLineSpacingToStore: Float = .zero
-    @State
-    private var titleLineLimitToStore: Int = .zero
-    @State
-    private var titleFontSizeToStore: Float = .zero
-    @State
-    private var titleLineSpacingToStore: Float = .zero
-    @State
-    private var showInfoToStore: Bool = false
-    @State
-    private var defaultTagColorToStore: String = ""
-
-    @State
-    private var color: Color = .clear
     @State
     private var toastMessage = ""
+
     @State
     private var showResetAlert = false
-
-    @Environment(\.dismiss)
-    private var dismiss
-
-    init() {
-        let vm = SettingsViewModel(
-            userDefaultsRepository: UserDefaultsRepository()
-        )
-        _viewModel = State(wrappedValue: vm)
-
-        let snapshot = SettingsSnapshot(viewModel: vm)
-        _hasLink = State(initialValue: snapshot.hasLink)
-        _contentFontSize = State(initialValue: snapshot.contentFontSize)
-        _contentLineSpacing = State(initialValue: snapshot.contentLineSpacing)
-        _titleLineLimit = State(initialValue: snapshot.titleLineLimit)
-        _titleFontSize = State(initialValue: snapshot.titleFontSize)
-        _titleLineSpacing = State(initialValue: snapshot.titleLineSpacing)
-        _showInfo = State(initialValue: snapshot.showInfo)
-        _defaultTagColor = State(initialValue: snapshot.defaultTagColor)
-
-        _hasLinkToStore = State(initialValue: snapshot.hasLink)
-        _contentFontSizeToStore = State(initialValue: snapshot.contentFontSize)
-        _contentLineSpacingToStore = State(initialValue: snapshot.contentLineSpacing)
-        _titleLineLimitToStore = State(initialValue: snapshot.titleLineLimit)
-        _titleFontSizeToStore = State(initialValue: snapshot.titleFontSize)
-        _titleLineSpacingToStore = State(initialValue: snapshot.titleLineSpacing)
-        _showInfoToStore = State(initialValue: snapshot.showInfo)
-        _defaultTagColorToStore = State(initialValue: snapshot.defaultTagColor)
-    }
 
     var body: some View {
         NavigationStack {
@@ -133,9 +28,6 @@ struct SettingsView: View {
                 titleSection
                 infoSection
                 colorSection
-            }
-            .onLoad {
-                color = defaultTagColor.color()
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -156,9 +48,14 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text("Has Link")
                     .font(.system(size: 12.0))
-                Toggle(isOn: $hasLink) {
-                    Text(hasLink ? "ON" : "OFF")
-                        .fontWeight(viewModel.hasLinkChanged(hasLink) ? .bold : .regular)
+
+                Toggle(isOn: $viewModel.draft.hasLink) {
+                    Text(viewModel.draft.hasLink ? "ON" : "OFF")
+                        .fontWeight(
+                            viewModel.hasLinkChanged(viewModel.draft.hasLink)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
         }
@@ -169,25 +66,36 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text("Font Size (\(rangeString(viewModel.contentFontSizeRange)))")
                     .font(.system(size: 12.0))
+
                 Stepper(
-                    value: $contentFontSize,
+                    value: $viewModel.draft.contentFontSize,
                     in: viewModel.contentFontSizeRange,
                     step: 0.5
                 ) {
-                    Text("\(contentFontSize, specifier: "%.1f")")
-                        .fontWeight(viewModel.contentFontSizeChanged(contentFontSize) ? .bold : .regular)
+                    Text("\(viewModel.draft.contentFontSize, specifier: "%.1f")")
+                        .fontWeight(
+                            viewModel.contentFontSizeChanged(viewModel.draft.contentFontSize)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
+
             VStack(alignment: .leading) {
                 Text("Line Spacing (\(rangeString(viewModel.contentLineSpacingRange)))")
                     .font(.system(size: 12.0))
+
                 Stepper(
-                    value: $contentLineSpacing,
+                    value: $viewModel.draft.contentLineSpacing,
                     in: viewModel.contentLineSpacingRange,
                     step: 0.5
                 ) {
-                    Text("\(contentLineSpacing, specifier: "%.1f")")
-                        .fontWeight(viewModel.contentLineSpacingChanged(contentLineSpacing) ? .bold : .regular)
+                    Text("\(viewModel.draft.contentLineSpacing, specifier: "%.1f")")
+                        .fontWeight(
+                            viewModel.contentLineSpacingChanged(viewModel.draft.contentLineSpacing)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
         }
@@ -198,36 +106,53 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text("Line Limit (\(rangeString(viewModel.titleLineLimitRange)))")
                     .font(.system(size: 12.0))
+
                 Stepper(
-                    value: $titleLineLimit,
-                    in: viewModel.titleLineLimitRange,
+                    value: $viewModel.draft.titleLineLimit,
+                    in: viewModel.titleLineLimitRange
                 ) {
-                    Text("\(titleLineLimit)")
-                        .fontWeight(viewModel.titleLineLimitChanged(titleLineLimit) ? .bold : .regular)
+                    Text("\(viewModel.draft.titleLineLimit)")
+                        .fontWeight(
+                            viewModel.titleLineLimitChanged(viewModel.draft.titleLineLimit)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
+
             VStack(alignment: .leading) {
                 Text("Font Size (\(rangeString(viewModel.titleFontSizeRange)))")
                     .font(.system(size: 12.0))
+
                 Stepper(
-                    value: $titleFontSize,
+                    value: $viewModel.draft.titleFontSize,
                     in: viewModel.titleFontSizeRange,
                     step: 0.5
                 ) {
-                    Text("\(titleFontSize, specifier: "%.1f")")
-                        .fontWeight(viewModel.titleFontSizeChanged(titleFontSize) ? .bold : .regular)
+                    Text("\(viewModel.draft.titleFontSize, specifier: "%.1f")")
+                        .fontWeight(
+                            viewModel.titleFontSizeChanged(viewModel.draft.titleFontSize)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
+
             VStack(alignment: .leading) {
                 Text("Line Spacing (\(rangeString(viewModel.titleLineSpacingRange)))")
                     .font(.system(size: 12.0))
+
                 Stepper(
-                    value: $titleLineSpacing,
+                    value: $viewModel.draft.titleLineSpacing,
                     in: viewModel.titleLineSpacingRange,
                     step: 0.5
                 ) {
-                    Text("\(titleLineSpacing, specifier: "%.1f")")
-                        .fontWeight(viewModel.titleLineSpacingChanged(titleLineSpacing) ? .bold : .regular)
+                    Text("\(viewModel.draft.titleLineSpacing, specifier: "%.1f")")
+                        .fontWeight(
+                            viewModel.titleLineSpacingChanged(viewModel.draft.titleLineSpacing)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
         }
@@ -238,9 +163,14 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text("Show Info\n(Content Characters, Content Line Numbers, Created At, Updated At)")
                     .font(.system(size: 12.0))
-                Toggle(isOn: $showInfo) {
-                    Text(showInfo ? "ON" : "OFF")
-                        .fontWeight(viewModel.showInfoChanged(showInfo) ? .bold : .regular)
+
+                Toggle(isOn: $viewModel.draft.showInfo) {
+                    Text(viewModel.draft.showInfo ? "ON" : "OFF")
+                        .fontWeight(
+                            viewModel.showInfoChanged(viewModel.draft.showInfo)
+                                ? .bold
+                                : .regular
+                        )
                 }
             }
         }
@@ -251,23 +181,34 @@ struct SettingsView: View {
             VStack(alignment: .leading) {
                 Text("Default Tag Color")
                     .font(.system(size: 12.0))
+
                 HStack {
                     TagColorView(
-                        colorString: defaultTagColor,
+                        colorString: viewModel.draft.defaultTagColor,
                         showColorString: true
                     )
+
                     Spacer()
+
                     ColorPicker(
                         "",
-                        selection: $color,
+                        selection: defaultTagColorBinding,
                         supportsOpacity: false
                     )
-                    .onChange(of: color) {
-                        defaultTagColor = color.hexString()
-                    }
                 }
             }
         }
+    }
+
+    private var defaultTagColorBinding: Binding<Color> {
+        Binding(
+            get: {
+                viewModel.draft.defaultTagColor.color()
+            },
+            set: { color in
+                viewModel.draft.defaultTagColor = color.hexString()
+            }
+        )
     }
 
     private var resetAlert: Alert {
@@ -275,25 +216,6 @@ struct SettingsView: View {
             title: Text("Reset all settings?"),
             primaryButton: .destructive(Text("Reset")) {
                 viewModel.reset()
-                let snapshot = SettingsSnapshot(viewModel: viewModel)
-                hasLink = snapshot.hasLink
-                contentFontSize = snapshot.contentFontSize
-                contentLineSpacing = snapshot.contentLineSpacing
-                titleLineLimit = snapshot.titleLineLimit
-                titleFontSize = snapshot.titleFontSize
-                titleLineSpacing = snapshot.titleLineSpacing
-                showInfo = snapshot.showInfo
-                defaultTagColor = snapshot.defaultTagColor
-                color = snapshot.defaultTagColor.color()
-
-                hasLinkToStore = snapshot.hasLink
-                contentFontSizeToStore = snapshot.contentFontSize
-                contentLineSpacingToStore = snapshot.contentLineSpacing
-                titleLineLimitToStore = snapshot.titleLineLimit
-                titleFontSizeToStore = snapshot.titleFontSize
-                titleLineSpacingToStore = snapshot.titleLineSpacing
-                showInfoToStore = snapshot.showInfo
-                defaultTagColorToStore = snapshot.defaultTagColor
                 toastMessage = "Successfully reset!"
             },
             secondaryButton: .cancel()
@@ -307,74 +229,21 @@ struct SettingsView: View {
         }
         .disabled(!viewModel.settingsChanged)
         .keyboardShortcut("r", modifiers: [.command])
+
         Button("Save", systemImage: "checkmark.circle.fill") {
-            let snapshot = currentSnapshot
-            save(snapshot: snapshot)
-            hasLinkToStore = snapshot.hasLink
-            contentFontSizeToStore = snapshot.contentFontSize
-            contentLineSpacingToStore = snapshot.contentLineSpacing
-            titleLineLimitToStore = snapshot.titleLineLimit
-            titleFontSizeToStore = snapshot.titleFontSize
-            titleLineSpacingToStore = snapshot.titleLineSpacing
-            showInfoToStore = snapshot.showInfo
-            defaultTagColorToStore = snapshot.defaultTagColor
+            viewModel.save()
             toastMessage = "Successfully saved!"
         }
-        .disabled(!settingsUpdated)
+        .disabled(!viewModel.canSave)
         .keyboardShortcut("s", modifiers: [.command])
     }
 
-    private var settingsUpdated: Bool {
-        storeSnapshot != currentSnapshot
+    private func rangeString(_ range: ClosedRange<Int>) -> String {
+        "\(range.lowerBound) 〜 \(range.upperBound)"
     }
 
-    private var currentSnapshot: SettingsSnapshot {
-        SettingsSnapshot(
-            hasLink: hasLink,
-            contentFontSize: contentFontSize,
-            contentLineSpacing: contentLineSpacing,
-            titleLineLimit: titleLineLimit,
-            titleFontSize: titleFontSize,
-            titleLineSpacing: titleLineSpacing,
-            showInfo: showInfo,
-            defaultTagColor: defaultTagColor
-        )
-    }
-
-    private var storeSnapshot: SettingsSnapshot {
-        SettingsSnapshot(
-            hasLink: hasLinkToStore,
-            contentFontSize: contentFontSizeToStore,
-            contentLineSpacing: contentLineSpacingToStore,
-            titleLineLimit: titleLineLimitToStore,
-            titleFontSize: titleFontSizeToStore,
-            titleLineSpacing: titleLineSpacingToStore,
-            showInfo: showInfoToStore,
-            defaultTagColor: defaultTagColorToStore
-        )
-    }
-
-    private func save(snapshot: SettingsSnapshot) {
-        viewModel.setHasLink(snapshot.hasLink)
-        viewModel.setContentFontSize(snapshot.contentFontSize)
-        viewModel.setContentLineSpacing(snapshot.contentLineSpacing)
-        viewModel.setTitleLineLimit(snapshot.titleLineLimit)
-        viewModel.setTitleFontSize(snapshot.titleFontSize)
-        viewModel.setTitleLineSpacing(snapshot.titleLineSpacing)
-        viewModel.setShowInfo(snapshot.showInfo)
-        viewModel.setDefaultTagColor(snapshot.defaultTagColor)
-    }
-
-    private func rangeString<T: Equatable>(_ range: ClosedRange<T>) -> String {
-        if let range = range as? ClosedRange<Int> {
-            "\(String(range.lowerBound)) 〜 \(String(range.upperBound))"
-        }
-        else if let range = range as? ClosedRange<Float> {
-            "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
-        }
-        else {
-            ""
-        }
+    private func rangeString(_ range: ClosedRange<Float>) -> String {
+        "\(String(format: "%.1f", range.lowerBound)) 〜 \(String(format: "%.1f", range.upperBound))"
     }
 }
 
