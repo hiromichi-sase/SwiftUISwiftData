@@ -171,8 +171,11 @@ struct EditMemoView: View {
             }
             .toast(message: $viewModel.toastMessage)
             .sheet(isPresented: $viewModel.showSelectTagView) {
-                SelectTagView(selectedTags: $viewModel.selectedTags)
-                    .interactiveDismissDisabled(true)
+                SelectTagView(
+                    selectedTags: $viewModel.selectedTags,
+                    viewModel: viewModel.makeSelectTagViewModel()
+                )
+                .interactiveDismissDisabled(true)
             }
             .onReceive(
                 NotificationCenter.default.publisher(

@@ -18,6 +18,7 @@ final class EditMemoViewModel {
     }
 
     private let memoRepository: MemoRepository
+    private let tagRepository: TagRepository
     private let userDefaultsRepository: UserDefaultsRepository
 
     private(set) var memo: Memo?
@@ -42,6 +43,7 @@ final class EditMemoViewModel {
     ) {
         self.memo = memo
         self.memoRepository = memoRepository
+        self.tagRepository = tagRepository
         self.userDefaultsRepository = userDefaultsRepository
 
         self.title = memo?.title ?? ""
@@ -112,6 +114,15 @@ final class EditMemoViewModel {
         else {
             addMemo()
         }
+    }
+
+    // MARK: - Factory
+
+    func makeSelectTagViewModel() -> SelectTagViewModel {
+        SelectTagViewModel(
+            tagRepository: tagRepository,
+            userDefaultsRepository: userDefaultsRepository
+        )
     }
 
     // MARK: - UseCases

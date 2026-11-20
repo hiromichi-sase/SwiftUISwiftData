@@ -17,24 +17,51 @@ struct SelectTagView: View {
     @Environment(\.dismiss)
     private var dismiss
     @Binding
-    var selectedTags: [Tag]
+    private var selectedTags: [Tag]
     @State
-    var editMode: EditMode = .active
+    private var editMode: EditMode = .active
     @State
     private var selection: Set<UUID> = []
     @State
     private var isPresentedModally = false
     @State
-    var path = NavigationPath()
+    private var didInitializeSelection = false
+    @State
+    private var path = NavigationPath()
 
+    /// 通常の依存関係を使用してビューを生成する。
     init(selectedTags: Binding<[Tag]>) {
-        _selectedTags = selectedTags
-        _viewModel = State(
-            wrappedValue: SelectTagViewModel(
-                tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-                userDefaultsRepository: UserDefaultsRepository()
+        self.init(
+            selectedTags: selectedTags,
+            tagRepository: TagRepository(
+                modelContext: ModelContainerManager.shared.modelContainer.mainContext
+            ),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
+    init(
+        selectedTags: Binding<[Tag]>,
+        tagRepository: TagRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.init(
+            selectedTags: selectedTags,
+            viewModel: SelectTagViewModel(
+                tagRepository: tagRepository,
+                userDefaultsRepository: userDefaultsRepository
             )
         )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(
+        selectedTags: Binding<[Tag]>,
+        viewModel: SelectTagViewModel
+    ) {
+        _selectedTags = selectedTags
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -81,14 +108,17 @@ struct SelectTagView: View {
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
-        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
+        .listRowBackground(
+            Color(uiColor: .secondarySystemGroupedBackground)
+        )
     }
 
     private func setupOnAppear() {
-        if selection.isEmpty {
+        if !didInitializeSelection {
             selection = viewModel.selectedIDs(from: selectedTags)
+            didInitializeSelection = true
         }
-        isPresentedModally = _isPresented.wrappedValue
+        isPresentedModally = isPresented
     }
 
     @ViewBuilder
