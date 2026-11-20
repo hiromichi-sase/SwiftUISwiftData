@@ -5,30 +5,35 @@
 //  Created by Hiromichi Sase on 2026/05/23.
 //
 
-import SwiftData
 import SwiftUI
 
 /// メモの内容を表示するビュー。
 struct BrowseMemoView: View {
-    /// ビューの状態を管理するViewModel。
     @State
     private var viewModel: BrowseMemoViewModel
-    /// タグ一覧の高さ。
     @State
     private var tagListViewHeight: CGFloat = .zero
-    /// ナビゲーションパスの状態変数。
     @State
     private var path = NavigationPath()
 
-    /// イニシャライザ。
-    /// - Parameter memo: 表示するメモ
-    init(memo: Memo) {
-        _viewModel = State(
-            wrappedValue: BrowseMemoViewModel(
+    /// メモと Repository からビューを生成する。
+    ///
+    /// Repository を省略した場合は通常の UserDefaults を使用する。
+    init(
+        memo: Memo,
+        userDefaultsRepository: UserDefaultsRepository = UserDefaultsRepository()
+    ) {
+        self.init(
+            viewModel: BrowseMemoViewModel(
                 memo: memo,
-                userDefaultsRepository: UserDefaultsRepository()
+                userDefaultsRepository: userDefaultsRepository
             )
         )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(viewModel: BrowseMemoViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -90,7 +95,6 @@ struct BrowseMemoView: View {
         tagListViewHeight = height
     }
 
-    /// ツールバーの右側のアイテムを定義するビュー。
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if !viewModel.isProtected {
@@ -103,8 +107,18 @@ struct BrowseMemoView: View {
 }
 
 #Preview {
-    NavigationStack {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
-        BrowseMemoView(memo: memo)
-    }
+    let memo = Memo(
+        title: "Sample Title",
+        content: "Sample Content",
+        createdAt: Date(),
+        updatedAt: Date(),
+        order: .zero
+    )
+
+    BrowseMemoView(
+        viewModel: BrowseMemoViewModel(
+            memo: memo,
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    )
 }
