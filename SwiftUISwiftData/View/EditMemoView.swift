@@ -23,15 +23,40 @@ struct EditMemoView: View {
     @State
     private var path = NavigationPath()
 
+    /// 通常の依存関係を使用してビューを生成する。
+    ///
+    /// - Parameter memo: 編集するメモ。nil の場合は新規作成。
     init(memo: Memo? = nil) {
-        _viewModel = State(
-            wrappedValue: EditMemoViewModel(
+        let modelContext = ModelContainerManager.shared.modelContainer.mainContext
+
+        self.init(
+            memo: memo,
+            memoRepository: MemoRepository(modelContext: modelContext),
+            tagRepository: TagRepository(modelContext: modelContext),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
+    init(
+        memo: Memo? = nil,
+        memoRepository: MemoRepository,
+        tagRepository: TagRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.init(
+            viewModel: EditMemoViewModel(
                 memo: memo,
-                memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-                tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-                userDefaultsRepository: UserDefaultsRepository()
+                memoRepository: memoRepository,
+                tagRepository: tagRepository,
+                userDefaultsRepository: userDefaultsRepository
             )
         )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(viewModel: EditMemoViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -54,7 +79,10 @@ struct EditMemoView: View {
 
                 if viewModel.getShowInfo(), !viewModel.showTitleView {
                     VStack(alignment: .leading, spacing: .zero) {
-                        InfoText.countView(content: viewModel.content, textSelection: textSelection)
+                        InfoText.countView(
+                            content: viewModel.content,
+                            textSelection: textSelection
+                        )
                         if let memo = viewModel.memo {
                             InfoText.dateView(for: memo)
                         }
@@ -66,7 +94,9 @@ struct EditMemoView: View {
             .onAppear {
                 textEditorFocus = true
                 DispatchQueue.main.async {
-                    textSelection = .init(insertionPoint: viewModel.content.startIndex)
+                    textSelection = .init(
+                        insertionPoint: viewModel.content.startIndex
+                    )
                 }
             }
             .alert(item: $viewModel.currentAlert) { alertType in
@@ -74,20 +104,28 @@ struct EditMemoView: View {
                     case .close:
                         Alert(
                             title: Text("Close without saving?"),
-                            primaryButton: .destructive(Text("Close")) { dismiss() },
+                            primaryButton: .destructive(Text("Close")) {
+                                dismiss()
+                            },
                             secondaryButton: .cancel()
                         )
+
                     case .error:
                         Alert(
                             title: Text("The Error occured."),
-                            message: Text(viewModel.error?.localizedDescription ?? ""),
+                            message: Text(
+                                viewModel.error?.localizedDescription ?? ""
+                            ),
                             dismissButton: .default(Text("OK"))
                         )
                 }
             }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
+            .toolbarBackground(
+                Color(uiColor: .systemBackground),
+                for: .navigationBar
+            )
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button("Close", systemImage: "xmark") {
@@ -100,16 +138,26 @@ struct EditMemoView: View {
                     }
                     .disabled(viewModel.showTitleView)
 
-                    Button("Tag", systemImage: viewModel.selectedTags.isEmpty ? "tag" : "tag.fill") {
+                    Button(
+                        "Tag",
+                        systemImage: viewModel.selectedTags.isEmpty
+                            ? "tag"
+                            : "tag.fill"
+                    ) {
                         viewModel.onTapTag()
                     }
                     .disabled(!viewModel.canOpenTagSelector)
                 }
 
                 ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("Rename", systemImage: "rectangle.and.pencil.and.ellipsis") {
+                    Button(
+                        "Rename",
+                        systemImage: "rectangle.and.pencil.and.ellipsis"
+                    ) {
                         viewModel.onTapRename()
-                        DispatchQueue.main.async { inputViewFocus = true }
+                        DispatchQueue.main.async {
+                            inputViewFocus = true
+                        }
                     }
                     .disabled(viewModel.showTitleView)
                     .keyboardShortcut("t", modifiers: [.command])
@@ -126,7 +174,11 @@ struct EditMemoView: View {
                 SelectTagView(selectedTags: $viewModel.selectedTags)
                     .interactiveDismissDisabled(true)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: .closeAllPresentedViewsFromShortcut
+                )
+            ) { _ in
                 viewModel.onReceiveCloseAllPresentedViews()
                 textEditorFocus = false
                 inputViewFocus = false
@@ -135,28 +187,43 @@ struct EditMemoView: View {
     }
 
     private var contentView: some View {
-        TextEditor(text: $viewModel.content, selection: $textSelection)
-            .disabled(viewModel.showTitleView)
-            .foregroundStyle(viewModel.showTitleView ? Color(UIColor.quaternaryLabel) : .primary)
-            .font(.system(size: CGFloat(viewModel.getContentFontSize())))
-            .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
-            .border(viewModel.showTitleView ? Color(UIColor.quaternaryLabel) : .primary)
-            .focused($textEditorFocus)
-            .overlay(alignment: .topLeading) {
-                if viewModel.content.isEmpty && !viewModel.showTitleView {
-                    Text("Input Content")
-                        .font(.system(size: CGFloat(viewModel.getContentFontSize())))
-                        .allowsHitTesting(false)
-                        .foregroundColor(Color(uiColor: .placeholderText))
-                        .padding(6)
-                }
+        TextEditor(
+            text: $viewModel.content,
+            selection: $textSelection
+        )
+        .disabled(viewModel.showTitleView)
+        .foregroundStyle(
+            viewModel.showTitleView
+                ? Color(UIColor.quaternaryLabel)
+                : .primary
+        )
+        .font(.system(size: CGFloat(viewModel.getContentFontSize())))
+        .lineSpacing(CGFloat(viewModel.getContentLineSpacing()))
+        .border(
+            viewModel.showTitleView
+                ? Color(UIColor.quaternaryLabel)
+                : .primary
+        )
+        .focused($textEditorFocus)
+        .overlay(alignment: .topLeading) {
+            if viewModel.content.isEmpty && !viewModel.showTitleView {
+                Text("Input Content")
+                    .font(.system(size: CGFloat(viewModel.getContentFontSize())))
+                    .allowsHitTesting(false)
+                    .foregroundColor(Color(uiColor: .placeholderText))
+                    .padding(6)
             }
+        }
     }
 }
 
 #Preview {
-    NavigationStack {
-        let memo = Memo(title: "Sample Title", content: "Sample Content", createdAt: Date(), updatedAt: Date(), order: .zero)
-        EditMemoView(memo: memo)
-    }
+    let memo = Memo(
+        title: "Sample Title",
+        content: "Sample Content",
+        createdAt: Date(),
+        updatedAt: Date(),
+        order: .zero
+    )
+    EditMemoView(memo: memo)
 }
