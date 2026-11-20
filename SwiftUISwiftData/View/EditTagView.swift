@@ -20,20 +20,43 @@ struct EditTagView: View {
     private var textFieldFocus: Bool
 
     @State
-    private var color: Color = .clear
+    private var color: Color
 
     @State
     private var path = NavigationPath()
 
-    /// - Parameter tag: 編集するタグ（デフォルトはnilで新規作成）
+    /// 通常の依存関係を使用してビューを生成する。
+    ///
+    /// - Parameter tag: 編集するタグ。nil の場合は新規作成。
     init(tag: Tag? = nil) {
-        let vm = EditTagViewModel(
+        self.init(
             tag: tag,
-            tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+            tagRepository: TagRepository(
+                modelContext: ModelContainerManager.shared.modelContainer.mainContext
+            ),
             userDefaultsRepository: UserDefaultsRepository()
         )
-        _viewModel = State(wrappedValue: vm)
-        _color = State(initialValue: vm.colorString.color())
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
+    init(
+        tag: Tag? = nil,
+        tagRepository: any TagRepositoryProtocol,
+        userDefaultsRepository: any UserDefaultsRepositoryProtocol
+    ) {
+        self.init(
+            viewModel: EditTagViewModel(
+                tag: tag,
+                tagRepository: tagRepository,
+                userDefaultsRepository: userDefaultsRepository
+            )
+        )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(viewModel: EditTagViewModel) {
+        _viewModel = State(initialValue: viewModel)
+        _color = State(initialValue: viewModel.colorString.color())
     }
 
     var body: some View {
@@ -97,6 +120,7 @@ struct EditTagView: View {
                             },
                             secondaryButton: .cancel()
                         )
+
                     case .error:
                         Alert(
                             title: Text("The Error occured."),
@@ -107,13 +131,17 @@ struct EditTagView: View {
             }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
+            .toolbarBackground(
+                Color(uiColor: .systemBackground),
+                for: .navigationBar
+            )
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button("Close", systemImage: "xmark") {
                         viewModel.onTapClose()
                     }
                 }
+
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Save", systemImage: "checkmark.circle.fill") {
                         viewModel.saveTag()
@@ -128,8 +156,13 @@ struct EditTagView: View {
 }
 
 #Preview {
-    NavigationStack {
-        let tag = Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
-        EditTagView(tag: tag)
-    }
+    let tag = Tag(
+        title: "Sample Title",
+        color: "#000000",
+        createdAt: Date(),
+        updatedAt: Date(),
+        order: .zero
+    )
+
+    EditTagView(tag: tag)
 }
