@@ -10,15 +10,13 @@ import SwiftUI
 
 struct TagsView: View {
     @State
-    var viewModel: TagsViewModel
+    private var viewModel: TagsViewModel
     @State
-    var scrollViewProxy: ScrollViewProxy?
-    @State
-    private var didSyncInitialExternalState = false
+    private var scrollViewProxy: ScrollViewProxy?
     @Binding
-    var editMode: EditMode
+    private var editMode: EditMode
     @Binding
-    var selectedTag: Tag?
+    private var selectedTag: Tag?
 
     init(
         editMode: Binding<EditMode>,
@@ -40,47 +38,36 @@ struct TagsView: View {
         VStack(spacing: 8.0) {
             list
                 .onAppear {
-                    guard !didSyncInitialExternalState else { return }
-                    didSyncInitialExternalState = true
-                    viewModel.editMode = editMode
-                    viewModel.selectedTag = selectedTag
+                    syncExternalState()
+                }
+                .onChange(of: editMode) { _, newValue in
+                    if viewModel.editMode != newValue {
+                        viewModel.editMode = newValue
+                    }
+                }
+                .onChange(of: selectedTag) { _, newValue in
+                    if viewModel.selectedTag != newValue {
+                        viewModel.selectedTag = newValue
+                    }
                 }
                 .onChange(of: viewModel.editMode) { _, newValue in
-                    editMode = newValue
+                    if editMode != newValue {
+                        editMode = newValue
+                    }
                 }
                 .onChange(of: viewModel.selectedTag) { _, newValue in
-                    selectedTag = newValue
+                    if selectedTag != newValue {
+                        selectedTag = newValue
+                    }
                 }
                 .onChange(of: viewModel.tags) { oldTags, newTags in
-                    viewModel.onTagsChanged(oldTags: oldTags, newTags: newTags)
-                    if let id = viewModel.consumeScrollTargetID(),
-                        let proxy = scrollViewProxy
-                    {
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        withTransaction(transaction) {
-                            proxy.scrollTo(id, anchor: .center)
-                        }
-                    }
+                    handleTagsChanged(
+                        oldTags: oldTags,
+                        newTags: newTags
+                    )
                 }
                 .alert(item: $viewModel.currentAlert) { alertType in
-                    switch alertType {
-                        case .delete:
-                            Alert(
-                                title: Text("Delete"),
-                                message: Text("Are you sure you want to delete selected tag(s)?"),
-                                primaryButton: .destructive(Text("Delete")) {
-                                    viewModel.confirmDelete()
-                                },
-                                secondaryButton: .cancel()
-                            )
-                        case .error:
-                            Alert(
-                                title: Text("Error"),
-                                message: Text(viewModel.error?.localizedDescription ?? "Unknown error"),
-                                dismissButton: .default(Text("OK"))
-                            )
-                    }
+                    alert(for: alertType)
                 }
                 .navigationTitle(viewModel.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
@@ -98,52 +85,63 @@ struct TagsView: View {
                     EditTagView()
                         .interactiveDismissDisabled(true)
                 }
-                .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                .onReceive(
+                    NotificationCenter.default.publisher(
+                        for: .closeAllPresentedViewsFromShortcut
+                    )
+                ) { _ in
                     viewModel.onCloseAllPresentedViews()
                 }
                 .toast(message: $viewModel.toastMessage)
         }
     }
 
+    // MARK: - State Synchronization
+
+    /// 表示時は親が保持する状態を ViewModel に反映する。
+    private func syncExternalState() {
+        if viewModel.editMode != editMode {
+            viewModel.editMode = editMode
+        }
+
+        if viewModel.selectedTag != selectedTag {
+            viewModel.selectedTag = selectedTag
+        }
+    }
+
+    private func handleTagsChanged(
+        oldTags: [Tag],
+        newTags: [Tag]
+    ) {
+        viewModel.onTagsChanged(
+            oldTags: oldTags,
+            newTags: newTags
+        )
+
+        guard let id = viewModel.consumeScrollTargetID(),
+            let proxy = scrollViewProxy
+        else {
+            return
+        }
+
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+
+        withTransaction(transaction) {
+            proxy.scrollTo(id, anchor: .center)
+        }
+    }
+
+    // MARK: - List
+
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
                 if viewModel.editMode.isEditing {
-                    List(selection: $viewModel.selection) {
-                        ForEach(viewModel.tags) { tag in
-                            activeRow(for: tag)
-                                .id(tag.id)
-                                .tag(tag.id)
-                        }
-                        .onMove(perform: viewModel.moveTag)
-                    }
+                    editingList
                 }
                 else {
-                    if viewModel.tags.isEmpty {
-                        EmptyListView(message: "No Tags")
-                    }
-                    else {
-                        List(selection: $viewModel.selectedTag) {
-                            ForEach(viewModel.tags) { tag in
-                                inactiveRow(for: tag)
-                                    .id(tag.id)
-                                    .tag(tag.id)
-                                    .if(!tag.title.isEmpty) { view in
-                                        view.swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                            Button("Copy", systemImage: "doc.on.doc") {
-                                                UIPasteboard.general.string = tag.title
-                                            }
-                                            .tint(.green)
-                                        }
-                                    }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button("Delete", systemImage: "trash", role: .destructive) {
-                                            viewModel.onTapDelete(tag: tag)
-                                        }
-                                    }
-                            }
-                        }
-                    }
+                    normalList
                 }
             }
             .onAppear {
@@ -151,6 +149,83 @@ struct TagsView: View {
             }
         }
     }
+
+    private var editingList: some View {
+        List(selection: $viewModel.selection) {
+            ForEach(viewModel.tags) { tag in
+                activeRow(for: tag)
+                    .id(tag.id)
+                    .tag(tag.id)
+            }
+            .onMove(perform: viewModel.moveTag)
+        }
+    }
+
+    @ViewBuilder
+    private var normalList: some View {
+        if viewModel.tags.isEmpty {
+            EmptyListView(message: "No Tags")
+        }
+        else {
+            List(selection: $viewModel.selectedTag) {
+                ForEach(viewModel.tags) { tag in
+                    inactiveRow(for: tag)
+                        .id(tag.id)
+                        .tag(tag.id)
+                        .if(!tag.title.isEmpty) { view in
+                            view.swipeActions(
+                                edge: .leading,
+                                allowsFullSwipe: false
+                            ) {
+                                Button("Copy", systemImage: "doc.on.doc") {
+                                    UIPasteboard.general.string = tag.title
+                                }
+                                .tint(.green)
+                            }
+                        }
+                        .swipeActions(
+                            edge: .trailing,
+                            allowsFullSwipe: false
+                        ) {
+                            Button(
+                                "Delete",
+                                systemImage: "trash",
+                                role: .destructive
+                            ) {
+                                viewModel.onTapDelete(tag: tag)
+                            }
+                        }
+                }
+            }
+        }
+    }
+
+    // MARK: - Alerts
+
+    private func alert(for alertType: TagsViewModel.AlertType) -> Alert {
+        switch alertType {
+            case .delete:
+                Alert(
+                    title: Text("Delete"),
+                    message: Text("Are you sure you want to delete selected tag(s)?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        viewModel.confirmDelete()
+                    },
+                    secondaryButton: .cancel()
+                )
+
+            case .error:
+                Alert(
+                    title: Text("Error"),
+                    message: Text(
+                        viewModel.error?.localizedDescription ?? "Unknown error"
+                    ),
+                    dismissButton: .default(Text("OK"))
+                )
+        }
+    }
+
+    // MARK: - Toolbar
 
     @ViewBuilder
     private var toolbarTopTrailing: some View {
@@ -178,7 +253,9 @@ struct TagsView: View {
 
             Spacer()
 
-            GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
+            GlassMenu(
+                imageSystemName: "circle.grid.2x2.topleft.checkmark.filled"
+            ) {
                 Button("Deselect All", systemImage: "circle") {
                     viewModel.onTapDeselectAll()
                 }
@@ -198,6 +275,8 @@ struct TagsView: View {
             .keyboardShortcut("n", modifiers: [.command])
         }
     }
+
+    // MARK: - Rows
 
     private func makeTagRow(for tag: Tag) -> TagRow {
         TagRow(
@@ -221,7 +300,9 @@ struct TagsView: View {
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
-        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
+        .listRowBackground(
+            Color(uiColor: .secondarySystemGroupedBackground)
+        )
     }
 
     private func inactiveRow(for tag: Tag) -> some View {
@@ -238,7 +319,11 @@ struct TagsView: View {
             .listRowInsets(.init())
             .moveDisabled(true)
             .listRowBackground(
-                Color(uiColor: tag == viewModel.selectedTag ? .quaternaryLabel : .systemBackground)
+                Color(
+                    uiColor: tag == viewModel.selectedTag
+                        ? .quaternaryLabel
+                        : .systemBackground
+                )
             )
     }
 }
