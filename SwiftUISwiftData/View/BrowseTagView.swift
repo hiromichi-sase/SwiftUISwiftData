@@ -5,27 +5,35 @@
 //  Created by Hiromichi Sase on 2026/07/16.
 //
 
-import SwiftData
 import SwiftUI
 
-/// メモの内容を表示するビュー。
+/// タグの内容を表示するビュー。
 struct BrowseTagView: View {
-    /// ビューの状態を管理するViewModel。
+    /// ビューの状態を管理する ViewModel。
     @State
     private var viewModel: BrowseTagViewModel
-    /// ナビゲーションパスの状態変数。
+    /// ナビゲーションパス。
     @State
-    var path = NavigationPath()
+    private var path = NavigationPath()
 
-    /// イニシャライザ。
-    /// - Parameter tag: 表示するタグ
-    init(tag: Tag) {
-        _viewModel = State(
-            wrappedValue: BrowseTagViewModel(
+    /// タグと Repository からビューを生成する。
+    ///
+    /// Repository を省略した場合は通常の UserDefaults を使用する。
+    init(
+        tag: Tag,
+        userDefaultsRepository: UserDefaultsRepository = UserDefaultsRepository()
+    ) {
+        self.init(
+            viewModel: BrowseTagViewModel(
                 tag: tag,
-                userDefaultsRepository: UserDefaultsRepository(),
+                userDefaultsRepository: userDefaultsRepository
             )
         )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(viewModel: BrowseTagViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -47,19 +55,7 @@ struct BrowseTagView: View {
             }
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
-            .sheet(
-                isPresented: Binding(
-                    get: { viewModel.showingEditTag },
-                    set: { newValue in
-                        if newValue {
-                            viewModel.editButtonTapped()
-                        }
-                        else {
-                            viewModel.dismissEdit()
-                        }
-                    }
-                )
-            ) {
+            .sheet(isPresented: showingEditTagBinding) {
                 EditTagView(tag: viewModel.tag)
                     .interactiveDismissDisabled(true)
             }
@@ -73,9 +69,21 @@ struct BrowseTagView: View {
         }
     }
 
-    /// ツールバーの右側のアイテムを定義するビュー。
-    ///
-    /// タイトルが空でない場合はコピーのボタンを表示し、常に編集のボタンを表示する。
+    /// 編集画面の表示状態を ViewModel の操作に接続する。
+    private var showingEditTagBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.showingEditTag },
+            set: { newValue in
+                if newValue {
+                    viewModel.editButtonTapped()
+                }
+                else {
+                    viewModel.dismissEdit()
+                }
+            }
+        )
+    }
+
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         Button("Edit", systemImage: "pencil") {
@@ -86,15 +94,30 @@ struct BrowseTagView: View {
 }
 
 #Preview("white") {
-    NavigationStack {
-        let tag = Tag(title: "Sample Title", color: "#FFFFFF", createdAt: Date(), updatedAt: Date(), order: .zero)
-        BrowseTagView(tag: tag)
-    }
+    let tag = Tag(
+        title: "Sample Title",
+        color: "#FFFFFF",
+        createdAt: Date(),
+        updatedAt: Date(),
+        order: .zero
+    )
+
+    BrowseTagView(
+        viewModel: BrowseTagViewModel(
+            tag: tag,
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    )
 }
 
 #Preview("black") {
-    NavigationStack {
-        let tag = Tag(title: "Sample Title", color: "#000000", createdAt: Date(), updatedAt: Date(), order: .zero)
-        BrowseTagView(tag: tag)
-    }
+    let tag = Tag(
+        title: "Sample Title",
+        color: "#000000",
+        createdAt: Date(),
+        updatedAt: Date(),
+        order: .zero
+    )
+
+    BrowseTagView(tag: tag)
 }
