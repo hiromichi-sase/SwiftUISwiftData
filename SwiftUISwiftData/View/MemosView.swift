@@ -18,7 +18,9 @@ struct MemosView: View {
 
     @State
     var viewModel = MemosViewModel(
-        memoRepository: MemoRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
+        memoRepository: MemoRepository(
+            modelContext: ModelContainerManager.shared.modelContainer.mainContext
+        ),
         userDefaultsRepository: UserDefaultsRepository()
     )
     @Binding
@@ -54,38 +56,13 @@ struct MemosView: View {
         VStack(spacing: 8.0) {
             list
                 .onAppear {
-                    viewModel.selectedMemo = selectedMemo
                     viewModel.applyFilter()
                 }
-                .onChange(of: selectedMemo) { _, newValue in
-                    if viewModel.selectedMemo != newValue {
-                        viewModel.selectedMemo = newValue
-                    }
-                }
-                .onChange(of: viewModel.selectedMemo) { _, newValue in
-                    if selectedMemo != newValue {
-                        selectedMemo = newValue
-                    }
-                }
                 .onChange(of: viewModel.memos) { oldMemos, newMemos in
-                    viewModel.handleMemosChanged(oldMemos: oldMemos, newMemos: newMemos, editMode: editMode)
-
-                    if editMode == .inactive,
-                        let memo = selectedMemo,
-                        let proxy = scrollViewProxy
-                    {
-                        DispatchQueue.main.async {
-                            var transaction = Transaction()
-                            transaction.disablesAnimations = true
-                            withTransaction(transaction) {
-                                proxy.scrollTo(memo.id, anchor: .center)
-                            }
-                        }
-                    }
-
-                    if editMode == .active, newMemos.isEmpty {
-                        editMode = .inactive
-                    }
+                    handleMemosChanged(
+                        oldMemos: oldMemos,
+                        newMemos: newMemos
+                    )
                 }
                 .alert(item: $currentAlert) { alertType in
                     switch alertType {
@@ -99,7 +76,9 @@ struct MemosView: View {
                 }
                 .navigationTitle(viewModel.navigationTitle(editMode: editMode))
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(editMode.isEditing || viewModel.isFiltering)
+                .navigationBarBackButtonHidden(
+                    editMode.isEditing || viewModel.isFiltering
+                )
                 .toolbar {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         toolbarItemTopBarTrailing
@@ -110,28 +89,13 @@ struct MemosView: View {
                 }
                 .environment(\.editMode, $editMode)
                 .sheet(isPresented: $openFilterMemosView) {
-                    FilterMemosView(
-                        isFiltering: Binding(
-                            get: { viewModel.isFiltering },
-                            set: { newValue in
-                                if newValue {
-                                    viewModel.applyFilter()
-                                }
-                                else {
-                                    viewModel.clearFilter()
-                                }
-                            }
-                        ),
-                        title: $viewModel.filterQuery,
-                        tagsForFiltering: $viewModel.filterTags,
-                        selectedMemo: $selectedMemo
-                    )
-                    .interactiveDismissDisabled(true)
-                    .onDisappear {
-                        viewModel.applyFilter()
-                    }
+                    filterMemosView
                 }
-                .onReceive(NotificationCenter.default.publisher(for: .closeAllPresentedViewsFromShortcut)) { _ in
+                .onReceive(
+                    NotificationCenter.default.publisher(
+                        for: .closeAllPresentedViewsFromShortcut
+                    )
+                ) { _ in
                     openFilterMemosView = false
                     viewModel.clearFilter()
                 }
@@ -142,70 +106,126 @@ struct MemosView: View {
         }
     }
 
+    private var filterMemosView: some View {
+        FilterMemosView(
+            isFiltering: Binding(
+                get: { viewModel.isFiltering },
+                set: { newValue in
+                    if newValue {
+                        viewModel.applyFilter()
+                    }
+                    else {
+                        viewModel.clearFilter()
+                    }
+                }
+            ),
+            title: $viewModel.filterQuery,
+            tagsForFiltering: $viewModel.filterTags,
+            selectedMemo: $selectedMemo
+        )
+        .interactiveDismissDisabled(true)
+        .onDisappear {
+            viewModel.applyFilter()
+        }
+    }
+
     private var list: some View {
         ScrollViewReader { proxy in
             VStack {
                 if editMode.isEditing {
-                    List(selection: $viewModel.selection) {
-                        ForEach(viewModel.memos) { memo in
-                            activeRow(for: memo)
-                                .id(memo.id)
-                                .tag(memo.id)
-                        }
-                        .onMove(perform: moveMemo)
-                    }
+                    editingList
                 }
                 else {
-                    if viewModel.memos.isEmpty {
-                        EmptyListView(message: "No memos")
-                    }
-                    else if viewModel.filteredMemos.isEmpty {
-                        EmptyListView(message: "No memos found")
-                    }
-                    else {
-                        List(selection: $selectedMemo) {
-                            ForEach(viewModel.filteredMemos) { memo in
-                                inactiveRow(for: memo)
-                                    .id(memo.id)
-                                    .tag(memo.id)
-                                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                        if !memo.title.isEmpty {
-                                            Button("Copy", systemImage: "doc.on.doc") {
-                                                UIPasteboard.general.string = memo.title
-                                            }
-                                            .tint(.green)
-                                        }
-                                        if !memo.protected {
-                                            Button("Duplicate", systemImage: "plus.square") {
-                                                duplicateMemo(memo)
-                                            }
-                                            .tint(.blue)
-                                        }
-                                    }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        if memo.protected {
-                                            Button("Unprotect", systemImage: "lock.open.fill") {
-                                                Task { await unprotect([memo]) }
-                                            }
-                                        }
-                                        else {
-                                            Button("Delete", systemImage: "trash", role: .destructive) {
-                                                memoToDelete = memo
-                                                currentAlert = .delete
-                                            }
-                                            Divider()
-                                            Button("Protect", systemImage: "lock.fill") {
-                                                Task { await protect([memo]) }
-                                            }
-                                        }
-                                    }
-                            }
-                        }
-                    }
+                    normalList
                 }
             }
             .onAppear {
                 scrollViewProxy = proxy
+            }
+        }
+    }
+
+    private var editingList: some View {
+        List(selection: $viewModel.selection) {
+            ForEach(viewModel.memos) { memo in
+                activeRow(for: memo)
+                    .id(memo.id)
+                    .tag(memo.id)
+            }
+            .onMove(perform: moveMemo)
+        }
+    }
+
+    @ViewBuilder
+    private var normalList: some View {
+        if viewModel.memos.isEmpty {
+            EmptyListView(message: "No memos")
+        }
+        else if viewModel.filteredMemos.isEmpty {
+            EmptyListView(message: "No memos found")
+        }
+        else {
+            List(selection: $selectedMemo) {
+                ForEach(viewModel.filteredMemos) { memo in
+                    inactiveRow(for: memo)
+                        .id(memo.id)
+                        .tag(memo.id)
+                        .swipeActions(
+                            edge: .leading,
+                            allowsFullSwipe: false
+                        ) {
+                            leadingSwipeActions(for: memo)
+                        }
+                        .swipeActions(
+                            edge: .trailing,
+                            allowsFullSwipe: false
+                        ) {
+                            trailingSwipeActions(for: memo)
+                        }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func leadingSwipeActions(for memo: Memo) -> some View {
+        if !memo.title.isEmpty {
+            Button("Copy", systemImage: "doc.on.doc") {
+                UIPasteboard.general.string = memo.title
+            }
+            .tint(.green)
+        }
+        if !memo.protected {
+            Button("Duplicate", systemImage: "plus.square") {
+                duplicateMemo(memo)
+            }
+            .tint(.blue)
+        }
+    }
+
+    @ViewBuilder
+    private func trailingSwipeActions(for memo: Memo) -> some View {
+        if memo.protected {
+            Button("Unprotect", systemImage: "lock.open.fill") {
+                Task {
+                    await unprotect([memo])
+                }
+            }
+        }
+        else {
+            Button(
+                "Delete",
+                systemImage: "trash",
+                role: .destructive
+            ) {
+                memoToDelete = memo
+                currentAlert = .delete
+            }
+            Divider()
+            Button("Protect", systemImage: "lock.fill") {
+                Task {
+                    await protect([memo])
+                }
             }
         }
     }
@@ -222,7 +242,6 @@ struct MemosView: View {
         else if !viewModel.memos.isEmpty {
             Button("Edit", systemImage: "pencil") {
                 selectedMemo = nil
-                viewModel.selectedMemo = nil
                 editMode = .active
             }
             .disabled(viewModel.isFiltering)
@@ -234,12 +253,10 @@ struct MemosView: View {
     private var toolbarItemBottomBar: some View {
         if editMode.isEditing {
             Button("Delete", systemImage: "trash") {
-                if viewModel.selectedMemos().allSatisfy({ !$0.protected }) {
-                    currentAlert = .delete
-                }
-                else {
-                    currentAlert = .containsProtectedMemo
-                }
+                currentAlert =
+                    viewModel.containsProtectedSelectedMemo
+                    ? .containsProtectedMemo
+                    : .delete
             }
             .disabled(viewModel.selection.isEmpty)
         }
@@ -255,11 +272,11 @@ struct MemosView: View {
             .disabled(viewModel.memos.isEmpty)
             .keyboardShortcut("s", modifiers: [.command])
         }
-
         Spacer()
-
         if editMode.isEditing {
-            GlassMenu(imageSystemName: "circle.grid.2x2.topleft.checkmark.filled") {
+            GlassMenu(
+                imageSystemName: "circle.grid.2x2.topleft.checkmark.filled"
+            ) {
                 Button("Deselect All", systemImage: "circle") {
                     viewModel.deselectAll()
                 }
@@ -302,7 +319,9 @@ struct MemosView: View {
         .contentShape(Rectangle())
         .listRowInsets(.init())
         .moveDisabled(false)
-        .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
+        .listRowBackground(
+            Color(uiColor: .secondarySystemGroupedBackground)
+        )
     }
 
     private func inactiveRow(for memo: Memo) -> some View {
@@ -310,12 +329,10 @@ struct MemosView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 selectedMemo = memo
-                viewModel.selectedMemo = memo
             }
             .contextMenu {
                 Button("Preview", systemImage: "eye") {
                     selectedMemo = memo
-                    viewModel.selectedMemo = memo
                 }
             } preview: {
                 PreviewMemoView(memo: memo)
@@ -329,5 +346,35 @@ struct MemosView: View {
                         : .systemBackground
                 )
             )
+    }
+
+    private func handleMemosChanged(
+        oldMemos: [Memo],
+        newMemos: [Memo]
+    ) {
+        selectedMemo = viewModel.selectedMemoAfterMemosChanged(
+            oldMemos: oldMemos,
+            newMemos: newMemos,
+            editMode: editMode,
+            currentSelectedMemo: selectedMemo
+        )
+
+        if editMode == .inactive,
+            let memo = selectedMemo,
+            let proxy = scrollViewProxy
+        {
+            DispatchQueue.main.async {
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+
+                withTransaction(transaction) {
+                    proxy.scrollTo(memo.id, anchor: .center)
+                }
+            }
+        }
+
+        if editMode == .active, newMemos.isEmpty {
+            editMode = .inactive
+        }
     }
 }
