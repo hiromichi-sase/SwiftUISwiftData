@@ -340,6 +340,54 @@ struct TagsViewModelTests {
         dependency.userDefaultsRepository.setShowInfo(false)
         #expect(dependency.testTarget.getShowInfo() == false)
     }
+
+    @Test
+    func makeEditTagViewModel_usesInjectedPreferences() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        dependency.userDefaultsRepository.setDefaultTagColor("#FF0000")
+
+        let editViewModel = dependency.testTarget.makeEditTagViewModel()
+
+        // 新規作成用 ViewModel として初期化される。
+        #expect(editViewModel.tag == nil)
+        #expect(editViewModel.title == "")
+        #expect(editViewModel.colorString == "#FF0000")
+        #expect(!editViewModel.canSave)
+
+        // 生成後の設定変更も参照できる。
+        editViewModel.title = "Test Tag"
+        editViewModel.saveTag()
+
+        dependency.userDefaultsRepository.setShowInfo(true)
+        #expect(editViewModel.showInfo)
+    }
+
+    @Test
+    func makeEditTagViewModel_savesToInjectedRepository() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let editViewModel = dependency.testTarget.makeEditTagViewModel()
+        editViewModel.title = "New Tag"
+        editViewModel.colorString = "#00FF00"
+
+        #expect(editViewModel.canSave)
+
+        editViewModel.saveTag()
+
+        let tags = try dependency.tagRepository.tags()
+        let savedTag = try #require(tags.first)
+
+        #expect(tags.count == 1)
+        #expect(savedTag.title == "New Tag")
+        #expect(savedTag.color == "#00FF00")
+        #expect(editViewModel.tag?.id == savedTag.id)
+        #expect(editViewModel.currentAlert == nil)
+        #expect(editViewModel.toastMessage == "Successfully saved!")
+        #expect(!editViewModel.canSave)
+    }
 }
 
 extension TagsViewModelTests {

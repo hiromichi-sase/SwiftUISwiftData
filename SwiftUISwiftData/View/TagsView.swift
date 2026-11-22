@@ -17,21 +17,47 @@ struct TagsView: View {
     private var editMode: EditMode
     @Binding
     private var selectedTag: Tag?
-
+    /// 通常の依存関係を使用してビューを生成する。
     init(
         editMode: Binding<EditMode>,
         selectedTag: Binding<Tag?>
     ) {
-        _editMode = editMode
-        _selectedTag = selectedTag
-        _viewModel = State(
-            wrappedValue: TagsViewModel(
-                tagRepository: TagRepository(
-                    modelContext: ModelContainerManager.shared.modelContainer.mainContext
-                ),
-                userDefaultsRepository: UserDefaultsRepository()
+        self.init(
+            editMode: editMode,
+            selectedTag: selectedTag,
+            tagRepository: TagRepository(
+                modelContext: ModelContainerManager.shared.modelContainer.mainContext
+            ),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
+    init(
+        editMode: Binding<EditMode>,
+        selectedTag: Binding<Tag?>,
+        tagRepository: TagRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.init(
+            editMode: editMode,
+            selectedTag: selectedTag,
+            viewModel: TagsViewModel(
+                tagRepository: tagRepository,
+                userDefaultsRepository: userDefaultsRepository
             )
         )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(
+        editMode: Binding<EditMode>,
+        selectedTag: Binding<Tag?>,
+        viewModel: TagsViewModel
+    ) {
+        _editMode = editMode
+        _selectedTag = selectedTag
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -82,8 +108,10 @@ struct TagsView: View {
                 }
                 .environment(\.editMode, $viewModel.editMode)
                 .sheet(isPresented: $viewModel.showingAddTag) {
-                    EditTagView()
-                        .interactiveDismissDisabled(true)
+                    EditTagView(
+                        viewModel: viewModel.makeEditTagViewModel()
+                    )
+                    .interactiveDismissDisabled(true)
                 }
                 .onReceive(
                     NotificationCenter.default.publisher(

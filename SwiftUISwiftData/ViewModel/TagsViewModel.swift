@@ -215,4 +215,13 @@ final class TagsViewModel {
     private func fetchTags() {
         tags = (try? tagRepository.tags()) ?? []
     }
+
+    // MARK: - Factory
+
+    func makeEditTagViewModel() -> EditTagViewModel {
+        EditTagViewModel(
+            tagRepository: tagRepository,
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
 }
