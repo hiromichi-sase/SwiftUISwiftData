@@ -10,15 +10,27 @@ import SwiftUI
 /// 設定画面を表示するビュー。
 struct SettingsView: View {
     @State
-    private var viewModel = SettingsViewModel(
-        userDefaultsRepository: UserDefaultsRepository()
-    )
+    private var viewModel: SettingsViewModel
 
     @State
     private var toastMessage = ""
 
     @State
     private var showResetAlert = false
+
+    /// 通常の依存関係を使用してビューを生成する。
+    init() {
+        self.init(
+            viewModel: SettingsViewModel(
+                userDefaultsRepository: UserDefaultsRepository()
+            )
+        )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(viewModel: SettingsViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         NavigationStack {
