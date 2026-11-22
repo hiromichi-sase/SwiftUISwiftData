@@ -33,4 +33,14 @@ final class BrowseTagViewModel {
     func dismissEdit() {
         showingEditTag = false
     }
+
+    // MARK: - Factory
+
+    func makeEditTagViewModel(modelContext: ModelContext) -> EditTagViewModel {
+        EditTagViewModel(
+            tag: tag,
+            tagRepository: TagRepository(modelContext: modelContext),
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
 }

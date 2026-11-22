@@ -65,4 +65,15 @@ final class BrowseMemoViewModel {
     func dismissEdit() {
         showingEditMemo = false
     }
+
+    // MARK: - Factory
+
+    func makeEditMemoViewModel(modelContext: ModelContext) -> EditMemoViewModel {
+        EditMemoViewModel(
+            memo: memo,
+            memoRepository: MemoRepository(modelContext: modelContext),
+            tagRepository: TagRepository(modelContext: modelContext),
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
 }

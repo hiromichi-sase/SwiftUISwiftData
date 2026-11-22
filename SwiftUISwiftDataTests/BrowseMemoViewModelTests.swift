@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -168,6 +169,69 @@ struct BrowseMemoViewModelTests {
         #expect(result.count == 2)
         #expect(result[0].title == tagA.title)
         #expect(result[1].title == tagB.title)
+    }
+
+    @MainActor
+    @Test
+    func makeEditMemoViewModel_usesProvidedContextAndPreferences() throws {
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        let memoRepository = MemoRepository(modelContext: context)
+        let tagRepository = TagRepository(modelContext: context)
+
+        let tag = Tag(title: "Test Tag", color: "#FF0000")
+        try tagRepository.add(tag)
+
+        let memo = Memo(title: "Original Title", content: "Original Content")
+        try memoRepository.add(memo)
+
+        let dependency = Dependency(memo: memo)
+        defer { dependency.removeUserDefaults() }
+
+        let editViewModel = dependency.testTarget.makeEditMemoViewModel(
+            modelContext: context
+        )
+
+        // 表示中のメモと、指定したコンテキストのタグを使用する。
+        #expect(editViewModel.memo?.id == memo.id)
+        #expect(editViewModel.title == "Original Title")
+        #expect(editViewModel.content == "Original Content")
+        #expect(editViewModel.tags.map(\.id) == [tag.id])
+
+        // BrowseMemoViewModel と同じ設定を参照する。
+        dependency.userDefaultsRepository.setContentFontSize(24.0)
+        dependency.userDefaultsRepository.setContentLineSpacing(2.0)
+        dependency.userDefaultsRepository.setShowInfo(true)
+
+        #expect(editViewModel.getContentFontSize() == 24.0)
+        #expect(editViewModel.getContentLineSpacing() == 2.0)
+        #expect(editViewModel.getShowInfo())
+
+        // 編集画面からの保存が指定したコンテナに反映される。
+        editViewModel.title = "Updated Title"
+        editViewModel.content = "Updated Content"
+        editViewModel.selectedTags = [tag]
+        editViewModel.save()
+
+        #expect(editViewModel.error == nil)
+        #expect(editViewModel.toastMessage == "Successfully saved!")
+
+        // 別コンテキストから読み直し、保存結果を確認する。
+        let verificationContext = ModelContext(container)
+        let savedMemos = try verificationContext.fetch(
+            FetchDescriptor<Memo>()
+        )
+        let savedMemo = try #require(
+            savedMemos.first { $0.id == memo.id }
+        )
+
+        #expect(savedMemo.title == "Updated Title")
+        #expect(savedMemo.content == "Updated Content")
+        #expect(savedMemo.tags.map(\.id) == [tag.id])
     }
 }
 

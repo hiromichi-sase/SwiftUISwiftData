@@ -5,10 +5,13 @@
 //  Created by Hiromichi Sase on 2026/05/23.
 //
 
+import SwiftData
 import SwiftUI
 
 /// メモの内容を表示するビュー。
 struct BrowseMemoView: View {
+    @Environment(\.modelContext)
+    private var modelContext
     @State
     private var viewModel: BrowseMemoViewModel
     @State
@@ -65,7 +68,11 @@ struct BrowseMemoView: View {
                 isPresented: $viewModel.showingEditMemo,
                 onDismiss: { viewModel.dismissEdit() }
             ) {
-                EditMemoView(memo: viewModel.memo)
+                EditMemoView(
+                    viewModel: viewModel.makeEditMemoViewModel(
+                        modelContext: modelContext
+                    )
+                )
             }
             .navigationTitle(viewModel.title)
             .navigationBarTitleDisplayMode(.inline)

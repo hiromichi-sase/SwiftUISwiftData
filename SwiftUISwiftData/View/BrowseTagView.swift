@@ -5,10 +5,13 @@
 //  Created by Hiromichi Sase on 2026/07/16.
 //
 
+import SwiftData
 import SwiftUI
 
 /// タグの内容を表示するビュー。
 struct BrowseTagView: View {
+    @Environment(\.modelContext)
+    private var modelContext
     /// ビューの状態を管理する ViewModel。
     @State
     private var viewModel: BrowseTagViewModel
@@ -56,8 +59,12 @@ struct BrowseTagView: View {
             .padding(.top, .zero)
             .padding([.horizontal, .bottom], 16)
             .sheet(isPresented: showingEditTagBinding) {
-                EditTagView(tag: viewModel.tag)
-                    .interactiveDismissDisabled(true)
+                EditTagView(
+                    viewModel: viewModel.makeEditTagViewModel(
+                        modelContext: modelContext
+                    )
+                )
+                .interactiveDismissDisabled(true)
             }
             .navigationTitle(viewModel.tag.title)
             .navigationBarTitleDisplayMode(.inline)
