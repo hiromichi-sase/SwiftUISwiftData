@@ -14,10 +14,8 @@ struct FilterMemosView: View {
         var id: AlertType { self }
     }
 
-    /// ビューの状態を管理するViewModel。
     @State
     private var viewModel: FilterMemosViewModel
-    /// ビューを閉じるための環境変数。
     @Environment(\.dismiss)
     private var dismiss
     @Binding
@@ -34,30 +32,64 @@ struct FilterMemosView: View {
     private var currentAlert: AlertType?
     @State
     private var showSelectTagView = false
-    /// ナビゲーションパスの状態変数。
+    @State
+    private var didInitializeFilter = false
     @State
     private var path = NavigationPath()
 
+    /// 通常の依存関係を使用してビューを生成する。
+    init(
+        isFiltering: Binding<Bool>,
+        title: Binding<String>,
+        tagsForFiltering: Binding<[Tag]>,
+        selectedMemo: Binding<Memo?>
+    ) {
+        self.init(
+            isFiltering: isFiltering,
+            title: title,
+            tagsForFiltering: tagsForFiltering,
+            selectedMemo: selectedMemo,
+            tagRepository: TagRepository(
+                modelContext: ModelContainerManager.shared.modelContainer.mainContext
+            ),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
     init(
         isFiltering: Binding<Bool>,
         title: Binding<String>,
         tagsForFiltering: Binding<[Tag]>,
         selectedMemo: Binding<Memo?>,
+        tagRepository: TagRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.init(
+            isFiltering: isFiltering,
+            title: title,
+            tagsForFiltering: tagsForFiltering,
+            selectedMemo: selectedMemo,
+            viewModel: FilterMemosViewModel(
+                tagRepository: tagRepository,
+                userDefaultsRepository: userDefaultsRepository
+            )
+        )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(
+        isFiltering: Binding<Bool>,
+        title: Binding<String>,
+        tagsForFiltering: Binding<[Tag]>,
+        selectedMemo: Binding<Memo?>,
+        viewModel: FilterMemosViewModel
     ) {
         _isFiltering = isFiltering
         _title = title
         _tagsForFiltering = tagsForFiltering
         _selectedMemo = selectedMemo
-
-        let vm = FilterMemosViewModel(
-            tagRepository: TagRepository(modelContext: ModelContainerManager.shared.modelContainer.mainContext),
-            userDefaultsRepository: UserDefaultsRepository()
-        )
-        vm.setInitialFilter(
-            title: title.wrappedValue,
-            tags: tagsForFiltering.wrappedValue
-        )
-        _viewModel = State(wrappedValue: vm)
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -79,9 +111,13 @@ struct FilterMemosView: View {
                         Button {
                             showSelectTagView = true
                         } label: {
-                            Image(systemName: viewModel.editingTags.isEmpty ? "tag" : "tag.fill")
-                                .font(.system(size: 24))
-                                .tint(.primary)
+                            Image(
+                                systemName: viewModel.editingTags.isEmpty
+                                    ? "tag"
+                                    : "tag.fill"
+                            )
+                            .font(.system(size: 24))
+                            .tint(.primary)
                         }
                         .disabled(viewModel.tags.isEmpty)
                     }
@@ -92,6 +128,9 @@ struct FilterMemosView: View {
             .padding(.top, .zero)
             .padding(.horizontal)
             .padding(.bottom, 8)
+            .onAppear {
+                initializeFilterIfNeeded()
+            }
             .onLoad {
                 textFieldFocus = true
             }
@@ -103,7 +142,10 @@ struct FilterMemosView: View {
             }
             .navigationTitle("Filter Memos")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
+            .toolbarBackground(
+                Color(uiColor: .systemBackground),
+                for: .navigationBar
+            )
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     toolbarItemTopBarLeading
@@ -113,9 +155,23 @@ struct FilterMemosView: View {
                 }
             }
             .navigationDestination(isPresented: $showSelectTagView) {
-                SelectTagView(selectedTags: $viewModel.editingTags)
+                SelectTagView(
+                    selectedTags: $viewModel.editingTags,
+                    viewModel: viewModel.makeSelectTagViewModel()
+                )
             }
         }
+    }
+
+    /// 初回表示時に親のフィルター条件を編集値へ取り込む。
+    private func initializeFilterIfNeeded() {
+        guard !didInitializeFilter else { return }
+
+        viewModel.setInitialFilter(
+            title: title,
+            tags: tagsForFiltering
+        )
+        didInitializeFilter = true
     }
 
     @ViewBuilder
@@ -170,12 +226,10 @@ struct FilterMemosView: View {
 }
 
 #Preview {
-    NavigationStack {
-        FilterMemosView(
-            isFiltering: .constant(false),
-            title: .constant(""),
-            tagsForFiltering: .constant([]),
-            selectedMemo: .constant(nil),
-        )
-    }
+    FilterMemosView(
+        isFiltering: .constant(false),
+        title: .constant(""),
+        tagsForFiltering: .constant([]),
+        selectedMemo: .constant(nil)
+    )
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import Testing
 
 @testable import SwiftUISwiftData
@@ -50,6 +51,8 @@ struct FilterMemosViewModelTests {
     @Test
     func setInitialFilter_setsOriginalAndEditingValues() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
         let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
@@ -59,14 +62,19 @@ struct FilterMemosViewModelTests {
         )
 
         #expect(dependency.testTarget.editingTitle == "keyword")
-        #expect(dependency.testTarget.editingTags.sortedByOrder == [tagA, tagB].sortedByOrder)
-        #expect(dependency.testTarget.saveButtonDisabled == true)
+        #expect(
+            dependency.testTarget.editingTags.sortedByOrder
+                == [tagA, tagB].sortedByOrder
+        )
+        #expect(dependency.testTarget.saveButtonDisabled)
     }
 
     @MainActor
     @Test
     func saveButtonDisabled_returnsTrue_whenTitleAndTagsAreSameAsInitial() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
         let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
@@ -75,13 +83,14 @@ struct FilterMemosViewModelTests {
             tags: [tagA, tagB]
         )
 
-        #expect(dependency.testTarget.saveButtonDisabled == true)
+        #expect(dependency.testTarget.saveButtonDisabled)
     }
 
     @MainActor
     @Test
     func saveButtonDisabled_returnsFalse_whenTitleIsDifferentFromInitial() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
 
         dependency.testTarget.setInitialFilter(
             title: "keyword",
@@ -89,13 +98,15 @@ struct FilterMemosViewModelTests {
         )
         dependency.testTarget.editingTitle = "keyword updated"
 
-        #expect(dependency.testTarget.saveButtonDisabled == false)
+        #expect(!dependency.testTarget.saveButtonDisabled)
     }
 
     @MainActor
     @Test
     func saveButtonDisabled_returnsFalse_whenTagsAreDifferentFromInitial() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
         let tagB = Tag(title: "B", color: "#00FF00", order: 2)
 
@@ -105,26 +116,28 @@ struct FilterMemosViewModelTests {
         )
         dependency.testTarget.editingTags = [tagA, tagB]
 
-        #expect(dependency.testTarget.saveButtonDisabled == false)
+        #expect(!dependency.testTarget.saveButtonDisabled)
     }
 
     @MainActor
     @Test
     func hasFilteringCondition_returnsFalse_whenTitleAndTagsAreEmpty() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
 
         dependency.testTarget.setInitialFilter(
             title: "",
             tags: []
         )
 
-        #expect(dependency.testTarget.hasFilteringCondition == false)
+        #expect(!dependency.testTarget.hasFilteringCondition)
     }
 
     @MainActor
     @Test
     func hasFilteringCondition_returnsTrue_whenTitleExists() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
 
         dependency.testTarget.setInitialFilter(
             title: "",
@@ -132,13 +145,15 @@ struct FilterMemosViewModelTests {
         )
         dependency.testTarget.editingTitle = "keyword"
 
-        #expect(dependency.testTarget.hasFilteringCondition == true)
+        #expect(dependency.testTarget.hasFilteringCondition)
     }
 
     @MainActor
     @Test
     func hasFilteringCondition_returnsTrue_whenTagsExist() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
 
         dependency.testTarget.setInitialFilter(
@@ -147,13 +162,15 @@ struct FilterMemosViewModelTests {
         )
         dependency.testTarget.editingTags = [tagA]
 
-        #expect(dependency.testTarget.hasFilteringCondition == true)
+        #expect(dependency.testTarget.hasFilteringCondition)
     }
 
     @MainActor
     @Test
     func buildSaveResult_returnsEditingValuesAndFilteringState() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
 
         dependency.testTarget.setInitialFilter(
@@ -165,7 +182,7 @@ struct FilterMemosViewModelTests {
 
         let result = dependency.testTarget.buildSaveResult()
 
-        #expect(result.isFiltering == true)
+        #expect(result.isFiltering)
         #expect(result.title == "keyword")
         #expect(result.tags.sortedByOrder == [tagA].sortedByOrder)
         #expect(result.selectedMemo == nil)
@@ -175,6 +192,7 @@ struct FilterMemosViewModelTests {
     @Test
     func buildSaveResult_returnsFilteringFalse_whenEditingIsEmpty() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
 
         dependency.testTarget.setInitialFilter(
             title: "",
@@ -185,7 +203,7 @@ struct FilterMemosViewModelTests {
 
         let result = dependency.testTarget.buildSaveResult()
 
-        #expect(result.isFiltering == false)
+        #expect(!result.isFiltering)
         #expect(result.title == "")
         #expect(result.tags.isEmpty)
         #expect(result.selectedMemo == nil)
@@ -195,6 +213,8 @@ struct FilterMemosViewModelTests {
     @Test
     func buildResetResult_returnsClearedValues() {
         let dependency = Dependency()
+        defer { dependency.removeUserDefaults() }
+
         let tagA = Tag(title: "A", color: "#FF0000", order: 1)
 
         dependency.testTarget.setInitialFilter(
@@ -206,10 +226,71 @@ struct FilterMemosViewModelTests {
 
         let result = dependency.testTarget.buildResetResult()
 
-        #expect(result.isFiltering == false)
+        #expect(!result.isFiltering)
         #expect(result.title == "")
         #expect(result.tags.isEmpty)
         #expect(result.selectedMemo == nil)
+    }
+
+    // MARK: - Factory
+
+    @MainActor
+    @Test
+    func makeSelectTagViewModel_usesInjectedTagsAndPreferences() {
+        let tagA = Tag(title: "A", color: "#FF0000", order: 1)
+        let tagB = Tag(title: "B", color: "#00FF00", order: 2)
+        let dependency = Dependency(tags: [tagA, tagB])
+        defer { dependency.removeUserDefaults() }
+
+        dependency.userDefaultsRepository.setTitleLineLimit(4)
+        dependency.userDefaultsRepository.setTitleFontSize(24.0)
+        dependency.userDefaultsRepository.setTitleLineSpacing(2.0)
+
+        let selectViewModel = dependency.testTarget.makeSelectTagViewModel()
+
+        #expect(selectViewModel.tags == [tagA, tagB])
+        #expect(selectViewModel.titleLineLimit == 4)
+        #expect(selectViewModel.titleFontSize == 24.0)
+        #expect(selectViewModel.titleLineSpacing == 2.0)
+    }
+
+    @MainActor
+    @Test
+    func makeSelectTagViewModel_usesInjectedRepository() throws {
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = TagRepository(modelContext: container.mainContext)
+
+        let tagA = Tag(title: "A", color: "#FF0000")
+        try repository.add(tagA)
+
+        let filterViewModel = FilterMemosViewModel(
+            tagRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+
+        // 親 ViewModel の生成後に追加したタグも、
+        // 子 ViewModel 生成時に同じ Repository から取得される。
+        let tagB = Tag(title: "B", color: "#00FF00")
+        try repository.add(tagB)
+
+        support.userDefaultsRepository.setTitleLineLimit(4)
+        support.userDefaultsRepository.setTitleFontSize(24.0)
+        support.userDefaultsRepository.setTitleLineSpacing(2.0)
+
+        let selectViewModel = filterViewModel.makeSelectTagViewModel()
+
+        #expect(filterViewModel.tags == [tagA])
+        #expect(selectViewModel.tags == [tagA, tagB])
+        #expect(selectViewModel.titleLineLimit == 4)
+        #expect(selectViewModel.titleFontSize == 24.0)
+        #expect(selectViewModel.titleLineSpacing == 2.0)
     }
 }
 
@@ -220,13 +301,13 @@ extension FilterMemosViewModelTests {
         private let support: TestDependencySupport
 
         @MainActor
-        init() {
+        init(tags: [Tag] = []) {
             let support = TestDependencySupport()
             self.support = support
             userDefaultsRepository = support.userDefaultsRepository
 
-            testTarget = .init(
-                tags: [],
+            testTarget = FilterMemosViewModel(
+                tags: tags,
                 userDefaultsRepository: userDefaultsRepository
             )
         }
