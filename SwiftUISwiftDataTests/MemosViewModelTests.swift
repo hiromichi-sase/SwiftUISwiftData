@@ -760,6 +760,103 @@ struct MemosViewModelTests {
     }
 
     @MainActor
+    @Test
+    func makeEditMemoViewModel_usesInjectedDependencies() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let tagRepository = TagRepository(
+            modelContext: dependency.memoRepository.modelContext
+        )
+        let tag = Tag(title: "Test Tag", color: "#FF0000")
+        try tagRepository.add(tag)
+
+        let editViewModel = dependency.testTarget.makeEditMemoViewModel()
+
+        // タグはメモ一覧と同じ ModelContext から取得される。
+        #expect(editViewModel.tags.map(\.id) == [tag.id])
+        #expect(editViewModel.memo == nil)
+
+        // 生成後の設定変更も参照できる。
+        dependency.userDefaultsRepository.setContentFontSize(24.0)
+        #expect(editViewModel.getContentFontSize() == 24.0)
+
+        // 新規メモがテスト用 Repository に保存される。
+        editViewModel.title = "New Memo"
+        editViewModel.content = "Test Content"
+        editViewModel.selectedTags = [tag]
+        editViewModel.save()
+
+        let savedMemos = try dependency.memoRepository.memos()
+        let savedMemo = try #require(savedMemos.first)
+
+        #expect(savedMemos.count == 1)
+        #expect(savedMemo.title == "New Memo")
+        #expect(savedMemo.content == "Test Content")
+        #expect(savedMemo.tags.map(\.id) == [tag.id])
+        #expect(editViewModel.memo?.id == savedMemo.id)
+        #expect(editViewModel.error == nil)
+    }
+
+    @MainActor
+    @Test
+    func makeFilterMemosViewModel_usesInjectedDependencies() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let tagRepository = TagRepository(
+            modelContext: dependency.memoRepository.modelContext
+        )
+        let tag = Tag(title: "Filter Tag", color: "#00FF00")
+        try tagRepository.add(tag)
+
+        let filterViewModel = dependency.testTarget.makeFilterMemosViewModel()
+
+        #expect(filterViewModel.tags.map(\.id) == [tag.id])
+
+        dependency.userDefaultsRepository.setTitleLineLimit(4)
+        dependency.userDefaultsRepository.setTitleFontSize(24.0)
+        dependency.userDefaultsRepository.setTitleLineSpacing(2.0)
+
+        #expect(filterViewModel.titleLineLimit == 4)
+        #expect(filterViewModel.titleFontSize == 24.0)
+        #expect(filterViewModel.titleLineSpacing == 2.0)
+
+        // フィルター画面から開くタグ選択画面にも依存関係が渡る。
+        let selectViewModel = filterViewModel.makeSelectTagViewModel()
+
+        #expect(selectViewModel.tags.map(\.id) == [tag.id])
+        #expect(selectViewModel.titleLineLimit == 4)
+        #expect(selectViewModel.titleFontSize == 24.0)
+        #expect(selectViewModel.titleLineSpacing == 2.0)
+    }
+
+    @MainActor
+    @Test
+    func makePreviewMemoViewModel_usesProvidedMemoAndPreferences() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo = Memo(title: "Test Memo", content: "Preview Content")
+        let previewViewModel = dependency.testTarget.makePreviewMemoViewModel(
+            memo: memo
+        )
+
+        #expect(previewViewModel.displayContent == "Preview Content")
+        #expect(!previewViewModel.isContentEmpty)
+
+        dependency.userDefaultsRepository.setContentFontSize(24.0)
+        dependency.userDefaultsRepository.setContentLineSpacing(2.0)
+
+        #expect(previewViewModel.contentFontSize == 24.0)
+        #expect(previewViewModel.contentLineSpacing == 2.0)
+
+        // 渡したメモの変更が表示内容に反映される。
+        memo.content = "Updated Content"
+        #expect(previewViewModel.displayContent == "Updated Content")
+    }
+
+    @MainActor
     private func seed(
         memoRepository: MemoRepository,
         context: ModelContext,

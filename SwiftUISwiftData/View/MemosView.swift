@@ -16,13 +16,9 @@ struct MemosView: View {
         var id: AlertType { self }
     }
 
+    // MemosView+CRUD.swift と MemosView+Alert.swift からも参照する。
     @State
-    var viewModel = MemosViewModel(
-        memoRepository: MemoRepository(
-            modelContext: ModelContainerManager.shared.modelContainer.mainContext
-        ),
-        userDefaultsRepository: UserDefaultsRepository()
-    )
+    var viewModel: MemosViewModel
     @Binding
     var editMode: EditMode
     @State
@@ -42,14 +38,53 @@ struct MemosView: View {
     @State
     private var openFilterMemosView = false
 
+    /// 通常の依存関係を使用してビューを生成する。
+    init(
+        editMode: Binding<EditMode>,
+        selectedMemo: Binding<Memo?>,
+        showingAddMemo: Binding<Bool>
+    ) {
+        self.init(
+            editMode: editMode,
+            selectedMemo: selectedMemo,
+            showingAddMemo: showingAddMemo,
+            memoRepository: MemoRepository(
+                modelContext: ModelContainerManager.shared.modelContainer.mainContext
+            ),
+            userDefaultsRepository: UserDefaultsRepository()
+        )
+    }
+
+    /// 外部から Repository を注入してビューを生成する。
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
         showingAddMemo: Binding<Bool>,
+        memoRepository: MemoRepository,
+        userDefaultsRepository: UserDefaultsRepository
+    ) {
+        self.init(
+            editMode: editMode,
+            selectedMemo: selectedMemo,
+            showingAddMemo: showingAddMemo,
+            viewModel: MemosViewModel(
+                memoRepository: memoRepository,
+                userDefaultsRepository: userDefaultsRepository
+            )
+        )
+    }
+
+    /// 外部で生成した ViewModel を使用する。
+    init(
+        editMode: Binding<EditMode>,
+        selectedMemo: Binding<Memo?>,
+        showingAddMemo: Binding<Bool>,
+        viewModel: MemosViewModel
     ) {
         _editMode = editMode
         _selectedMemo = selectedMemo
         _showingAddMemo = showingAddMemo
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
@@ -100,7 +135,9 @@ struct MemosView: View {
                     viewModel.clearFilter()
                 }
                 .fullScreenCover(isPresented: $showingAddMemo) {
-                    EditMemoView()
+                    EditMemoView(
+                        viewModel: viewModel.makeEditMemoViewModel()
+                    )
                 }
                 .toast(message: $toastMessage)
         }
@@ -121,7 +158,8 @@ struct MemosView: View {
             ),
             title: $viewModel.filterQuery,
             tagsForFiltering: $viewModel.filterTags,
-            selectedMemo: $selectedMemo
+            selectedMemo: $selectedMemo,
+            viewModel: viewModel.makeFilterMemosViewModel()
         )
         .interactiveDismissDisabled(true)
         .onDisappear {
@@ -335,7 +373,9 @@ struct MemosView: View {
                     selectedMemo = memo
                 }
             } preview: {
-                PreviewMemoView(memo: memo)
+                PreviewMemoView(
+                    viewModel: viewModel.makePreviewMemoViewModel(memo: memo)
+                )
             }
             .listRowInsets(.init())
             .moveDisabled(true)

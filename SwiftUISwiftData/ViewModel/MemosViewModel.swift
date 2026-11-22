@@ -331,4 +331,32 @@ final class MemosViewModel {
     func getShowInfo() -> Bool {
         userDefaultsRepository.getShowInfo()
     }
+
+    // MARK: - Factory
+
+    func makeEditMemoViewModel() -> EditMemoViewModel {
+        EditMemoViewModel(
+            memoRepository: memoRepository,
+            tagRepository: TagRepository(
+                modelContext: memoRepository.modelContext
+            ),
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
+
+    func makeFilterMemosViewModel() -> FilterMemosViewModel {
+        FilterMemosViewModel(
+            tagRepository: TagRepository(
+                modelContext: memoRepository.modelContext
+            ),
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
+
+    func makePreviewMemoViewModel(memo: Memo) -> PreviewMemoViewModel {
+        PreviewMemoViewModel(
+            memo: memo,
+            userDefaultsRepository: userDefaultsRepository
+        )
+    }
 }
