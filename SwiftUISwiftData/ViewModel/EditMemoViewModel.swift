@@ -128,9 +128,11 @@ final class EditMemoViewModel {
     // MARK: - UseCases
 
     private func addMemo() {
-        let newMemo = Memo(title: title, content: content, tags: selectedTags)
+        // タグは Repository 内で未保存変更の確認後に関連付ける。
+        let newMemo = Memo(title: title, content: content)
+
         do {
-            try memoRepository.add(newMemo)
+            try memoRepository.add(newMemo, tags: selectedTags)
             memo = newMemo
             toastMessage = "Successfully saved!"
         }
@@ -141,21 +143,20 @@ final class EditMemoViewModel {
     }
 
     private func updateMemo(_ memo: Memo) {
-        let oldTitle = memo.title
-        let oldContent = memo.content
-        let oldTags = memo.tags
-
         do {
-            try memoRepository.update(memo, title: title, content: content, tags: selectedTags)
+            try memoRepository.update(
+                memo,
+                title: title,
+                content: content,
+                tags: selectedTags
+            )
             toastMessage = "Successfully saved!"
         }
         catch {
+            // モデルの復元は Repository の rollback() に任せる。
+            // title・content・selectedTags は編集値のまま残す。
             self.error = error
             currentAlert = .error
-
-            memo.title = oldTitle
-            memo.content = oldContent
-            memo.tags = oldTags
         }
     }
 

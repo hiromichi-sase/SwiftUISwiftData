@@ -5,6 +5,7 @@
 //  Created by Hiromichi Sase on 2026/05/04.
 //
 
+import Foundation
 import SwiftData
 import Testing
 
@@ -60,8 +61,8 @@ struct EditMemoViewModelTests {
 
         let memos = try dependency.memoRepository.memos()
         #expect(memos.count == 1)
-        let updated = try #require(memos.first)
 
+        let updated = try #require(memos.first)
         #expect(updated.title == "Updated Title")
         #expect(updated.content == "Updated Content")
         #expect(updated.tags == [updatedTag])
@@ -69,6 +70,234 @@ struct EditMemoViewModelTests {
         #expect(updated.updatedAt >= oldCreatedAt)
         #expect(dependency.sut.toastMessage == "Successfully saved!")
         #expect(dependency.sut.currentAlert == nil)
+    }
+
+    // MARK: - Save Failure and Retry
+
+    @Test
+    func save_newMemo_failureRestoresState_andAllowsRetry() throws {
+        struct SimulatedSaveError: Error {}
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        context.autosaveEnabled = false
+
+        let tagRepository = TagRepository(modelContext: context)
+        let tag = Tag(title: "Tag", color: "#000000")
+        try tagRepository.add(tag)
+
+        var shouldFail = true
+        let memoRepository = MemoRepository(modelContext: context) { context in
+            if shouldFail {
+                // willSave 通知後の失敗を模擬する。
+                NotificationCenter.default.post(
+                    name: ModelContext.willSave,
+                    object: context
+                )
+                throw SimulatedSaveError()
+            }
+
+            try context.save()
+        }
+
+        let listViewModel = MemosViewModel(
+            memoRepository: memoRepository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+        let sut = EditMemoViewModel(
+            memoRepository: memoRepository,
+            tagRepository: tagRepository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+
+        sut.title = "New Memo"
+        sut.content = "New Content"
+        sut.selectedTags = [tag]
+        sut.save()
+
+        // 編集値は残り、再試行できる。
+        #expect(sut.currentAlert == .error)
+        #expect(sut.memo == nil)
+        #expect(sut.title == "New Memo")
+        #expect(sut.content == "New Content")
+        #expect(sut.selectedTags.map(\.id) == [tag.id])
+        #expect(sut.canSave)
+
+        // 未保存のメモやタグとの関連は残らない。
+        #expect(listViewModel.memos.isEmpty)
+        #expect(try memoRepository.memos().isEmpty)
+        #expect(tag.memos.isEmpty)
+        #expect(!context.hasChanges)
+
+        let verificationContext = ModelContext(container)
+        let savedBeforeRetry = try verificationContext.fetch(
+            FetchDescriptor<Memo>()
+        )
+        #expect(savedBeforeRetry.isEmpty)
+
+        // エラーを閉じ、同じ入力値で再試行する。
+        sut.currentAlert = nil
+        shouldFail = false
+        sut.save()
+
+        #expect(sut.currentAlert == nil)
+        #expect(sut.memo != nil)
+        #expect(sut.toastMessage == "Successfully saved!")
+        #expect(listViewModel.memos.map(\.title) == ["New Memo"])
+
+        let savedMemo = try #require(memoRepository.memos().first)
+        #expect(savedMemo.title == "New Memo")
+        #expect(savedMemo.content == "New Content")
+        #expect(savedMemo.tags.map(\.id) == [tag.id])
+    }
+
+    @Test
+    func save_existingMemo_failureRestoresModel_andAllowsRetry() throws {
+        struct SimulatedSaveError: Error {}
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        context.autosaveEnabled = false
+
+        let tagRepository = TagRepository(modelContext: context)
+        let originalTag = Tag(title: "Original Tag", color: "#000000")
+        let updatedTag = Tag(title: "Updated Tag", color: "#FF0000")
+        try tagRepository.add(originalTag)
+        try tagRepository.add(updatedTag)
+
+        let setupRepository = MemoRepository(modelContext: context)
+        let memo = Memo(title: "Original", content: "Original Content")
+        try setupRepository.add(memo, tags: [originalTag])
+
+        let originalUpdatedAt = memo.updatedAt
+
+        var shouldFail = true
+        let memoRepository = MemoRepository(modelContext: context) { context in
+            if shouldFail {
+                NotificationCenter.default.post(
+                    name: ModelContext.willSave,
+                    object: context
+                )
+                throw SimulatedSaveError()
+            }
+
+            try context.save()
+        }
+
+        let listViewModel = MemosViewModel(
+            memoRepository: memoRepository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+        let sut = EditMemoViewModel(
+            memo: memo,
+            memoRepository: memoRepository,
+            tagRepository: tagRepository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+
+        sut.title = "Updated"
+        sut.content = "Updated Content"
+        sut.selectedTags = [updatedTag]
+        sut.save()
+
+        // 編集値は残り、再試行できる。
+        #expect(sut.currentAlert == .error)
+        #expect(sut.title == "Updated")
+        #expect(sut.content == "Updated Content")
+        #expect(sut.selectedTags.map(\.id) == [updatedTag.id])
+        #expect(sut.canSave)
+
+        // 一覧・詳細が参照するモデルは保存前の状態に戻る。
+        let listedMemo = try #require(listViewModel.memos.first)
+        #expect(listedMemo.id == memo.id)
+        #expect(listedMemo.title == "Original")
+        #expect(listedMemo.content == "Original Content")
+        #expect(listedMemo.tags.map(\.id) == [originalTag.id])
+        #expect(listedMemo.updatedAt == originalUpdatedAt)
+        #expect(!context.hasChanges)
+
+        let verificationContext = ModelContext(container)
+        let savedBeforeRetry = try verificationContext.fetch(
+            FetchDescriptor<Memo>()
+        )
+        let originalSavedMemo = try #require(savedBeforeRetry.first)
+
+        #expect(originalSavedMemo.title == "Original")
+        #expect(originalSavedMemo.content == "Original Content")
+        #expect(originalSavedMemo.tags.map(\.id) == [originalTag.id])
+
+        // 同じ入力値で再試行する。
+        sut.currentAlert = nil
+        shouldFail = false
+        sut.save()
+
+        #expect(sut.currentAlert == nil)
+        #expect(sut.toastMessage == "Successfully saved!")
+        #expect(listViewModel.memos.first?.title == "Updated")
+
+        let updatedMemo = try #require(memoRepository.memos().first)
+        #expect(updatedMemo.title == "Updated")
+        #expect(updatedMemo.content == "Updated Content")
+        #expect(updatedMemo.tags.map(\.id) == [updatedTag.id])
+    }
+
+    @Test
+    func save_withPendingChanges_preservesChanges_andAllowsRetry() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let context = dependency.memoRepository.modelContext
+        context.autosaveEnabled = false
+
+        // 同じコンテキストに別の未保存変更を用意する。
+        let pendingTag = Tag(title: "Pending Tag", color: "#000000")
+        context.insert(pendingTag)
+        #expect(context.hasChanges)
+
+        dependency.sut.title = "New Memo"
+        dependency.sut.content = "New Content"
+        dependency.sut.save()
+
+        #expect(dependency.sut.currentAlert == .error)
+        #expect(dependency.sut.error != nil)
+        #expect(dependency.sut.memo == nil)
+        #expect(dependency.sut.title == "New Memo")
+        #expect(dependency.sut.content == "New Content")
+        #expect(dependency.sut.canSave)
+
+        // 既存の未保存変更は取り消されない。
+        #expect(context.hasChanges)
+        let pendingTags = try context.fetch(FetchDescriptor<Tag>())
+        #expect(pendingTags.map(\.id).contains(pendingTag.id))
+        #expect(try dependency.memoRepository.memos().isEmpty)
+
+        // 別の変更を保存した後、再試行する。
+        try context.save()
+        #expect(!context.hasChanges)
+
+        dependency.sut.currentAlert = nil
+        dependency.sut.save()
+
+        #expect(dependency.sut.currentAlert == nil)
+        #expect(dependency.sut.memo != nil)
+        #expect(try dependency.memoRepository.memos().map(\.title) == ["New Memo"])
+
+        let tags = try context.fetch(FetchDescriptor<Tag>())
+        #expect(tags.map(\.id).contains(pendingTag.id))
     }
 
     // MARK: - Intents
@@ -134,7 +363,7 @@ struct EditMemoViewModelTests {
         #expect(dependency.sut.currentAlert == nil)
     }
 
-    // MARK: - Derived values
+    // MARK: - Derived Values
 
     @Test
     func memoUpdated_newMemo_false_whenEmpty_true_whenChanged() throws {
@@ -248,19 +477,31 @@ extension EditMemoViewModelTests {
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
 
-            self.memoRepository = MemoRepository(modelContext: container.mainContext)
-            self.tagRepository = TagRepository(modelContext: container.mainContext)
+            self.memoRepository = MemoRepository(
+                modelContext: container.mainContext
+            )
+            self.tagRepository = TagRepository(
+                modelContext: container.mainContext
+            )
 
             if existingTags > 0 {
                 for i in 1 ... existingTags {
-                    let tag = Tag(title: "Tag \(i)", color: "#000000", order: i)
+                    let tag = Tag(
+                        title: "Tag \(i)",
+                        color: "#000000",
+                        order: i
+                    )
                     try tagRepository.add(tag)
                 }
             }
 
             let initialMemo: Memo?
             if existingMemo {
-                let memo = Memo(title: "Old Title", content: "Old Content", tags: [])
+                let memo = Memo(
+                    title: "Old Title",
+                    content: "Old Content",
+                    tags: []
+                )
                 try memoRepository.add(memo)
                 initialMemo = memo
             }

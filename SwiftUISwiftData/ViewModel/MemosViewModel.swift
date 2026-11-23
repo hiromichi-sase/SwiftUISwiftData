@@ -54,9 +54,6 @@ final class MemosViewModel {
     private let authenticateHandler: AuthenticateHandler
 
     @ObservationIgnored
-    private var saveNotificationToken: NSObjectProtocol?
-
-    @ObservationIgnored
     private var memoDuplicateSource: Memo?
 
     init(
@@ -71,7 +68,9 @@ final class MemosViewModel {
                 throw NSError(
                     domain: "Authentication",
                     code: -1,
-                    userInfo: [NSLocalizedDescriptionKey: "Authentication failed."]
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Authentication failed."
+                    ]
                 )
             }
             return true
@@ -86,17 +85,19 @@ final class MemosViewModel {
         setupNotification()
     }
 
+    // MARK: - Notifications
+
     private func setupNotification() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(handleModelContextWillSave(_:)),
-            name: ModelContext.willSave,
+            selector: #selector(handleModelContextDidSave(_:)),
+            name: ModelContext.didSave,
             object: memoRepository.modelContext
         )
     }
 
     @objc
-    private func handleModelContextWillSave(_ notification: Notification) {
+    private func handleModelContextDidSave(_ notification: Notification) {
         fetchMemos()
         applyFilter()
     }
@@ -105,9 +106,19 @@ final class MemosViewModel {
         NotificationCenter.default.removeObserver(self)
     }
 
-    private func hasAnyMatch(_ memo: Memo, keywords: [String], tags: [Tag]) -> Bool {
-        keywords.contains { memo.title.lowercased().contains($0.lowercased()) }
-            || tags.contains { memo.tags.contains($0) }
+    // MARK: - Filtering
+
+    private func hasAnyMatch(
+        _ memo: Memo,
+        keywords: [String],
+        tags: [Tag]
+    ) -> Bool {
+        keywords.contains {
+            memo.title.lowercased().contains($0.lowercased())
+        }
+            || tags.contains {
+                memo.tags.contains($0)
+            }
     }
 
     func applyFilter() {
@@ -123,11 +134,13 @@ final class MemosViewModel {
             return
         }
 
-        filteredMemos = memos.filter { hasAnyMatch($0, keywords: keywords, tags: filterTags) }
+        filteredMemos = memos.filter {
+            hasAnyMatch($0, keywords: keywords, tags: filterTags)
+        }
     }
 
     func clearFilter() {
-        // didSet で applyFilter が走るため、最後に query をクリア
+        // didSet で applyFilter が走るため、最後に query をクリア。
         filterTags = []
         keywordsForFiltering = []
         isFiltering = false
@@ -150,6 +163,8 @@ final class MemosViewModel {
             memos = []
         }
     }
+
+    // MARK: - List State
 
     func displayedMemos(editMode: EditMode) -> [Memo] {
         editMode.isEditing ? memos : filteredMemos
@@ -197,8 +212,12 @@ final class MemosViewModel {
                     selection.removeAll()
                 }
             case .inactive:
-                if let newMemo = newMemos.first(where: { !oldMemos.contains($0) }) {
-                    if let memoDuplicateSource, memoDuplicateSource.order + 1 == newMemo.order {
+                if let newMemo = newMemos.first(
+                    where: { !oldMemos.contains($0) }
+                ) {
+                    if let memoDuplicateSource,
+                        memoDuplicateSource.order + 1 == newMemo.order
+                    {
                         self.memoDuplicateSource = nil
                         return
                     }
@@ -214,9 +233,19 @@ final class MemosViewModel {
         }
     }
 
+    // MARK: - Repository Operations
+
     func duplicate(_ memo: Memo) throws {
         memoDuplicateSource = memo
-        try memoRepository.duplicate(memo)
+
+        do {
+            try memoRepository.duplicate(memo)
+        }
+        catch {
+            // 失敗時は次の一覧変更に複製状態を持ち越さない。
+            memoDuplicateSource = nil
+            throw error
+        }
     }
 
     func delete(_ memos: [Memo]) throws {
@@ -247,7 +276,7 @@ final class MemosViewModel {
         try memoRepository.unprotect(memos)
     }
 
-    // MARK: - UI Action entry points (MVVM)
+    // MARK: - UI Actions
 
     func onDuplicateMemo(_ memo: Memo) -> ActionResult {
         do {
@@ -267,7 +296,9 @@ final class MemosViewModel {
             try delete(memosToDelete)
 
             var nextSelectedMemo = currentSelectedMemo
-            if let selected = currentSelectedMemo, memosToDelete.contains(selected) {
+            if let selected = currentSelectedMemo,
+                memosToDelete.contains(selected)
+            {
                 nextSelectedMemo = nil
                 selectedMemo = nil
             }
@@ -276,11 +307,17 @@ final class MemosViewModel {
             return (.toast("Successfully deleted!"), nextSelectedMemo)
         }
         catch {
-            return (.alert(.error, message: error.localizedDescription), currentSelectedMemo)
+            return (
+                .alert(.error, message: error.localizedDescription),
+                currentSelectedMemo
+            )
         }
     }
 
-    func onMoveMemo(from source: IndexSet, to destination: Int) -> ActionResult {
+    func onMoveMemo(
+        from source: IndexSet,
+        to destination: Int
+    ) -> ActionResult {
         do {
             try moveMemo(from: source.map { $0 }, to: destination)
             return .none
@@ -315,6 +352,8 @@ final class MemosViewModel {
             return .alert(.error, message: error.localizedDescription)
         }
     }
+
+    // MARK: - Preferences
 
     func getTitleLineLimit() -> Int {
         userDefaultsRepository.getTitleLineLimit()
