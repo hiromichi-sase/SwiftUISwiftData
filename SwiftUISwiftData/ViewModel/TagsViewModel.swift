@@ -205,7 +205,10 @@ final class TagsViewModel {
 
     private func setupNotification() {
         NotificationCenter.default
-            .publisher(for: ModelContext.willSave)
+            .publisher(
+                for: ModelContext.didSave,
+                object: tagRepository.modelContext
+            )
             .sink { [weak self] _ in
                 self?.fetchTags()
             }
