@@ -85,6 +85,382 @@ struct MemosViewModelTests {
         #expect(testTarget.filteredMemos.count == testTarget.memos.count)
     }
 
+    // MARK: - Fetch Failure
+
+    @Test
+    func initialFetchFailure_resetsFilterAndSelection_andCanRetrySuccessfully() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = MemoRepository(modelContext: container.mainContext)
+
+        let memo = Memo(title: "Memo", content: "Content")
+        try repository.add(memo)
+
+        var shouldFail = true
+
+        let viewModel = MemosViewModel(
+            memoRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            authenticateHandler: { true },
+            fetchMemosHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+
+                return try repository.memos()
+            }
+        )
+
+        #expect(viewModel.memos.isEmpty)
+        #expect(viewModel.filteredMemos.isEmpty)
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+        #expect(!viewModel.isFiltering)
+        #expect(viewModel.filterQuery == "")
+        #expect(viewModel.filterTags.isEmpty)
+        #expect(viewModel.selectedMemo == nil)
+
+        shouldFail = false
+        viewModel.retryFetchMemos()
+
+        #expect(viewModel.fetchErrorMessage == nil)
+        #expect(viewModel.memos.map(\.id) == [memo.id])
+        #expect(viewModel.filteredMemos.map(\.id) == [memo.id])
+    }
+
+    @Test
+    func refreshFailure_resetsFilterAndSelection_andRetryLoadsLatest() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = MemoRepository(modelContext: container.mainContext)
+
+        let firstMemo = Memo(title: "First", content: "A")
+        try repository.add(firstMemo)
+
+        var shouldFail = false
+
+        let viewModel = MemosViewModel(
+            memoRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            authenticateHandler: { true },
+            fetchMemosHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+
+                return try repository.memos()
+            }
+        )
+
+        viewModel.filterQuery = "First"
+        viewModel.selectedMemo = firstMemo
+
+        #expect(viewModel.isFiltering)
+
+        shouldFail = true
+        try repository.add(Memo(title: "Second", content: "B"))
+
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+        #expect(viewModel.memos.map(\.id) == [firstMemo.id])
+        #expect(!viewModel.isFiltering)
+        #expect(viewModel.filterQuery == "")
+        #expect(viewModel.filterTags.isEmpty)
+        #expect(viewModel.selectedMemo == nil)
+
+        shouldFail = false
+        viewModel.retryFetchMemos()
+
+        #expect(viewModel.fetchErrorMessage == nil)
+        #expect(viewModel.memos.map(\.title) == ["First", "Second"])
+        #expect(!viewModel.isFiltering)
+    }
+
+    @Test
+    func fetchFailure_whileEditing_allowsDoneEquivalentAction() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated memo fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = MemoRepository(modelContext: container.mainContext)
+
+        let memo = Memo(title: "First", content: "A")
+        try repository.add(memo)
+
+        var shouldFail = false
+
+        let viewModel = MemosViewModel(
+            memoRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            authenticateHandler: { true },
+            fetchMemosHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+
+                return try repository.memos()
+            }
+        )
+
+        viewModel.selection = [memo.id]
+        #expect(viewModel.selection == [memo.id])
+
+        shouldFail = true
+        try repository.add(Memo(title: "Second", content: "B"))
+
+        #expect(viewModel.fetchErrorMessage == "Simulated memo fetch failure")
+
+        viewModel.deselectAll()
+        #expect(viewModel.selection.isEmpty)
+    }
+
+    // MARK: - Displayed Memos
+
+    @Test
+    func displayedMemos_active_returnsAllMemos() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A"),
+                Memo(title: "Banana", content: "B"),
+            ]
+        )
+
+        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
+
+        let displayed = dependency.testTarget.displayedMemos(editMode: .active)
+
+        #expect(displayed.count == 2)
+    }
+
+    @Test
+    func displayedMemos_inactive_returnsFilteredMemos() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A"),
+                Memo(title: "Banana", content: "B"),
+            ]
+        )
+
+        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
+
+        let displayed = dependency.testTarget.displayedMemos(editMode: .inactive)
+
+        #expect(displayed.count == 1)
+        #expect(displayed.first?.title == "Apple")
+    }
+
+    // MARK: - Navigation Title
+
+    @Test
+    func navigationTitle_active_returnsSelectionCount() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A"),
+                Memo(title: "B", content: "B"),
+            ]
+        )
+
+        dependency.testTarget.selectAll()
+
+        #expect(
+            dependency.testTarget.navigationTitle(editMode: .active) == "Memos (2/2)"
+        )
+    }
+
+    @Test
+    func navigationTitle_inactive_filtering_returnsFilteredCount() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "Apple", content: "A"),
+                Memo(title: "Banana", content: "B"),
+            ]
+        )
+
+        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
+
+        #expect(
+            dependency.testTarget.navigationTitle(editMode: .inactive) == "Memos (1/2)"
+        )
+    }
+
+    @Test
+    func navigationTitle_inactive_noFilter_returnsTotalCount() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A"),
+                Memo(title: "B", content: "B"),
+            ]
+        )
+
+        #expect(
+            dependency.testTarget.navigationTitle(editMode: .inactive) == "Memos (2)"
+        )
+    }
+
+    // MARK: - Selection
+
+    @Test
+    func toggleSelection_togglesMembership() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let id = UUID()
+
+        dependency.testTarget.toggleSelection(for: id)
+        #expect(dependency.testTarget.selection.contains(id))
+
+        dependency.testTarget.toggleSelection(for: id)
+        #expect(!dependency.testTarget.selection.contains(id))
+    }
+
+    @Test
+    func selectAllAndDeselectAll_workAsExpected() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [
+                Memo(title: "A", content: "A"),
+                Memo(title: "B", content: "B"),
+            ]
+        )
+
+        dependency.testTarget.selectAll()
+        #expect(dependency.testTarget.selection.count == 2)
+
+        dependency.testTarget.deselectAll()
+        #expect(dependency.testTarget.selection.isEmpty)
+    }
+
+    @Test
+    func selectedMemos_returnsSelectedOnly() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let memo1 = Memo(title: "A", content: "A")
+        let memo2 = Memo(title: "B", content: "B")
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [memo1, memo2]
+        )
+
+        dependency.testTarget.selection = [memo2.id]
+
+        let selected = dependency.testTarget.selectedMemos()
+
+        #expect(selected.count == 1)
+        #expect(selected.first?.id == memo2.id)
+    }
+
+    // MARK: - Memos Changed
+
+    @Test
+    func handleMemosChanged_active_emptyNewMemos_clearsSelection() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        dependency.testTarget.selection = [UUID()]
+
+        dependency.testTarget.handleMemosChanged(
+            oldMemos: [Memo(title: "A", content: "A")],
+            newMemos: [],
+            editMode: .active
+        )
+
+        #expect(dependency.testTarget.selection.isEmpty)
+    }
+
+    @Test
+    func handleMemosChanged_inactive_newMemo_selectsNewMemo() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        let oldMemo = Memo(title: "Old", content: "Old", order: 1)
+        let newMemo = Memo(title: "New", content: "New", order: 2)
+
+        dependency.testTarget.handleMemosChanged(
+            oldMemos: [oldMemo],
+            newMemos: [oldMemo, newMemo],
+            editMode: .inactive
+        )
+
+        #expect(dependency.testTarget.selectedMemo?.id == newMemo.id)
+        #expect(dependency.testTarget.selection.isEmpty)
+    }
+
+    @Test
+    func handleMemosChanged_inactive_emptyNewMemos_clearsSelectedMemoAndFilter() throws {
+        let dependency = try Dependency()
+        defer { dependency.removeUserDefaults() }
+
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [Memo(title: "A", content: "A")]
+        )
+
+        let testTarget = dependency.testTarget
+        testTarget.selectedMemo = Memo(title: "X", content: "X")
+        _ = testTarget.filteredMemos(by: "A", and: [])
+
+        testTarget.handleMemosChanged(
+            oldMemos: [Memo(title: "A", content: "A")],
+            newMemos: [],
+            editMode: .inactive
+        )
+
+        #expect(testTarget.selectedMemo == nil)
+        #expect(testTarget.filterQuery == "")
+        #expect(!testTarget.isFiltering)
+    }
+
     // MARK: - Repository Operations
 
     @Test
@@ -94,6 +470,7 @@ struct MemosViewModelTests {
 
         let memo1 = Memo(title: "Test Title 1", content: "Test Memo 1")
         let memo2 = Memo(title: "Test Title 2", content: "Test Memo 2")
+
         try seed(
             context: dependency.memoRepository.modelContext,
             memos: [memo1, memo2]
@@ -103,10 +480,17 @@ struct MemosViewModelTests {
         try dependency.testTarget.duplicate(memo1)
 
         let memos = try dependency.memoRepository.memos()
+
         #expect(memos.count == countBefore + 1)
-        #expect(memos[0].title == memo1.title)
-        #expect(memos[1].title == memos[0].title)
-        #expect(memos[2].title == memo2.title)
+
+        let first = try #require(memos.first)
+        #expect(first.title == memo1.title)
+
+        let duplicate = try #require(memos.dropFirst().first)
+        #expect(duplicate.title == first.title)
+
+        let last = try #require(memos.last)
+        #expect(last.title == memo2.title)
     }
 
     @Test
@@ -117,6 +501,7 @@ struct MemosViewModelTests {
         let memo1 = Memo(title: "A", content: "A")
         let memo2 = Memo(title: "B", content: "B")
         let memo3 = Memo(title: "C", content: "C")
+
         try seed(
             context: dependency.memoRepository.modelContext,
             memos: [memo1, memo2, memo3]
@@ -125,85 +510,10 @@ struct MemosViewModelTests {
         try dependency.testTarget.delete([memo2])
 
         let memos = try dependency.memoRepository.memos()
+
         #expect(memos.count == 2)
         #expect(memos.map(\.title) == ["A", "C"])
         #expect(memos.map(\.order) == [1, 2])
-    }
-
-    @Test
-    func deleteFailure_restoresMemosAndSelection_allowsRetry() throws {
-        struct SimulatedSaveError: Error {}
-
-        let support = TestDependencySupport()
-        defer { support.removeUserDefaults() }
-
-        let container = try ModelContainer(
-            for: Memo.self,
-            Tag.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        let context = container.mainContext
-        context.autosaveEnabled = false
-
-        // 初期データは通常の Repository で保存する。
-        let setupRepository = MemoRepository(modelContext: context)
-        let memoA = Memo(title: "A", content: "A")
-        let memoB = Memo(title: "B", content: "B")
-        try setupRepository.add(memoA)
-        try setupRepository.add(memoB)
-
-        var shouldFail = true
-
-        // テスト対象には保存処理を差し替えた Repository を渡す。
-        let repository = MemoRepository(modelContext: context) { context in
-            if shouldFail {
-                NotificationCenter.default.post(
-                    name: ModelContext.willSave,
-                    object: context
-                )
-                throw SimulatedSaveError()
-            }
-
-            try context.save()
-        }
-
-        let viewModel = MemosViewModel(
-            memoRepository: repository,
-            userDefaultsRepository: support.userDefaultsRepository
-        )
-        viewModel.selection = [memoA.id]
-
-        let failed = viewModel.onDeleteMemos(
-            [memoA],
-            currentSelectedMemo: memoA
-        )
-
-        if case .alert(.error, _) = failed.result {
-            // 期待どおりエラー。
-        }
-        else {
-            Issue.record("削除失敗時にエラーが返されませんでした")
-        }
-
-        #expect(failed.newSelectedMemo?.id == memoA.id)
-        #expect(viewModel.selection == [memoA.id])
-        #expect(viewModel.memos.map(\.title) == ["A", "B"])
-        #expect(viewModel.memos.map(\.order) == [1, 2])
-        #expect(try repository.memos().map(\.title) == ["A", "B"])
-        #expect(!context.hasChanges)
-
-        // 保存処理を正常に戻して再試行する。
-        shouldFail = false
-
-        let retried = viewModel.onDeleteMemos(
-            [memoA],
-            currentSelectedMemo: memoA
-        )
-
-        #expect(retried.result == .toast("Successfully deleted!"))
-        #expect(retried.newSelectedMemo == nil)
-        #expect(viewModel.selection.isEmpty)
-        #expect(viewModel.memos.map(\.title) == ["B"])
     }
 
     @Test
@@ -300,7 +610,86 @@ struct MemosViewModelTests {
         let memos = try dependency.memoRepository.memos()
         try dependency.testTarget.unprotect(memos)
 
-        #expect(try dependency.memoRepository.memos().allSatisfy { !$0.protected })
+        #expect(
+            try dependency.memoRepository.memos().allSatisfy { !$0.protected }
+        )
+    }
+
+    // MARK: - Repository Operation Failures
+
+    @Test
+    func deleteFailure_restoresMemosAndSelection_allowsRetry() throws {
+        struct SimulatedSaveError: Error {}
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        context.autosaveEnabled = false
+
+        let setupRepository = MemoRepository(modelContext: context)
+        let memoA = Memo(title: "A", content: "A")
+        let memoB = Memo(title: "B", content: "B")
+
+        try setupRepository.add(memoA)
+        try setupRepository.add(memoB)
+
+        var shouldFail = true
+
+        let repository = MemoRepository(modelContext: context) { context in
+            if shouldFail {
+                NotificationCenter.default.post(
+                    name: ModelContext.willSave,
+                    object: context
+                )
+
+                throw SimulatedSaveError()
+            }
+
+            try context.save()
+        }
+
+        let viewModel = MemosViewModel(
+            memoRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository
+        )
+        viewModel.selection = [memoA.id]
+
+        let failed = viewModel.onDeleteMemos(
+            [memoA],
+            currentSelectedMemo: memoA
+        )
+
+        if case .alert(.error, _) = failed.result {
+            // 期待どおり。
+        }
+        else {
+            Issue.record("削除失敗時にエラーが返されませんでした")
+        }
+
+        #expect(failed.newSelectedMemo?.id == memoA.id)
+        #expect(viewModel.selection == [memoA.id])
+        #expect(viewModel.memos.map(\.title) == ["A", "B"])
+        #expect(viewModel.memos.map(\.order) == [1, 2])
+        #expect(try repository.memos().map(\.title) == ["A", "B"])
+        #expect(!context.hasChanges)
+
+        shouldFail = false
+
+        let retried = viewModel.onDeleteMemos(
+            [memoA],
+            currentSelectedMemo: memoA
+        )
+
+        #expect(retried.result == .toast("Successfully deleted!"))
+        #expect(retried.newSelectedMemo == nil)
+        #expect(viewModel.selection.isEmpty)
+        #expect(viewModel.memos.map(\.title) == ["B"])
     }
 
     @Test
@@ -352,7 +741,7 @@ struct MemosViewModelTests {
         let failed = viewModel.onDuplicateMemo(memoA)
 
         if case .alert(.error, _) = failed {
-            // 期待どおりエラー。
+            // 期待どおり。
         }
         else {
             Issue.record("複製失敗時にエラーが返されませんでした")
@@ -366,14 +755,12 @@ struct MemosViewModelTests {
         #expect(tag.memos.map(\.id) == [memoA.id])
         #expect(!context.hasChanges)
 
-        // 別コンテキストからも複製が保存されていないことを確認する。
         let verificationContext = ModelContext(container)
         let savedBeforeRetry = try verificationContext.fetch(
             FetchDescriptor<Memo>()
         )
         #expect(savedBeforeRetry.count == 2)
 
-        // 再試行すると、タグ付きメモが複製される。
         shouldFail = false
         let retried = viewModel.onDuplicateMemo(memoA)
 
@@ -383,8 +770,10 @@ struct MemosViewModelTests {
         #expect(memos.count == 3)
         #expect(memos.map(\.title) == ["A", "A", "B"])
         #expect(memos.map(\.order) == [1, 2, 3])
-        #expect(memos[1].id != memoA.id)
-        #expect(memos[1].tags.map(\.id) == [tag.id])
+
+        let duplicatedMemo = try #require(memos.dropFirst().first)
+        #expect(duplicatedMemo.id != memoA.id)
+        #expect(duplicatedMemo.tags.map(\.id) == [tag.id])
     }
 
     @Test
@@ -435,7 +824,7 @@ struct MemosViewModelTests {
         )
 
         if case .alert(.error, _) = failed {
-            // 期待どおりエラー。
+            // 期待どおり。
         }
         else {
             Issue.record("並べ替え失敗時にエラーが返されませんでした")
@@ -520,7 +909,7 @@ struct MemosViewModelTests {
         }
 
         if case .alert(.error, _) = failed {
-            // 期待どおりエラー。
+            // 期待どおり。
         }
         else {
             Issue.record("保護状態の保存失敗時にエラーが返されませんでした")
@@ -536,11 +925,13 @@ struct MemosViewModelTests {
             FetchDescriptor<Memo>()
         )
         let savedMemo = try #require(savedBeforeRetry.first)
+
         #expect(savedMemo.protected == initiallyProtected)
 
         shouldFail = false
 
         let retried: MemosViewModel.ActionResult
+
         if initiallyProtected {
             retried = await viewModel.onUnprotectMemos([memo])
         }
@@ -554,214 +945,90 @@ struct MemosViewModelTests {
         #expect(viewModel.selection == [memo.id])
     }
 
-    // MARK: - Displayed Memos
+    // MARK: - Tag Save Failure Impact
 
-    @Test
-    func displayedMemos_active_returnsAllMemos() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
+    @Test(arguments: [false, true])
+    func tagSaveFailure_preservesMemoListAndFilter(isDeletion: Bool) throws {
+        struct SimulatedSaveError: Error {}
 
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "Apple", content: "A"),
-                Memo(title: "Banana", content: "B"),
-            ]
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
+        let context = container.mainContext
+        context.autosaveEnabled = false
 
-        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
+        let setupTagRepository = TagRepository(modelContext: context)
+        let memoRepository = MemoRepository(modelContext: context)
 
-        let displayed = dependency.testTarget.displayedMemos(editMode: .active)
-        #expect(displayed.count == 2)
-    }
+        let tag = Tag(title: "Original Tag", color: "#000000")
+        try setupTagRepository.add(tag)
 
-    @Test
-    func displayedMemos_inactive_returnsFilteredMemos() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
+        let taggedMemo = Memo(title: "Tagged Memo", content: "A")
+        let untaggedMemo = Memo(title: "Untagged Memo", content: "B")
 
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "Apple", content: "A"),
-                Memo(title: "Banana", content: "B"),
-            ]
+        try memoRepository.add(taggedMemo, tags: [tag])
+        try memoRepository.add(untaggedMemo)
+
+        let viewModel = MemosViewModel(
+            memoRepository: memoRepository,
+            userDefaultsRepository: support.userDefaultsRepository
         )
+        viewModel.filterTags = [tag]
+        viewModel.selectedMemo = taggedMemo
 
-        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
+        #expect(viewModel.isFiltering)
+        #expect(viewModel.memos.map(\.id) == [taggedMemo.id, untaggedMemo.id])
+        #expect(viewModel.filteredMemos.map(\.id) == [taggedMemo.id])
 
-        let displayed = dependency.testTarget.displayedMemos(editMode: .inactive)
-        #expect(displayed.count == 1)
-        #expect(displayed.first?.title == "Apple")
-    }
+        let failingTagRepository = TagRepository(modelContext: context) { context in
+            NotificationCenter.default.post(
+                name: ModelContext.willSave,
+                object: context
+            )
 
-    // MARK: - Navigation Title
+            throw SimulatedSaveError()
+        }
 
-    @Test
-    func navigationTitle_active_returnsSelectionCount() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
+        #expect(throws: SimulatedSaveError.self) {
+            if isDeletion {
+                try failingTagRepository.delete([tag])
+            }
+            else {
+                try failingTagRepository.update(
+                    tag,
+                    title: "Changed Tag",
+                    color: "#FF0000"
+                )
+            }
+        }
 
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "A", content: "A"),
-                Memo(title: "B", content: "B"),
-            ]
-        )
+        #expect(tag.title == "Original Tag")
+        #expect(tag.color == "#000000")
+        #expect(taggedMemo.tags.map(\.id) == [tag.id])
+        #expect(tag.memos.map(\.id).contains(taggedMemo.id))
+        #expect(!context.hasChanges)
 
-        dependency.testTarget.selectAll()
-        #expect(dependency.testTarget.navigationTitle(editMode: .active) == "Memos (2/2)")
-    }
+        #expect(viewModel.memos.map(\.id) == [taggedMemo.id, untaggedMemo.id])
+        #expect(viewModel.selectedMemo?.id == taggedMemo.id)
+        #expect(viewModel.isFiltering)
+        #expect(viewModel.filterTags.map(\.id) == [tag.id])
+        #expect(viewModel.filteredMemos.map(\.id) == [taggedMemo.id])
 
-    @Test
-    func navigationTitle_inactive_filtering_returnsFilteredCount() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
+        let verificationContext = ModelContext(container)
+        let savedTags = try verificationContext.fetch(FetchDescriptor<Tag>())
+        let savedMemos = try verificationContext.fetch(FetchDescriptor<Memo>())
 
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "Apple", content: "A"),
-                Memo(title: "Banana", content: "B"),
-            ]
-        )
+        let savedTag = try #require(savedTags.first { $0.id == tag.id })
+        let savedMemo = try #require(savedMemos.first { $0.id == taggedMemo.id })
 
-        _ = dependency.testTarget.filteredMemos(by: "Apple", and: [])
-
-        #expect(
-            dependency.testTarget.navigationTitle(editMode: .inactive) == "Memos (1/2)"
-        )
-    }
-
-    @Test
-    func navigationTitle_inactive_noFilter_returnsTotalCount() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "A", content: "A"),
-                Memo(title: "B", content: "B"),
-            ]
-        )
-
-        #expect(dependency.testTarget.navigationTitle(editMode: .inactive) == "Memos (2)")
-    }
-
-    // MARK: - Selection
-
-    @Test
-    func toggleSelection_togglesMembership() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        let id = UUID()
-        dependency.testTarget.toggleSelection(for: id)
-        #expect(dependency.testTarget.selection.contains(id))
-
-        dependency.testTarget.toggleSelection(for: id)
-        #expect(!dependency.testTarget.selection.contains(id))
-    }
-
-    @Test
-    func selectAllAndDeselectAll_workAsExpected() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [
-                Memo(title: "A", content: "A"),
-                Memo(title: "B", content: "B"),
-            ]
-        )
-
-        dependency.testTarget.selectAll()
-        #expect(dependency.testTarget.selection.count == 2)
-
-        dependency.testTarget.deselectAll()
-        #expect(dependency.testTarget.selection.isEmpty)
-    }
-
-    @Test
-    func selectedMemos_returnsSelectedOnly() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        let memo1 = Memo(title: "A", content: "A")
-        let memo2 = Memo(title: "B", content: "B")
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [memo1, memo2]
-        )
-
-        dependency.testTarget.selection = [memo2.id]
-
-        let selected = dependency.testTarget.selectedMemos()
-        #expect(selected.count == 1)
-        #expect(selected.first?.id == memo2.id)
-    }
-
-    // MARK: - Memos Changed
-
-    @Test
-    func handleMemosChanged_active_emptyNewMemos_clearsSelection() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        dependency.testTarget.selection = [UUID()]
-        dependency.testTarget.handleMemosChanged(
-            oldMemos: [Memo(title: "A", content: "A")],
-            newMemos: [],
-            editMode: .active
-        )
-
-        #expect(dependency.testTarget.selection.isEmpty)
-    }
-
-    @Test
-    func handleMemosChanged_inactive_newMemo_selectsNewMemo() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        let oldMemo = Memo(title: "Old", content: "Old", order: 1)
-        let newMemo = Memo(title: "New", content: "New", order: 2)
-
-        dependency.testTarget.handleMemosChanged(
-            oldMemos: [oldMemo],
-            newMemos: [oldMemo, newMemo],
-            editMode: .inactive
-        )
-
-        #expect(dependency.testTarget.selectedMemo?.id == newMemo.id)
-        #expect(dependency.testTarget.selection.isEmpty)
-    }
-
-    @Test
-    func handleMemosChanged_inactive_emptyNewMemos_clearsSelectedMemoAndFilter() throws {
-        let dependency = try Dependency()
-        defer { dependency.removeUserDefaults() }
-
-        try seed(
-            context: dependency.memoRepository.modelContext,
-            memos: [Memo(title: "A", content: "A")]
-        )
-
-        let testTarget = dependency.testTarget
-        testTarget.selectedMemo = Memo(title: "X", content: "X")
-        _ = testTarget.filteredMemos(by: "A", and: [])
-
-        testTarget.handleMemosChanged(
-            oldMemos: [Memo(title: "A", content: "A")],
-            newMemos: [],
-            editMode: .inactive
-        )
-
-        #expect(testTarget.selectedMemo == nil)
-        #expect(testTarget.filterQuery == "")
-        #expect(!testTarget.isFiltering)
+        #expect(savedTag.title == "Original Tag")
+        #expect(savedTag.color == "#000000")
+        #expect(savedMemo.tags.map(\.id) == [tag.id])
     }
 
     // MARK: - UI Actions
@@ -772,7 +1039,10 @@ struct MemosViewModelTests {
         defer { dependency.removeUserDefaults() }
 
         let memo = Memo(title: "A", content: "A")
-        try seed(context: dependency.memoRepository.modelContext, memos: [memo])
+        try seed(
+            context: dependency.memoRepository.modelContext,
+            memos: [memo]
+        )
 
         let result = dependency.testTarget.onDuplicateMemo(memo)
         #expect(result == .toast("Successfully duplicated!"))
@@ -880,11 +1150,9 @@ struct MemosViewModelTests {
             to: 1
         )
 
-        if case .alert(.error, _) = result {
-            #expect(Bool(true))
-        }
-        else {
-            #expect(Bool(false))
+        guard case .alert(.error, _) = result else {
+            Issue.record("Expected an error alert, got \(result)")
+            return
         }
     }
 
@@ -910,7 +1178,9 @@ struct MemosViewModelTests {
 
     @Test
     func onProtectMemos_authFailure_returnsAlert() async throws {
-        enum DummyError: Error { case failed }
+        enum DummyError: Error {
+            case failed
+        }
 
         let dependency = try Dependency(
             authenticateHandler: { throw DummyError.failed }
@@ -925,11 +1195,9 @@ struct MemosViewModelTests {
         let memos = try dependency.memoRepository.memos()
         let result = await dependency.testTarget.onProtectMemos(memos)
 
-        if case .alert(.error, _) = result {
-            #expect(Bool(true))
-        }
-        else {
-            #expect(Bool(false))
+        guard case .alert(.error, _) = result else {
+            Issue.record("Expected an error alert, got \(result)")
+            return
         }
     }
 
@@ -950,12 +1218,16 @@ struct MemosViewModelTests {
         let result = await dependency.testTarget.onUnprotectMemos(memos)
 
         #expect(result == .none)
-        #expect(try dependency.memoRepository.memos().allSatisfy { !$0.protected })
+        #expect(
+            try dependency.memoRepository.memos().allSatisfy { !$0.protected }
+        )
     }
 
     @Test
     func onUnprotectMemos_authFailure_returnsAlert() async throws {
-        enum DummyError: Error { case failed }
+        enum DummyError: Error {
+            case failed
+        }
 
         let dependency = try Dependency(
             authenticateHandler: { throw DummyError.failed }
@@ -970,11 +1242,9 @@ struct MemosViewModelTests {
         let memos = try dependency.memoRepository.memos()
         let result = await dependency.testTarget.onUnprotectMemos(memos)
 
-        if case .alert(.error, _) = result {
-            #expect(Bool(true))
-        }
-        else {
-            #expect(Bool(false))
+        guard case .alert(.error, _) = result else {
+            Issue.record("Expected an error alert, got \(result)")
+            return
         }
     }
 
@@ -1143,7 +1413,9 @@ struct MemosViewModelTests {
         context.insert(pendingMemo)
 
         #expect(dependency.testTarget.memos.isEmpty)
-        #expect(try dependency.memoRepository.memos().map(\.id) == [pendingMemo.id])
+        #expect(
+            try dependency.memoRepository.memos().map(\.id) == [pendingMemo.id]
+        )
 
         let otherContainer = try ModelContainer(
             for: Memo.self,
@@ -1161,99 +1433,9 @@ struct MemosViewModelTests {
         #expect(dependency.testTarget.memos.map(\.id) == [pendingMemo.id])
     }
 
-    @Test(arguments: [false, true])
-    func tagSaveFailure_preservesMemoListAndFilter(isDeletion: Bool) throws {
-        struct SimulatedSaveError: Error {}
-
-        let support = TestDependencySupport()
-        defer { support.removeUserDefaults() }
-
-        let container = try ModelContainer(
-            for: Memo.self,
-            Tag.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        let context = container.mainContext
-        context.autosaveEnabled = false
-
-        // 初期データは通常の Repository で保存する。
-        let setupTagRepository = TagRepository(modelContext: context)
-        let memoRepository = MemoRepository(modelContext: context)
-
-        let tag = Tag(title: "Original Tag", color: "#000000")
-        try setupTagRepository.add(tag)
-
-        let taggedMemo = Memo(title: "Tagged Memo", content: "A")
-        let untaggedMemo = Memo(title: "Untagged Memo", content: "B")
-        try memoRepository.add(taggedMemo, tags: [tag])
-        try memoRepository.add(untaggedMemo)
-
-        let viewModel = MemosViewModel(
-            memoRepository: memoRepository,
-            userDefaultsRepository: support.userDefaultsRepository
-        )
-        viewModel.filterTags = [tag]
-        viewModel.selectedMemo = taggedMemo
-
-        #expect(viewModel.isFiltering)
-        #expect(viewModel.memos.map(\.id) == [taggedMemo.id, untaggedMemo.id])
-        #expect(viewModel.filteredMemos.map(\.id) == [taggedMemo.id])
-
-        // タグの保存通知後に失敗する状況を模擬する。
-        let failingTagRepository = TagRepository(modelContext: context) { context in
-            NotificationCenter.default.post(
-                name: ModelContext.willSave,
-                object: context
-            )
-            throw SimulatedSaveError()
-        }
-
-        #expect(throws: SimulatedSaveError.self) {
-            if isDeletion {
-                try failingTagRepository.delete([tag])
-            }
-            else {
-                try failingTagRepository.update(
-                    tag,
-                    title: "Changed Tag",
-                    color: "#FF0000"
-                )
-            }
-        }
-
-        // タグとメモの関連は保存前の状態に戻る。
-        #expect(tag.title == "Original Tag")
-        #expect(tag.color == "#000000")
-        #expect(taggedMemo.tags.map(\.id) == [tag.id])
-        #expect(tag.memos.map(\.id).contains(taggedMemo.id))
-        #expect(!context.hasChanges)
-
-        // 一覧・選択・フィルター条件と結果も維持される。
-        #expect(viewModel.memos.map(\.id) == [taggedMemo.id, untaggedMemo.id])
-        #expect(viewModel.selectedMemo?.id == taggedMemo.id)
-        #expect(viewModel.isFiltering)
-        #expect(viewModel.filterTags.map(\.id) == [tag.id])
-        #expect(viewModel.filteredMemos.map(\.id) == [taggedMemo.id])
-
-        // 別コンテキストからも保存済みの状態を確認する。
-        let verificationContext = ModelContext(container)
-        let savedTags = try verificationContext.fetch(FetchDescriptor<Tag>())
-        let savedMemos = try verificationContext.fetch(FetchDescriptor<Memo>())
-
-        let savedTag = try #require(savedTags.first { $0.id == tag.id })
-        let savedMemo = try #require(savedMemos.first { $0.id == taggedMemo.id })
-
-        #expect(savedTag.title == "Original Tag")
-        #expect(savedTag.color == "#000000")
-        #expect(savedMemo.tags.map(\.id) == [tag.id])
-    }
-
     // MARK: - Test Data
 
     /// テストデータをコンテキストにまとめて登録・保存する。
-    ///
-    /// Repository の pendingChanges チェックに未保存のタグが
-    /// 引っかからないよう、準備段階では Repository を使用しない。
     private func seed(
         context: ModelContext,
         tags: [Tag] = [],

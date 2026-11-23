@@ -27,6 +27,7 @@ final class MemosViewModel {
     }
 
     typealias AuthenticateHandler = @MainActor () async throws -> Bool
+    typealias FetchMemosHandler = () throws -> [Memo]
 
     private(set) var memos: [Memo] = []
     private(set) var filteredMemos: [Memo] = []
@@ -44,6 +45,11 @@ final class MemosViewModel {
     var selectedMemo: Memo?
     var selection: Set<UUID> = []
 
+    /// 最後の取得に失敗した場合のメッセージ。
+    ///
+    /// nil なら取得成功状態。
+    private(set) var fetchErrorMessage: String?
+
     @ObservationIgnored
     private let memoRepository: MemoRepository
 
@@ -52,6 +58,9 @@ final class MemosViewModel {
 
     @ObservationIgnored
     private let authenticateHandler: AuthenticateHandler
+
+    @ObservationIgnored
+    private let fetchMemosHandler: FetchMemosHandler
 
     @ObservationIgnored
     private var memoDuplicateSource: Memo?
@@ -74,11 +83,21 @@ final class MemosViewModel {
                 )
             }
             return true
-        }
+        },
+        fetchMemosHandler: FetchMemosHandler? = nil
     ) {
         self.memoRepository = memoRepository
         self.userDefaultsRepository = userDefaultsRepository
         self.authenticateHandler = authenticateHandler
+
+        if let fetchMemosHandler {
+            self.fetchMemosHandler = fetchMemosHandler
+        }
+        else {
+            self.fetchMemosHandler = {
+                try memoRepository.memos()
+            }
+        }
 
         fetchMemos()
         applyFilter()
@@ -148,6 +167,14 @@ final class MemosViewModel {
         filterQuery = ""
     }
 
+    private func clearFilterForFetchFailure() {
+        filterTags = []
+        filterQuery = ""
+        keywordsForFiltering = []
+        isFiltering = false
+        filteredMemos = memos
+    }
+
     // Backward-compatible helper
     func filteredMemos(by keywords: String, and tags: [Tag]) -> [Memo] {
         filterTags = tags
@@ -155,12 +182,24 @@ final class MemosViewModel {
         return filteredMemos
     }
 
+    /// 一覧取得を再試行する。
+    func retryFetchMemos() {
+        fetchMemos()
+        applyFilter()
+    }
+
     private func fetchMemos() {
         do {
-            memos = try memoRepository.memos()
+            let fetched = try fetchMemosHandler()
+            memos = fetched
+            fetchErrorMessage = nil
         }
         catch {
-            memos = []
+            // 取得失敗時は直前の一覧データを保持しつつ、
+            // フィルター状態を解除して通常画面に戻す。
+            clearFilterForFetchFailure()
+            selectedMemo = nil
+            fetchErrorMessage = error.localizedDescription
         }
     }
 
@@ -242,7 +281,6 @@ final class MemosViewModel {
             try memoRepository.duplicate(memo)
         }
         catch {
-            // 失敗時は次の一覧変更に複製状態を持ち越さない。
             memoDuplicateSource = nil
             throw error
         }

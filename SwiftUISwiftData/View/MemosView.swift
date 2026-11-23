@@ -16,7 +16,6 @@ struct MemosView: View {
         var id: AlertType { self }
     }
 
-    // MemosView+CRUD.swift と MemosView+Alert.swift からも参照する。
     @State
     var viewModel: MemosViewModel
     @Binding
@@ -38,7 +37,6 @@ struct MemosView: View {
     @State
     private var openFilterMemosView = false
 
-    /// 通常の依存関係を使用してビューを生成する。
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
@@ -55,7 +53,6 @@ struct MemosView: View {
         )
     }
 
-    /// 外部から Repository を注入してビューを生成する。
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
@@ -74,7 +71,6 @@ struct MemosView: View {
         )
     }
 
-    /// 外部で生成した ViewModel を使用する。
     init(
         editMode: Binding<EditMode>,
         selectedMemo: Binding<Memo?>,
@@ -109,7 +105,11 @@ struct MemosView: View {
                             errorAlert
                     }
                 }
-                .navigationTitle(viewModel.navigationTitle(editMode: editMode))
+                .navigationTitle(
+                    viewModel.fetchErrorMessage == nil
+                        ? viewModel.navigationTitle(editMode: editMode)
+                        : "Memos"
+                )
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarBackButtonHidden(
                     editMode.isEditing || viewModel.isFiltering
@@ -119,7 +119,10 @@ struct MemosView: View {
                         toolbarItemTopBarTrailing
                     }
                     ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarItemBottomBar
+                        Group {
+                            toolbarItemBottomBar
+                        }
+                        .disabled(viewModel.fetchErrorMessage != nil)
                     }
                 }
                 .environment(\.editMode, $editMode)
@@ -167,20 +170,44 @@ struct MemosView: View {
         }
     }
 
+    @ViewBuilder
     private var list: some View {
-        ScrollViewReader { proxy in
-            VStack {
-                if editMode.isEditing {
-                    editingList
+        if let message = viewModel.fetchErrorMessage {
+            fetchErrorView(message: message)
+        }
+        else {
+            ScrollViewReader { proxy in
+                VStack {
+                    if editMode.isEditing {
+                        editingList
+                    }
+                    else {
+                        normalList
+                    }
                 }
-                else {
-                    normalList
+                .onAppear {
+                    scrollViewProxy = proxy
                 }
-            }
-            .onAppear {
-                scrollViewProxy = proxy
             }
         }
+    }
+
+    private func fetchErrorView(message: String) -> some View {
+        VStack(spacing: 12) {
+            Text("Unable to load memos")
+                .font(.headline)
+
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button("Retry") {
+                viewModel.retryFetchMemos()
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var editingList: some View {
@@ -208,16 +235,10 @@ struct MemosView: View {
                     inactiveRow(for: memo)
                         .id(memo.id)
                         .tag(memo.id)
-                        .swipeActions(
-                            edge: .leading,
-                            allowsFullSwipe: false
-                        ) {
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
                             leadingSwipeActions(for: memo)
                         }
-                        .swipeActions(
-                            edge: .trailing,
-                            allowsFullSwipe: false
-                        ) {
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             trailingSwipeActions(for: memo)
                         }
                 }
@@ -271,6 +292,7 @@ struct MemosView: View {
     @ViewBuilder
     private var toolbarItemTopBarTrailing: some View {
         if editMode.isEditing {
+            // 取得失敗中でも編集モードを終了できる。
             Button("Done", systemImage: "checkmark") {
                 viewModel.deselectAll()
                 editMode = .inactive
@@ -282,7 +304,7 @@ struct MemosView: View {
                 selectedMemo = nil
                 editMode = .active
             }
-            .disabled(viewModel.isFiltering)
+            .disabled(viewModel.isFiltering || viewModel.fetchErrorMessage != nil)
             .keyboardShortcut("e", modifiers: [.command])
         }
     }
@@ -417,4 +439,62 @@ struct MemosView: View {
             editMode = .inactive
         }
     }
+}
+
+@MainActor
+private func makeMemoFetchFailurePreview() -> AnyView {
+    do {
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+
+        let memoRepository = MemoRepository(modelContext: container.mainContext)
+        let userDefaultsRepository = UserDefaultsRepository()
+
+        let memo = Memo(title: "Sample Memo", content: "Sample Content")
+        try memoRepository.add(memo)
+
+        var shouldFail = true
+        let viewModel = MemosViewModel(
+            memoRepository: memoRepository,
+            userDefaultsRepository: userDefaultsRepository,
+            authenticateHandler: { true },
+            fetchMemosHandler: {
+                if shouldFail {
+                    shouldFail = false
+                    throw NSError(
+                        domain: "Preview",
+                        code: 1,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Simulated memo fetch failure"
+                        ]
+                    )
+                }
+                return try memoRepository.memos()
+            }
+        )
+
+        return AnyView(
+            NavigationStack {
+                MemosView(
+                    editMode: .constant(.inactive),
+                    selectedMemo: .constant(nil),
+                    showingAddMemo: .constant(false),
+                    viewModel: viewModel
+                )
+            }
+            .modelContainer(container)
+        )
+    }
+    catch {
+        return AnyView(
+            Text("Preview setup failed: \(error.localizedDescription)")
+        )
+    }
+}
+
+#Preview("Memo fetch failure") {
+    makeMemoFetchFailurePreview()
 }
