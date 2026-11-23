@@ -18,6 +18,11 @@ final class TagsViewModel {
         var id: Self { self }
     }
 
+    /// タグ取得処理。
+    ///
+    /// テストでは失敗を模擬できる。
+    typealias FetchTagsHandler = () throws -> [Tag]
+
     private(set) var tags: [Tag] = []
     var editMode: EditMode = .inactive
     var selectedTag: Tag?
@@ -29,16 +34,31 @@ final class TagsViewModel {
     var currentAlert: AlertType?
     private(set) var scrollTargetID: UUID?
 
+    /// 最後の取得に失敗した場合のエラーメッセージ。
+    private(set) var fetchErrorMessage: String?
+
     private let tagRepository: TagRepository
     private let userDefaultsRepository: UserDefaultsRepository
+    private let fetchTagsHandler: FetchTagsHandler
     private var cancellables = Set<AnyCancellable>()
 
     init(
         tagRepository: TagRepository,
-        userDefaultsRepository: UserDefaultsRepository
+        userDefaultsRepository: UserDefaultsRepository,
+        fetchTagsHandler: FetchTagsHandler? = nil
     ) {
         self.tagRepository = tagRepository
         self.userDefaultsRepository = userDefaultsRepository
+
+        if let fetchTagsHandler {
+            self.fetchTagsHandler = fetchTagsHandler
+        }
+        else {
+            self.fetchTagsHandler = {
+                try tagRepository.tags()
+            }
+        }
+
         fetchTags()
         setupNotification()
     }
@@ -79,6 +99,11 @@ final class TagsViewModel {
     }
 
     // MARK: - Intents
+
+    /// タグ一覧の取得を再試行する。
+    func retryFetchTags() {
+        fetchTags()
+    }
 
     func onTapEdit() {
         selectedTag = nil
@@ -150,7 +175,9 @@ final class TagsViewModel {
         do {
             try tagRepository.delete(targets)
 
-            if let selected = selectedTag, targets.contains(where: { $0.id == selected.id }) {
+            if let selected = selectedTag,
+                targets.contains(where: { $0.id == selected.id })
+            {
                 selectedTag = nil
             }
 
@@ -167,7 +194,10 @@ final class TagsViewModel {
 
     func moveTag(from source: IndexSet, to destination: Int) {
         do {
-            try tagRepository.moveTag(from: Array(source), to: destination)
+            try tagRepository.moveTag(
+                from: Array(source),
+                to: destination
+            )
             fetchTags()
         }
         catch {
@@ -184,9 +214,10 @@ final class TagsViewModel {
                     editMode = .inactive
                 }
             case .inactive:
-                // id差分で新規追加を検出
                 let oldIDs = Set(oldTags.map(\.id))
-                if let newTag = newTags.first(where: { !oldIDs.contains($0.id) }) {
+                if let newTag = newTags.first(
+                    where: { !oldIDs.contains($0.id) }
+                ) {
                     selection.removeAll()
                     selectedTag = newTag
                     scrollTargetID = newTag.id
@@ -216,7 +247,15 @@ final class TagsViewModel {
     }
 
     private func fetchTags() {
-        tags = (try? tagRepository.tags()) ?? []
+        do {
+            let fetchedTags = try fetchTagsHandler()
+            tags = fetchedTags
+            fetchErrorMessage = nil
+        }
+        catch {
+            // 取得失敗時は、直前の一覧を空配列で上書きしない。
+            fetchErrorMessage = error.localizedDescription
+        }
     }
 
     // MARK: - Factory

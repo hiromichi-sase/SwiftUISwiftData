@@ -17,6 +17,7 @@ struct TagsView: View {
     private var editMode: EditMode
     @Binding
     private var selectedTag: Tag?
+
     /// 通常の依存関係を使用してビューを生成する。
     init(
         editMode: Binding<EditMode>,
@@ -95,7 +96,11 @@ struct TagsView: View {
                 .alert(item: $viewModel.currentAlert) { alertType in
                     alert(for: alertType)
                 }
-                .navigationTitle(viewModel.navigationTitle)
+                .navigationTitle(
+                    viewModel.fetchErrorMessage == nil
+                        ? viewModel.navigationTitle
+                        : "Tags"
+                )
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarBackButtonHidden(viewModel.editMode.isEditing)
                 .toolbar {
@@ -103,7 +108,10 @@ struct TagsView: View {
                         toolbarTopTrailing
                     }
                     ToolbarItemGroup(placement: .bottomBar) {
-                        toolbarBottomBar
+                        Group {
+                            toolbarBottomBar
+                        }
+                        .disabled(viewModel.fetchErrorMessage != nil)
                     }
                 }
                 .environment(\.editMode, $viewModel.editMode)
@@ -126,7 +134,6 @@ struct TagsView: View {
 
     // MARK: - State Synchronization
 
-    /// 表示時は親が保持する状態を ViewModel に反映する。
     private func syncExternalState() {
         if viewModel.editMode != editMode {
             viewModel.editMode = editMode
@@ -162,20 +169,44 @@ struct TagsView: View {
 
     // MARK: - List
 
+    @ViewBuilder
     private var list: some View {
-        ScrollViewReader { proxy in
-            VStack {
-                if viewModel.editMode.isEditing {
-                    editingList
+        if let message = viewModel.fetchErrorMessage {
+            fetchErrorView(message: message)
+        }
+        else {
+            ScrollViewReader { proxy in
+                VStack {
+                    if viewModel.editMode.isEditing {
+                        editingList
+                    }
+                    else {
+                        normalList
+                    }
                 }
-                else {
-                    normalList
+                .onAppear {
+                    scrollViewProxy = proxy
                 }
-            }
-            .onAppear {
-                scrollViewProxy = proxy
             }
         }
+    }
+
+    private func fetchErrorView(message: String) -> some View {
+        VStack(spacing: 12) {
+            Text("Unable to load tags")
+                .font(.headline)
+
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button("Retry") {
+                viewModel.retryFetchTags()
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var editingList: some View {
@@ -258,6 +289,7 @@ struct TagsView: View {
     @ViewBuilder
     private var toolbarTopTrailing: some View {
         if viewModel.editMode.isEditing {
+            // 取得失敗中も編集モードを終了できる。
             Button("Done", systemImage: "checkmark") {
                 viewModel.onTapDone()
             }
@@ -267,6 +299,7 @@ struct TagsView: View {
             Button("Edit", systemImage: "pencil") {
                 viewModel.onTapEdit()
             }
+            .disabled(viewModel.fetchErrorMessage != nil)
             .keyboardShortcut("e", modifiers: [.command])
         }
     }
@@ -354,4 +387,58 @@ struct TagsView: View {
                 )
             )
     }
+}
+
+@MainActor
+private func makeTagFetchFailurePreview() -> AnyView {
+    do {
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = TagRepository(modelContext: container.mainContext)
+        try repository.add(
+            Tag(title: "Test Tag", color: "#FF0000")
+        )
+
+        var shouldFail = true
+        let viewModel = TagsViewModel(
+            tagRepository: repository,
+            userDefaultsRepository: UserDefaultsRepository(),
+            fetchTagsHandler: {
+                if shouldFail {
+                    shouldFail = false
+                    throw NSError(
+                        domain: "Preview",
+                        code: 1,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Simulated fetch failure"
+                        ]
+                    )
+                }
+                return try repository.tags()
+            }
+        )
+
+        return AnyView(
+            NavigationStack {
+                TagsView(
+                    editMode: .constant(.inactive),
+                    selectedTag: .constant(nil),
+                    viewModel: viewModel
+                )
+            }
+            .modelContainer(container)
+        )
+    }
+    catch {
+        return AnyView(
+            Text("Preview setup failed: \(error.localizedDescription)")
+        )
+    }
+}
+
+#Preview("Tag fetch failure") {
+    makeTagFetchFailurePreview()
 }

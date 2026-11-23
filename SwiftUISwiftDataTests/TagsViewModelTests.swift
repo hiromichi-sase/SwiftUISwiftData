@@ -773,6 +773,163 @@ struct TagsViewModelTests {
         let savedTags = try verificationContext.fetch(descriptor)
         #expect(savedTags.map(\.title) == ["A", "C", "B"])
     }
+
+    // MARK: - Fetch Failure
+
+    @Test
+    func initialFetchFailure_canRetrySuccessfully() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = TagRepository(modelContext: container.mainContext)
+        let tag = Tag(title: "Tag", color: "#000000")
+        try repository.add(tag)
+
+        var shouldFail = true
+        let viewModel = TagsViewModel(
+            tagRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            fetchTagsHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+                return try repository.tags()
+            }
+        )
+
+        #expect(viewModel.tags.isEmpty)
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+        #expect(viewModel.currentAlert == nil)
+
+        // 再試行も失敗する場合はエラーを維持する。
+        viewModel.retryFetchTags()
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+
+        // 取得可能になったら、エラーが消えて一覧を表示できる。
+        shouldFail = false
+        viewModel.retryFetchTags()
+
+        #expect(viewModel.fetchErrorMessage == nil)
+        #expect(viewModel.tags.map(\.id) == [tag.id])
+    }
+
+    @Test
+    func refreshFailure_preservesPreviousTags_andRetryLoadsLatest() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        let repository = TagRepository(modelContext: context)
+
+        let firstTag = Tag(title: "First", color: "#000000")
+        try repository.add(firstTag)
+
+        var shouldFail = false
+        let viewModel = TagsViewModel(
+            tagRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            fetchTagsHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+                return try repository.tags()
+            }
+        )
+
+        #expect(viewModel.tags.map(\.id) == [firstTag.id])
+        #expect(viewModel.fetchErrorMessage == nil)
+
+        // 保存は成功するが、didSave 後の一覧取得を失敗させる。
+        shouldFail = true
+        let secondTag = Tag(title: "Second", color: "#FFFFFF")
+        try repository.add(secondTag)
+
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+        #expect(viewModel.tags.map(\.id) == [firstTag.id])
+
+        // 再試行で最新の一覧を取得する。
+        shouldFail = false
+        viewModel.retryFetchTags()
+
+        #expect(viewModel.fetchErrorMessage == nil)
+        #expect(viewModel.tags.map(\.id) == [firstTag.id, secondTag.id])
+    }
+
+    @Test
+    func refreshFailure_preservesTags_andCanExitEditModeAndRetry() throws {
+        struct FetchError: LocalizedError {
+            var errorDescription: String? { "Simulated fetch failure" }
+        }
+
+        let support = TestDependencySupport()
+        defer { support.removeUserDefaults() }
+
+        let container = try ModelContainer(
+            for: Memo.self,
+            Tag.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let repository = TagRepository(modelContext: container.mainContext)
+
+        let firstTag = Tag(title: "First", color: "#000000")
+        try repository.add(firstTag)
+
+        var shouldFail = false
+        let viewModel = TagsViewModel(
+            tagRepository: repository,
+            userDefaultsRepository: support.userDefaultsRepository,
+            fetchTagsHandler: {
+                if shouldFail {
+                    throw FetchError()
+                }
+                return try repository.tags()
+            }
+        )
+
+        viewModel.onTapEdit()
+        viewModel.selection = [firstTag.id]
+
+        // 保存は成功するが、didSave 後の一覧取得を失敗させる。
+        shouldFail = true
+        let secondTag = Tag(title: "Second", color: "#FFFFFF")
+        try repository.add(secondTag)
+
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+        #expect(viewModel.tags.map(\.id) == [firstTag.id])
+        #expect(viewModel.editMode == .active)
+
+        // 取得失敗中でも編集モードを終了できる。
+        viewModel.onTapDone()
+
+        #expect(viewModel.editMode == .inactive)
+        #expect(viewModel.selection.isEmpty)
+        #expect(viewModel.fetchErrorMessage == "Simulated fetch failure")
+
+        // 再試行で最新の一覧を取得する。
+        shouldFail = false
+        viewModel.retryFetchTags()
+
+        #expect(viewModel.fetchErrorMessage == nil)
+        #expect(viewModel.tags.map(\.id) == [firstTag.id, secondTag.id])
+    }
 }
 
 extension TagsViewModelTests {
